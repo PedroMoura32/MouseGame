@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Cliques</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo dos Cliques</h1>
+        <div class="instruction">
+            <p>Clique na forma correta:</p>
+            <img id="instruction-image" src="images/triangle/triangle1.png" alt="Instrução">
+        </div>
+        <div class="shapes">
+            <div class="shape" id="square" data-correct="false"></div>
+            <div class="shape" id="triangle" data-correct="true"></div>
+            <div class="shape" id="circle" data-correct="false"></div>
+            <div class="shape" id="rectangle" data-correct="false"></div>
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <button id="next-button" style="display: none;">Próxima Pergunta</button>
+    </div>
+    <audio id="correct-sound" src="sounds/correct.mp3"></audio>
+    <audio id="wrong-sound" src="sounds/wrong.mp3"></audio>
+    <script src="script.js"></script>
+</body>
+</html>
