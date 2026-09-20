@@ -2,28 +2,101 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Cliques</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#6c5ce7">
+    <title>Jogo dos Cliques 🎈</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Jogo dos Cliques</h1>
-        <div class="instruction">
-            <p>Clique na forma correta:</p>
-            <img id="instruction-image" src="images/triangle/triangle1.png" alt="Instrução">
+    <!-- Barra superior sempre visível -->
+    <header class="topbar">
+        <div class="brand">🎈 Jogo dos Cliques</div>
+        <div class="topbar-actions">
+            <button id="sound-toggle" class="icon-btn" aria-pressed="false" title="Ligar/desligar som" aria-label="Ligar ou desligar o som">🔊</button>
         </div>
-        <div class="shapes">
-            <div class="shape" id="square" data-correct="false"></div>
-            <div class="shape" id="triangle" data-correct="true"></div>
-            <div class="shape" id="circle" data-correct="false"></div>
-            <div class="shape" id="rectangle" data-correct="false"></div>
-        </div>
-        <div id="feedback" class="feedback"></div>
-        <button id="next-button" style="display: none;">Próxima Pergunta</button>
-    </div>
-    <audio id="correct-sound" src="sounds/correct.mp3"></audio>
-    <audio id="wrong-sound" src="sounds/wrong.mp3"></audio>
+    </header>
+
+    <main class="stage">
+
+        <!-- ========================= TELA: MENU ========================= -->
+        <section id="screen-menu" class="screen is-active">
+            <h1 class="title">Vamos brincar? 🐭</h1>
+            <p class="subtitle">Clique com o mouse na resposta certa!</p>
+
+            <div class="panel">
+                <h2 class="panel-title">1. Escolha o jogo</h2>
+                <div id="category-grid" class="choice-grid" role="radiogroup" aria-label="Categoria"></div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">2. Escolha o nível</h2>
+                <div id="difficulty-grid" class="choice-grid choice-grid--3" role="radiogroup" aria-label="Nível"></div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">3. Quantas perguntas?</h2>
+                <div id="count-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Número de perguntas"></div>
+                <div class="custom-count">
+                    <label for="custom-count-input">Outro número:</label>
+                    <input id="custom-count-input" type="number" min="1" max="99" inputmode="numeric" placeholder="ex: 15">
+                </div>
+            </div>
+
+            <button id="start-btn" class="big-btn">Começar! ▶</button>
+        </section>
+
+        <!-- ========================= TELA: JOGO ========================= -->
+        <section id="screen-game" class="screen">
+            <div class="game-hud">
+                <div class="hud-item">
+                    <span class="hud-label">Pergunta</span>
+                    <span class="hud-value"><span id="q-current">1</span> / <span id="q-total">10</span></span>
+                </div>
+                <div class="hud-item hud-stars">
+                    <span class="hud-label">Estrelas</span>
+                    <span class="hud-value"><span id="q-score">0</span> ⭐</span>
+                </div>
+                <button id="quit-btn" class="ghost-btn" title="Encerrar e ver o resultado">Encerrar</button>
+            </div>
+
+            <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
+
+            <div class="prompt">
+                <p id="prompt-text" class="prompt-text">Clique no <b>círculo</b></p>
+                <button id="repeat-btn" class="icon-btn icon-btn--big" title="Ouvir de novo" aria-label="Ouvir a pergunta de novo">🔊</button>
+            </div>
+
+            <div id="options" class="options" role="group" aria-label="Opções"></div>
+
+            <div id="feedback" class="feedback" aria-live="polite"></div>
+        </section>
+
+        <!-- ======================= TELA: RESULTADO ======================= -->
+        <section id="screen-results" class="screen">
+            <div class="results-card">
+                <div id="results-emoji" class="results-emoji">🏆</div>
+                <h2 id="results-title" class="results-title">Muito bem!</h2>
+                <p class="results-score">Você acertou de primeira <b><span id="results-correct">0</span></b> de <b><span id="results-answered">0</span></b>!</p>
+                <div id="results-stars" class="results-stars"></div>
+                <div class="results-actions">
+                    <button id="play-again-btn" class="big-btn">Jogar de novo 🔁</button>
+                    <button id="menu-btn" class="ghost-btn">Voltar ao início</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Camada de comemoração (confete) -->
+    <canvas id="confetti" class="confetti-canvas" aria-hidden="true"></canvas>
+
+    <!-- Efeitos sonoros -->
+    <audio id="correct-sound" src="sounds/correct.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="sounds/wrong.mp3" preload="auto"></audio>
+
     <script src="script.js"></script>
 </body>
 </html>
