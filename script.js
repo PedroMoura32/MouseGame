@@ -175,6 +175,7 @@ const CATEGORY_META = [
     { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…' },
     { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…' },
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
+    { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…' },
     { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…' },
 ];
 
@@ -200,6 +201,18 @@ const SUB_OPTIONS = {
             { id: 'misturar',    label: 'Misturar',    emoji: '🎲', sub: 'todas' },
         ],
     },
+    // Os ids são as chaves de MINIGAMES (minigames.js)
+    mouse: {
+        title: 'Qual treino?',
+        say: 'Escolha o treino do mouse',
+        items: [
+            { id: 'baloes',   label: 'Balões',   emoji: '🎈', sub: '2 cliques' },
+            { id: 'alvos',    label: 'Alvos',    emoji: '🎯', sub: 'que se mexem' },
+            { id: 'rolar',    label: 'Rolar',    emoji: '📜', sub: 'a rodinha' },
+            { id: 'caminho',  label: 'Caminho',  emoji: '🐭', sub: 'arrastar' },
+            { id: 'misturar', label: 'Misturar', emoji: '🎲', sub: 'todos' },
+        ],
+    },
 };
 
 const DIFFICULTIES = [
@@ -216,7 +229,12 @@ const MODES = [
 // O modo arrastar só existe para estes jogos (nos outros, só clicar).
 const DRAG_CATEGORIES = ['formas', 'cores', 'animais'];
 
-const COUNT_OPTIONS = [5, 10, 20, 30];
+// Quantas perguntas (jogos de quiz) ou rodadas (treino do mouse — cada rodada é mais longa).
+const COUNTS = { quiz: [5, 10, 20, 30], mouse: [3, 5, 8, 10] };
+const COUNT_DEFAULT_INDEX = 1;
+
+// Texto do nível no treino do mouse (nos outros jogos o nível muda o nº de opções).
+const DIFF_SUB_MOUSE = ['grande e devagar', 'tamanho normal', 'pequeno e rápido'];
 
 const AVATARS = ['🦄', '🌸', '🦋', '🌈', '🐱', '🐰', '🐼', '⭐', '🐬', '🍓', '🌷', '🐞'];
 
@@ -231,7 +249,7 @@ const WRONG_SHOW_MS = 800;  // (arrastar) peça errada fica no alvo antes de vol
 
 const state = {
     category: 'formas',
-    sub: { ingles: 'misturar', matematica: 'somar' },
+    sub: { ingles: 'misturar', matematica: 'somar', mouse: 'misturar' },
     difficulty: 'facil',
     mode: 'clicar',
     totalQuestions: 10,
@@ -245,6 +263,7 @@ const state = {
 
 let busy = false;        // trava durante o "suspense"/comemoração
 let lastKey = null;      // evita repetir a mesma pergunta em sequência
+let round = null;        // minijogo em andamento (treino do mouse)
 
 // Só existe um timer de jogo por vez (suspense OU avanço). Guardado para
 // poder cancelar ao encerrar/reiniciar e não vazar para outra tela/partida.
@@ -291,12 +310,17 @@ const el = {
     subListen: $('#sub-listen'),
     subGrid: $('#sub-grid'),
     difficultyGrid: $('#difficulty-grid'),
+    countTitle: $('#count-title'),
+    countListen: $('#count-listen'),
     countGrid: $('#count-grid'),
     panelMode: $('#panel-mode'),
     modeGrid: $('#mode-grid'),
     customCount: $('#custom-count-input'),
     startBtn: $('#start-btn'),
     // jogo
+    hudLabel: $('#hud-label'),
+    playfield: $('#playfield'),
+    installBtn: $('#install-btn'),
     qCurrent: $('#q-current'),
     qTotal: $('#q-total'),
     qScore: $('#q-score'),
@@ -311,8 +335,7 @@ const el = {
     // resultado
     resultsEmoji: $('#results-emoji'),
     resultsTitle: $('#results-title'),
-    resultsCorrect: $('#results-correct'),
-    resultsAnswered: $('#results-answered'),
+    resultsScore: $('#results-score'),
     resultsStars: $('#results-stars'),
     resultsName: $('#results-name'),
     resultsProfileStars: $('#results-profile-stars'),
@@ -342,11 +365,20 @@ function shuffle(arr) {
 }
 function sample(arr, n) { return shuffle(arr).slice(0, n); }
 
+// Largura da barra de rolagem (0 em telas de toque): usada para alinhar o botão "Começar!" à direita.
+function updateScrollbarWidth() {
+    const w = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty('--sbw', Math.max(0, w) + 'px');
+}
+window.addEventListener('resize', updateScrollbarWidth);
+
 function showScreen(name) {
     stopSpeech();
+    if (name !== 'game') stopRound();   // fora do jogo, nenhum minijogo fica rodando
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
     document.body.classList.toggle('is-playing', name === 'game');   // tela do jogo cabe na janela (sem rolar)
+    updateScrollbarWidth();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -605,6 +637,7 @@ function buildQuestion(count) {
 }
 
 function newQuestion() {
+    if (state.category === 'mouse') { newRound(); return; }
     const count = optionCount();
     let q = buildQuestion(count);
     for (let tries = 0; tries < 8 && q.key === lastKey; tries++) q = buildQuestion(count);
@@ -619,6 +652,9 @@ function renderQuestion(q) {
     const dragMode = state.mode === 'arrastar';
 
     stopSpeech();
+    stopRound();
+    el.playfield.hidden = true;     // (o campo dos minijogos só aparece no treino do mouse)
+    el.options.hidden = false;
     el.promptText.innerHTML = q.prompt(state.mode).html;
     el.promptText.classList.toggle('is-big', !!q.big);
 
@@ -680,8 +716,94 @@ function layoutOptions() {
 }
 
 // Recalcula quando a janela muda de tamanho (girar o tablet, redimensionar, zoom...).
-if ('ResizeObserver' in window) new ResizeObserver(layoutOptions).observe(el.optionsArea);
-else window.addEventListener('resize', layoutOptions);
+// Se um minijogo está rodando, a rodada recomeça no tamanho novo (com um pequeno atraso).
+let resizeTimer = 0;
+function onAreaResize() {
+    layoutOptions();
+    if (!round) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        const w = el.playfield.clientWidth, h = el.playfield.clientHeight;
+        if (round && !busy && (Math.abs(w - round.w) > 2 || Math.abs(h - round.h) > 2)) startRound();
+    }, 250);
+}
+if ('ResizeObserver' in window) new ResizeObserver(onAreaResize).observe(el.optionsArea);
+else window.addEventListener('resize', onAreaResize);
+
+/* -----------------------------------------------------------
+   8b) TREINO DO MOUSE (minijogos — ver minigames.js)
+   Cada "pergunta" é uma rodada de um minijogo. Estrela = rodada
+   concluída sem nenhum erro.
+----------------------------------------------------------- */
+
+function stopRound() {
+    if (round) { try { round.game.destroy(); } catch (_) {} round = null; }
+}
+
+// (Re)inicia a rodada atual no tamanho atual do campo. O tamanho é guardado ANTES de
+// desenhar: se algo mexer no campo durante o desenho, a checagem de redimensionamento
+// percebe a diferença e redesenha.
+function startRound() {
+    round.w = el.playfield.clientWidth;
+    round.h = el.playfield.clientHeight;
+    round.game.start();
+}
+
+function newRound() {
+    stopRound();
+    stopSpeech();
+    el.options.hidden = true;
+    el.options.innerHTML = '';
+    el.dropZone.hidden = true;
+    clearDropPiece();
+    el.playfield.hidden = false;
+    el.playfield.innerHTML = '';
+
+    // "misturar" alterna entre os minijogos (sem repetir o anterior)
+    const keys = Object.keys(MINIGAMES);
+    const chosen = state.sub.mouse;
+    const key = chosen === 'misturar' ? randomFrom(keys.filter((k) => k !== lastKey)) : chosen;
+    lastKey = key;
+
+    const api = {
+        field: el.playfield,
+        level: Math.max(0, DIFFICULTIES.findIndex((d) => d.id === state.difficulty)),
+        size: () => ({ w: el.playfield.clientWidth, h: el.playfield.clientHeight }),
+        hint: (text) => { el.feedback.textContent = text; el.feedback.className = 'feedback is-checking'; },
+        mistake: (text) => {
+            state.firstTry = false;
+            playSound(el.wrongSound);
+            el.feedback.textContent = text;
+            el.feedback.className = 'feedback is-wrong';
+        },
+        done: () => completeRound(),
+    };
+    const game = MINIGAMES[key].create(api);
+    round = { game, key, w: 0, h: 0 };
+    state.question = { key, prompt: () => game.prompt };
+
+    el.promptText.innerHTML = game.prompt.html;
+    el.promptText.classList.remove('is-big');
+    el.feedback.textContent = '';
+    el.feedback.className = 'feedback';
+    state.firstTry = true;
+    busy = false;
+    updateHud();
+    startRound();
+}
+
+function completeRound() {
+    if (busy) return;
+    busy = true;
+    el.feedback.textContent = randomFrom(CHEERS);
+    el.feedback.className = 'feedback is-correct';
+    playSound(el.correctSound);
+    burstConfetti();
+    state.answered++;
+    if (state.firstTry) state.correctFirstTry++;
+    updateHud();
+    schedule(nextStep, ADVANCE_MS + 500);
+}
 
 /* -----------------------------------------------------------
    9) MODO ARRASTAR (pointer events: mouse + toque)
@@ -853,12 +975,17 @@ function showResults() {
 
     el.resultsEmoji.textContent = emoji;
     el.resultsTitle.textContent = title;
-    el.resultsCorrect.textContent = correct;
-    el.resultsAnswered.textContent = answered;
+    // Treino do mouse fala em "rodadas sem errar"; os outros jogos em "acertou de primeira".
+    const mouse = state.category === 'mouse';
+    el.resultsScore.innerHTML = mouse
+        ? `Você fez <b>${correct}</b> de <b>${answered}</b> rodadas sem errar!`
+        : `Você acertou de primeira <b>${correct}</b> de <b>${answered}</b>!`;
     el.resultsStars.textContent = correct <= 12 ? ('⭐'.repeat(correct) || '—') : `⭐ x ${correct}`;
 
     // Texto do botão "ouvir resultado" (para quem ainda não lê).
-    let speech = `${title} Você acertou de primeira ${correct} de ${answered}. `;
+    let speech = `${title} ` + (mouse
+        ? `Você fez ${correct} de ${answered} rodadas sem errar. `
+        : `Você acertou de primeira ${correct} de ${answered}. `);
 
     // Acumula estrelas no perfil.
     if (state.profile) {
@@ -1111,21 +1238,49 @@ function refreshSubPanel() {
         it.id === state.sub[state.category]));
 }
 
+// Treino do mouse conta "rodadas" (não "perguntas") e o nível muda tamanho/velocidade.
+// Só refaz os textos/botões quando o tipo de jogo muda (quiz <-> treino do mouse).
+let menuKind = null;
+function refreshKindPanels() {
+    const kind = state.category === 'mouse' ? 'mouse' : 'quiz';
+    if (kind === menuKind) return;
+    menuKind = kind;
+    const mouse = kind === 'mouse';
+
+    // nível: legenda de cada botão
+    el.difficultyGrid.querySelectorAll('.choice-sub').forEach((s, i) => {
+        s.textContent = mouse ? DIFF_SUB_MOUSE[i] : DIFFICULTIES[i].options + ' opções';
+    });
+
+    // quantidade
+    const list = COUNTS[kind];
+    el.countTitle.textContent = mouse ? '3. Quantas rodadas?' : '3. Quantas perguntas?';
+    el.countListen.dataset.say = mouse ? 'Quantas rodadas você quer jogar?' : 'Quantas perguntas você quer responder?';
+    el.countGrid.innerHTML = '';
+    el.customCount.value = '';
+    list.forEach((n, i) => buildChoice(
+        el.countGrid,
+        { value: String(n), label: String(n), sub: mouse ? 'rodadas' : 'perguntas' },
+        (v) => { state.totalQuestions = parseInt(v, 10); el.customCount.value = ''; }, i === COUNT_DEFAULT_INDEX));
+    state.totalQuestions = list[COUNT_DEFAULT_INDEX];
+}
+
+function refreshMenuForCategory() {
+    refreshSubPanel();
+    refreshModePanel();
+    refreshKindPanels();
+}
+
 function buildMenu() {
     CATEGORY_META.forEach((c, i) => buildChoice(
         el.categoryGrid,
         { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
-        (v) => { state.category = v; refreshSubPanel(); refreshModePanel(); }, i === 0));
+        (v) => { state.category = v; refreshMenuForCategory(); }, i === 0));
 
     DIFFICULTIES.forEach((d, i) => buildChoice(
         el.difficultyGrid,
         { value: d.id, label: d.label, emoji: d.emoji, sub: d.options + ' opções' },
         (v) => { state.difficulty = v; }, i === 0));
-
-    COUNT_OPTIONS.forEach((n, i) => buildChoice(
-        el.countGrid,
-        { value: String(n), label: String(n), sub: 'perguntas' },
-        (v) => { state.totalQuestions = parseInt(v, 10); el.customCount.value = ''; }, i === 1));
 
     MODES.forEach((m, i) => buildChoice(
         el.modeGrid,
@@ -1135,9 +1290,7 @@ function buildMenu() {
     state.category = 'formas';
     state.difficulty = 'facil';
     state.mode = 'clicar';
-    state.totalQuestions = 10;
-    refreshSubPanel();
-    refreshModePanel();
+    refreshMenuForCategory();
 }
 
 el.customCount.addEventListener('input', () => {
@@ -1167,10 +1320,14 @@ function startGame() {
     if (!DRAG_CATEGORIES.includes(state.category)) state.mode = 'clicar';
 
     cancelPending();
+    stopRound();
     state.answered = 0;
     state.correctFirstTry = 0;
     lastKey = null;
     busy = false;
+    el.hudLabel.textContent = state.category === 'mouse' ? 'Rodada' : 'Pergunta';
+    // no treino do mouse a dica pode ter 2 linhas: reserva a altura para o campo não "pular"
+    document.body.classList.toggle('is-mouse', state.category === 'mouse');
 
     showScreen('game');
     updateHud();
@@ -1194,6 +1351,34 @@ el.switchProfile.addEventListener('click', () => { renderProfiles(); showScreen(
 el.createConfirm.addEventListener('click', createProfile);
 el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true; });
 el.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
+
+/* -----------------------------------------------------------
+   16b) APP INSTALÁVEL (PWA)
+   Service worker (sw.js) guarda o jogo no aparelho: depois da primeira
+   visita ele abre mesmo sem internet. O botão "Instalar app" aparece
+   sozinho quando o navegador permite instalar.
+----------------------------------------------------------- */
+
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* funciona normal, só não fica offline */ });
+    });
+}
+
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installPrompt = e;
+    el.installBtn.hidden = false;
+});
+el.installBtn.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    try { await installPrompt.userChoice; } catch (_) { /* ignorado */ }
+    installPrompt = null;
+    el.installBtn.hidden = true;
+});
+window.addEventListener('appinstalled', () => { el.installBtn.hidden = true; });
 
 /* -----------------------------------------------------------
    17) INICIALIZAÇÃO

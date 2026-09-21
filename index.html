@@ -4,16 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#e0559b">
+    <meta name="description" content="Jogo educativo para crianças aprenderem a usar o mouse: formas, cores, animais, inglês, matemática e treino de cliques.">
     <title>Jogo dos Cliques 🎀</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- App instalável (PWA): funciona offline depois da primeira visita -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Jogo dos Cliques">
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Barra superior sempre visível -->
     <header class="topbar">
         <div class="brand">🎀 Jogo dos Cliques</div>
+        <!-- só aparece se o navegador permitir instalar o app -->
+        <button id="install-btn" class="chip-btn" hidden>📲 Instalar app</button>
     </header>
 
     <main class="stage">
@@ -55,7 +64,7 @@
                 <div id="category-grid" class="choice-grid" role="radiogroup" aria-label="Categoria"></div>
             </div>
 
-            <!-- Escolha extra: aparece só para Inglês (tipo) e Matemática (operação) -->
+            <!-- Escolha extra: aparece só para Inglês (tipo), Matemática (operação) e Treino do mouse -->
             <div id="panel-sub" class="panel" hidden>
                 <h2 class="panel-title"><span id="sub-title">Que tipo?</span>
                     <button id="sub-listen" class="listen-btn" data-say="" aria-label="Ouvir">🔊</button>
@@ -71,8 +80,8 @@
             </div>
 
             <div class="panel">
-                <h2 class="panel-title">3. Quantas perguntas?
-                    <button class="listen-btn" data-say="Quantas perguntas você quer responder?" aria-label="Ouvir: quantas perguntas">🔊</button>
+                <h2 class="panel-title"><span id="count-title">3. Quantas perguntas?</span>
+                    <button id="count-listen" class="listen-btn" data-say="Quantas perguntas você quer responder?" aria-label="Ouvir: quantas perguntas">🔊</button>
                 </h2>
                 <div id="count-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Número de perguntas"></div>
                 <div class="custom-count">
@@ -89,14 +98,17 @@
                 <div id="mode-grid" class="choice-grid choice-grid--2" role="radiogroup" aria-label="Modo de jogo"></div>
             </div>
 
-            <button id="start-btn" class="big-btn">Começar! ▶</button>
+            <!-- Faixa flutuante na largura da janela; o botão fica no canto direito (na margem, fora do conteúdo) -->
+            <div class="start-dock">
+                <button id="start-btn" class="big-btn">Começar! ▶</button>
+            </div>
         </section>
 
         <!-- ========================= TELA: JOGO ========================= -->
         <section id="screen-game" class="screen">
             <div class="game-hud">
                 <div class="hud-item">
-                    <span class="hud-label">Pergunta</span>
+                    <span id="hud-label" class="hud-label">Pergunta</span>
                     <span class="hud-value"><span id="q-current">1</span> / <span id="q-total">10</span></span>
                 </div>
                 <div class="hud-item hud-stars">
@@ -121,6 +133,8 @@
             <!-- Ocupa todo o espaço que sobra na tela; o script calcula o tamanho das opções para caberem -->
             <div id="options-area" class="options-area">
                 <div id="options" class="options" role="group" aria-label="Opções"></div>
+                <!-- Campo dos minijogos do "Treino do mouse" (escondido nos outros jogos) -->
+                <div id="playfield" class="playfield" hidden></div>
             </div>
 
             <div id="feedback" class="feedback" aria-live="polite"></div>
@@ -131,7 +145,7 @@
             <div class="results-card">
                 <div id="results-emoji" class="results-emoji">🏆</div>
                 <h2 id="results-title" class="results-title">Muito bem!</h2>
-                <p class="results-score">Você acertou de primeira <b><span id="results-correct">0</span></b> de <b><span id="results-answered">0</span></b>!</p>
+                <p id="results-score" class="results-score"></p>
                 <div id="results-stars" class="results-stars"></div>
                 <button id="results-listen" class="listen-pill" aria-label="Ouvir o resultado">🔊 Ouvir meu resultado</button>
                 <p class="results-total">Total de estrelas de <b><span id="results-name">você</span></b>: <b><span id="results-profile-stars">0</span></b> ⭐</p>
@@ -151,6 +165,7 @@
     <audio id="correct-sound" src="sounds/correct.mp3" preload="auto"></audio>
     <audio id="wrong-sound" src="sounds/wrong.mp3" preload="auto"></audio>
 
+    <script src="minigames.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
