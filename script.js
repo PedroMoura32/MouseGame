@@ -3,10 +3,12 @@
    Joguinho para crianças treinarem o uso do mouse (clicar e
    arrastar), associando objetos/nomes às respostas certas.
 
-   Como adicionar conteúdo novo (é só editar CONTENT):
+   Como adicionar conteúdo novo (é só editar os bancos abaixo):
    - Formas:  shapeItem(id, NOME, genero, forma, cor)
    - Cores:   colorItem(id, NOME, hex)
    - Animais: animalItem(id, NOME, genero, emoji)
+   - Inglês:  EN_VOCAB (palavra + figura) e EN_PHRASES (frases)
+   - Matemática: níveis em mathOperands()
    - Números/Letras: gerados automaticamente
    "genero" é 'o' ou 'a' (para montar "Clique NO..." e "Arraste O...").
    ============================================================ */
@@ -91,13 +93,114 @@ const CONTENT = {
     numletras: { num: NUMBERS, let: LETTERS },
 };
 
+/* ---------- Inglês básico ----------
+   Cada grupo tem "prefix" (usado na frase: "Click on THE dog") e
+   itens [inglês, português, figura]. A figura pode ser um emoji,
+   uma cor ('#hex') ou um dígito ('3'). As opções erradas sempre vêm
+   do mesmo grupo, para a pergunta nunca ficar ambígua. */
+
+function enItem(group, en, pt, visual) {
+    const base = { id: `en-${group}-${en.toLowerCase()}`, group, en, pt, name: en };
+    if (visual.startsWith('#')) return { ...base, kind: 'color', hex: visual };
+    if (/^\d+$/.test(visual))   return { ...base, kind: 'char', glyph: visual };
+    return { ...base, kind: 'emoji', glyph: visual };
+}
+
+const EN_VOCAB = {
+    animals: { prefix: 'the ', items: [
+        ['Dog', 'Cachorro', '🐶'], ['Cat', 'Gato', '🐱'], ['Lion', 'Leão', '🦁'], ['Horse', 'Cavalo', '🐴'],
+        ['Cow', 'Vaca', '🐮'], ['Pig', 'Porco', '🐷'], ['Duck', 'Pato', '🦆'], ['Frog', 'Sapo', '🐸'],
+        ['Monkey', 'Macaco', '🐵'], ['Rabbit', 'Coelho', '🐰'], ['Bear', 'Urso', '🐻'], ['Fish', 'Peixe', '🐟'],
+        ['Elephant', 'Elefante', '🐘'], ['Bee', 'Abelha', '🐝'],
+    ] },
+    fruits: { prefix: 'the ', items: [
+        ['Apple', 'Maçã', '🍎'], ['Banana', 'Banana', '🍌'], ['Grapes', 'Uvas', '🍇'], ['Orange', 'Laranja', '🍊'],
+        ['Strawberry', 'Morango', '🍓'], ['Watermelon', 'Melancia', '🍉'], ['Pineapple', 'Abacaxi', '🍍'],
+        ['Cherry', 'Cereja', '🍒'], ['Pear', 'Pera', '🍐'], ['Lemon', 'Limão', '🍋'],
+    ] },
+    colors: { prefix: 'the color ', items: [
+        ['Red', 'Vermelho', '#e03131'], ['Blue', 'Azul', '#1c7ed6'], ['Yellow', 'Amarelo', '#f2c81e'],
+        ['Green', 'Verde', '#2f9e44'], ['Orange', 'Laranja', '#e8590c'], ['Purple', 'Roxo', '#9c36b5'],
+        ['Pink', 'Rosa', '#f06595'], ['Brown', 'Marrom', '#8b5a2b'], ['Black', 'Preto', '#343a40'],
+        ['Gray', 'Cinza', '#adb5bd'],
+    ] },
+    numbers: { prefix: 'the number ', items: [
+        ['One', 'Um', '1'], ['Two', 'Dois', '2'], ['Three', 'Três', '3'], ['Four', 'Quatro', '4'],
+        ['Five', 'Cinco', '5'], ['Six', 'Seis', '6'], ['Seven', 'Sete', '7'], ['Eight', 'Oito', '8'],
+        ['Nine', 'Nove', '9'], ['Ten', 'Dez', '10'],
+    ] },
+    family: { prefix: 'the ', items: [
+        ['Mother', 'Mãe', '👩'], ['Father', 'Pai', '👨'], ['Baby', 'Bebê', '👶'], ['Boy', 'Menino', '👦'],
+        ['Girl', 'Menina', '👧'], ['Grandma', 'Vovó', '👵'], ['Grandpa', 'Vovô', '👴'],
+    ] },
+    things: { prefix: 'the ', items: [
+        ['House', 'Casa', '🏠'], ['Car', 'Carro', '🚗'], ['Book', 'Livro', '📖'], ['Ball', 'Bola', '⚽'],
+        ['Tree', 'Árvore', '🌳'], ['Flower', 'Flor', '🌸'], ['Sun', 'Sol', '☀️'], ['Moon', 'Lua', '🌙'],
+        ['Star', 'Estrela', '⭐'], ['Cake', 'Bolo', '🎂'], ['Bread', 'Pão', '🍞'], ['Milk', 'Leite', '🥛'],
+    ] },
+};
+
+const EN_GROUPS = {};
+Object.keys(EN_VOCAB).forEach((g) => {
+    EN_GROUPS[g] = {
+        prefix: EN_VOCAB[g].prefix,
+        items: EN_VOCAB[g].items.map(([en, pt, visual]) => enItem(g, en, pt, visual)),
+    };
+});
+
+// Frases: só entram no jogo de tradução (não têm figura).
+const EN_PHRASES = [
+    ['Good morning', 'Bom dia'], ['Good afternoon', 'Boa tarde'], ['Good night', 'Boa noite'],
+    ['Hello', 'Olá'], ['Goodbye', 'Tchau'], ['Thank you', 'Obrigado(a)'], ['Please', 'Por favor'],
+    ['Sorry', 'Desculpa'], ['Yes', 'Sim'], ['No', 'Não'], ['Welcome', 'Bem-vindo(a)'],
+    ['See you later', 'Até logo'], ['Happy birthday', 'Feliz aniversário'], ['I love you', 'Eu te amo'],
+    ['How are you?', 'Como vai você?'],
+].map(([en, pt], i) => ({ id: 'en-phrase-' + i, group: 'phrases', en, pt, name: en }));
+
+/* ---------- Matemática ---------- */
+
+const MATH_OPS = {
+    somar:       { sym: '+', say: 'mais' },
+    subtrair:    { sym: '−', say: 'menos' },
+    multiplicar: { sym: '×', say: 'vezes' },
+    dividir:     { sym: '÷', say: 'dividido por' },
+};
+
+/* ---------- Menu ---------- */
+
 const CATEGORY_META = [
-    { id: 'formas',    label: 'Formas',           emoji: '🔷', sub: 'círculo, estrela…' },
-    { id: 'cores',     label: 'Cores',            emoji: '🎨', sub: 'vermelho, azul…' },
-    { id: 'animais',   label: 'Animais',          emoji: '🐶', sub: 'cachorro, gato…' },
-    { id: 'numletras', label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…' },
-    { id: 'misturar',  label: 'Misturar Tudo',    emoji: '🎲', sub: 'um pouco de cada' },
+    { id: 'formas',     label: 'Formas',           emoji: '🔷', sub: 'círculo, estrela…' },
+    { id: 'cores',      label: 'Cores',            emoji: '🎨', sub: 'vermelho, azul…' },
+    { id: 'animais',    label: 'Animais',          emoji: '🐶', sub: 'cachorro, gato…' },
+    { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…' },
+    { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…' },
+    { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
+    { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…' },
 ];
+
+// Escolha extra que aparece só para algumas categorias.
+const SUB_OPTIONS = {
+    ingles: {
+        title: 'Que tipo de inglês?',
+        say: 'Escolha o tipo de pergunta em inglês',
+        items: [
+            { id: 'figuras',  label: 'Figuras',   emoji: '🖼️', sub: 'ache a figura' },
+            { id: 'traducao', label: 'Tradução',  emoji: '🔁', sub: 'inglês e português' },
+            { id: 'misturar', label: 'Misturar',  emoji: '🎲', sub: 'um pouco de cada' },
+        ],
+    },
+    matematica: {
+        title: 'Qual operação?',
+        say: 'Escolha a operação de matemática',
+        items: [
+            { id: 'somar',       label: 'Somar',       emoji: '➕', sub: 'mais' },
+            { id: 'subtrair',    label: 'Subtrair',    emoji: '➖', sub: 'menos' },
+            { id: 'multiplicar', label: 'Multiplicar', emoji: '✖️', sub: 'vezes' },
+            { id: 'dividir',     label: 'Dividir',     emoji: '➗', sub: 'dividido' },
+            { id: 'misturar',    label: 'Misturar',    emoji: '🎲', sub: 'todas' },
+        ],
+    },
+};
 
 const DIFFICULTIES = [
     { id: 'facil',   label: 'Fácil',   emoji: '🙂', options: 3 },
@@ -110,13 +213,17 @@ const MODES = [
     { id: 'arrastar', label: 'Arrastar', emoji: '✊', sub: 'arraste até o alvo' },
 ];
 
+// O modo arrastar só existe para estes jogos (nos outros, só clicar).
+const DRAG_CATEGORIES = ['formas', 'cores', 'animais'];
+
 const COUNT_OPTIONS = [5, 10, 20, 30];
 
 const AVATARS = ['🦄', '🌸', '🦋', '🌈', '🐱', '🐰', '🐼', '⭐', '🐬', '🍓', '🌷', '🐞'];
 
 /* Tempos de experiência */
-const SUSPENSE_MS = 1100;  // "aguardar a validação" após escolher
-const ADVANCE_MS = 1300;   // depois do acerto, antes da próxima
+const SUSPENSE_MS = 1100;   // "aguardar a validação" após escolher
+const ADVANCE_MS = 1300;    // depois do acerto, antes da próxima
+const WRONG_SHOW_MS = 800;  // (arrastar) peça errada fica no alvo antes de voltar
 
 /* -----------------------------------------------------------
    3) ESTADO
@@ -124,19 +231,20 @@ const ADVANCE_MS = 1300;   // depois do acerto, antes da próxima
 
 const state = {
     category: 'formas',
+    sub: { ingles: 'misturar', matematica: 'somar' },
     difficulty: 'facil',
     mode: 'clicar',
     totalQuestions: 10,
     answered: 0,
     correctFirstTry: 0,
     firstTry: true,
-    correctItem: null,
-    muted: false,
+    question: null,       // pergunta atual (ver "8) PERGUNTAS")
+    resultSpeech: '',     // texto lido no botão "ouvir resultado"
     profile: null,
 };
 
 let busy = false;        // trava durante o "suspense"/comemoração
-let lastCorrectId = null;
+let lastKey = null;      // evita repetir a mesma pergunta em sequência
 
 // Só existe um timer de jogo por vez (suspense OU avanço). Guardado para
 // poder cancelar ao encerrar/reiniciar e não vazar para outra tela/partida.
@@ -178,12 +286,16 @@ const el = {
     switchProfile: $('#switch-profile'),
     // menu
     categoryGrid: $('#category-grid'),
+    panelSub: $('#panel-sub'),
+    subTitle: $('#sub-title'),
+    subListen: $('#sub-listen'),
+    subGrid: $('#sub-grid'),
     difficultyGrid: $('#difficulty-grid'),
     countGrid: $('#count-grid'),
+    panelMode: $('#panel-mode'),
     modeGrid: $('#mode-grid'),
     customCount: $('#custom-count-input'),
     startBtn: $('#start-btn'),
-    soundToggle: $('#sound-toggle'),
     // jogo
     qCurrent: $('#q-current'),
     qTotal: $('#q-total'),
@@ -203,6 +315,7 @@ const el = {
     resultsStars: $('#results-stars'),
     resultsName: $('#results-name'),
     resultsProfileStars: $('#results-profile-stars'),
+    resultsListen: $('#results-listen'),
     playAgainBtn: $('#play-again-btn'),
     menuBtn: $('#menu-btn'),
     // sons
@@ -216,6 +329,7 @@ const el = {
 
 function randInt(max) { return Math.floor(Math.random() * max); }
 function randomFrom(arr) { return arr[randInt(arr.length)]; }
+function randRange(min, max) { return min + randInt(max - min + 1); }
 
 function shuffle(arr) {
     const a = arr.slice();
@@ -228,12 +342,13 @@ function shuffle(arr) {
 function sample(arr, n) { return shuffle(arr).slice(0, n); }
 
 function showScreen(name) {
+    stopSpeech();
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Monta a frase da pergunta conforme o modo de jogo.
+// Frase (formas, cores, animais, números e letras) conforme o modo de jogo.
 function buildPrompt(item, mode) {
     if (mode === 'arrastar') {
         return { html: `Arraste ${item.gender} ${item.nounHTML}`, speak: `Arraste ${item.gender} ${item.nounText}` };
@@ -246,35 +361,47 @@ function buildPrompt(item, mode) {
    6) NARRAÇÃO (só sob demanda) + SONS
 ----------------------------------------------------------- */
 
-let ptVoice = null;
-function loadVoice() {
+const voices = { 'pt-BR': null, 'en-US': null };
+
+function loadVoices() {
     if (!('speechSynthesis' in window)) return;
-    const voices = window.speechSynthesis.getVoices();
-    ptVoice = voices.find((v) => /pt[-_]BR/i.test(v.lang))
-        || voices.find((v) => /^pt/i.test(v.lang)) || null;
+    const all = window.speechSynthesis.getVoices();
+    voices['pt-BR'] = all.find((v) => /pt[-_]BR/i.test(v.lang)) || all.find((v) => /^pt/i.test(v.lang)) || null;
+    voices['en-US'] = all.find((v) => /en[-_]US/i.test(v.lang)) || all.find((v) => /^en/i.test(v.lang)) || null;
 }
 if ('speechSynthesis' in window) {
-    loadVoice();
-    window.speechSynthesis.onvoiceschanged = loadVoice;
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-// "force" = narração pedida por um botão de acessibilidade (toca mesmo mudo).
-function speak(text, force) {
-    if (!force && state.muted) return;
+function stopSpeech() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+// Palavras em MAIÚSCULAS (COELHO, MACACO...) são soletradas por muitas vozes.
+// Passamos para minúsculas só na hora de falar; letras soltas (A, B) ficam como estão.
+function speakable(text, lang) {
+    return text.replace(/\p{L}{2,}/gu, (w) => w.toLocaleLowerCase(lang));
+}
+
+// "parts" = texto (pt-BR) ou lista [{ text, lang }] para misturar idiomas.
+function speak(parts) {
     if (!('speechSynthesis' in window)) return;
+    const list = typeof parts === 'string' ? [{ text: parts, lang: 'pt-BR' }] : parts;
     try {
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'pt-BR';
-        u.rate = 0.95;
-        u.pitch = 1.1;
-        if (ptVoice) u.voice = ptVoice;
-        window.speechSynthesis.speak(u);
+        list.forEach((seg) => {
+            const u = new SpeechSynthesisUtterance(speakable(seg.text, seg.lang));
+            u.lang = seg.lang;
+            u.rate = seg.lang === 'en-US' ? 0.85 : 0.95;
+            u.pitch = 1.1;
+            if (voices[seg.lang]) u.voice = voices[seg.lang];
+            window.speechSynthesis.speak(u);
+        });
     } catch (_) { /* narração é opcional */ }
 }
 
 function playSound(audio) {
-    if (state.muted) return;
     try {
         audio.currentTime = 0;
         const p = audio.play();
@@ -305,13 +432,24 @@ function renderItemInner(item) {
         case 'color': return `<span class="swatch" style="background:${item.hex}"></span>`;
         case 'emoji':
         case 'char':  return `<span class="glyph">${item.glyph}</span>`;
+        case 'text':  return `<span class="label-text">${item.label}</span>`;
         default:      return '';
     }
 }
 
 /* -----------------------------------------------------------
-   8) GERAÇÃO E RENDER DA PERGUNTA
+   8) PERGUNTAS
+   Toda pergunta tem o mesmo formato, seja qual for o jogo:
+     { key, correct, options, big?, prompt(mode) -> { html, speak } }
+   "speak" é um texto (pt-BR) ou uma lista [{ text, lang }].
 ----------------------------------------------------------- */
+
+function optionCount() {
+    const diff = DIFFICULTIES.find((d) => d.id === state.difficulty);
+    return diff ? diff.options : 4;
+}
+
+/* ---------- formas, cores, animais, números e letras ---------- */
 
 function poolForCategory(catId) {
     if (catId === 'numletras') {
@@ -320,48 +458,175 @@ function poolForCategory(catId) {
     return CONTENT[catId];
 }
 
-function optionCount() {
-    const diff = DIFFICULTIES.find((d) => d.id === state.difficulty);
-    return diff ? diff.options : 4;
+function classicQuestion(catId, count) {
+    const pool = poolForCategory(catId);
+    const n = Math.min(count, pool.length);
+    const correct = randomFrom(pool);
+    const options = shuffle([correct, ...sample(pool.filter((it) => it.id !== correct.id), n - 1)]);
+    return { key: correct.id, correct, options, prompt: (mode) => buildPrompt(correct, mode) };
+}
+
+/* ---------- inglês ---------- */
+
+// Fala em inglês: "Click on the dog" -> figuras.
+function englishFigures(count) {
+    const { prefix, items } = EN_GROUPS[randomFrom(Object.keys(EN_GROUPS))];
+    const n = Math.min(count, items.length);
+    const correct = randomFrom(items);
+    const options = shuffle([correct, ...sample(items.filter((it) => it.id !== correct.id), n - 1)]);
+    return {
+        key: 'fig:' + correct.id, correct, options,
+        prompt: () => ({
+            html: `Click on ${prefix}<b>${correct.en}</b>`,
+            speak: [{ text: `Click on ${prefix}${correct.en}`, lang: 'en-US' }],
+        }),
+    };
+}
+
+// "O que significa Good morning?" / "Como se diz Bom dia em inglês?" -> textos.
+function englishTranslation(count) {
+    const groupKey = Math.random() < 0.4 ? 'phrases' : randomFrom(Object.keys(EN_GROUPS));
+    const items = groupKey === 'phrases' ? EN_PHRASES : EN_GROUPS[groupKey].items;
+    const toPt = Math.random() < 0.5;   // true: inglês -> português
+    const n = Math.min(count, items.length);
+
+    const asOption = (it) => {
+        const label = toPt ? it.pt : it.en;
+        return { id: `tr-${it.id}-${toPt ? 'pt' : 'en'}`, name: label, kind: 'text', label };
+    };
+    const source = randomFrom(items);
+    const correct = asOption(source);
+    const options = shuffle([correct, ...sample(items.filter((it) => it.id !== source.id), n - 1).map(asOption)]);
+
+    return {
+        key: `tr:${source.id}:${toPt ? 'pt' : 'en'}`, correct, options,
+        prompt: () => (toPt
+            ? { html: `O que significa <b>${source.en}</b>?`,
+                speak: [{ text: 'O que significa', lang: 'pt-BR' }, { text: source.en, lang: 'en-US' }] }
+            : { html: `Como se diz <b>${source.pt}</b> em inglês?`,
+                speak: `Como se diz ${source.pt} em inglês?` }),
+    };
+}
+
+function englishQuestion(count) {
+    const type = state.sub.ingles === 'misturar' ? randomFrom(['figuras', 'traducao']) : state.sub.ingles;
+    return type === 'figuras' ? englishFigures(count) : englishTranslation(count);
+}
+
+/* ---------- matemática ---------- */
+
+// Números de cada operação por nível (fácil / médio / difícil).
+function mathOperands(op, difficulty) {
+    const lvl = { facil: 0, medio: 1, dificil: 2 }[difficulty] || 0;
+    switch (op) {
+        case 'somar': {
+            const [min, max] = [[1, 5], [5, 15], [15, 60]][lvl];
+            const a = randRange(min, max), b = randRange(min, max);
+            return { a, b, answer: a + b };
+        }
+        case 'subtrair': {
+            const [min, max] = [[3, 10], [10, 30], [30, 99]][lvl];
+            const a = randRange(min, max), b = randRange(1, a - 1);
+            return { a, b, answer: a - b };
+        }
+        case 'multiplicar': {
+            const [[aMin, aMax], [bMin, bMax]] = [[[1, 5], [1, 3]], [[2, 10], [2, 10]], [[6, 12], [6, 12]]][lvl];
+            const a = randRange(aMin, aMax), b = randRange(bMin, bMax);
+            return { a, b, answer: a * b };
+        }
+        default: { // dividir: sempre divisão exata
+            const [[bMin, bMax], [qMin, qMax]] = [[[2, 3], [1, 5]], [[2, 5], [2, 10]], [[2, 10], [2, 12]]][lvl];
+            const b = randRange(bMin, bMax), q = randRange(qMin, qMax);
+            return { a: b * q, b, answer: q };
+        }
+    }
+}
+
+function numberOption(v) {
+    return { id: 'ans-' + v, name: String(v), kind: 'char', glyph: String(v) };
+}
+
+// Conta "armada": um número em cima do outro, sinal à esquerda, linha embaixo.
+// Cada dígito fica numa caixinha de largura fixa para as casas (unidade,
+// dezena...) ficarem alinhadas, seja qual for a fonte.
+function mathStackHTML(a, sym, b) {
+    const digits = (n) => String(n).split('').map((d) => `<span class="d">${d}</span>`).join('');
+    return `<span class="math-stack" role="img" aria-label="${a} ${sym} ${b}">`
+        + `<span class="mrow mrow--top"><span class="num">${digits(a)}</span></span>`
+        + `<span class="mrow"><span class="op">${sym}</span><span class="num">${digits(b)}</span></span>`
+        + `<span class="mline"></span>`
+        + `<span class="mrow mrow--answer"><span class="num"><span class="d">?</span></span></span>`
+        + `</span>`;
+}
+
+function mathQuestion(count) {
+    const opKey = state.sub.matematica === 'misturar' ? randomFrom(Object.keys(MATH_OPS)) : state.sub.matematica;
+    const op = MATH_OPS[opKey];
+    const { a, b, answer } = mathOperands(opKey, state.difficulty);
+
+    // Respostas erradas: números "perto" da certa (primeiro os mais próximos).
+    const near = [], far = [];
+    [1, 2, 3, 4, 5, 6].forEach((d) => near.push(answer + d, answer - d));
+    [10].forEach((d) => far.push(answer + d, answer - d));
+    const distractors = [...shuffle(near), ...shuffle(far)].filter((v) => v >= 0);
+
+    const values = [answer];
+    for (const v of distractors) {
+        if (values.length >= count) break;
+        if (!values.includes(v)) values.push(v);
+    }
+
+    const correct = numberOption(answer);
+    const options = shuffle(values.map(numberOption));
+    return {
+        key: `${a}${op.sym}${b}`, correct, options, big: true,
+        prompt: () => ({
+            html: mathStackHTML(a, op.sym, b),
+            speak: `Quanto é ${a} ${op.say} ${b}?`,
+        }),
+    };
+}
+
+/* ---------- escolhe o jogo ---------- */
+
+function buildQuestion(count) {
+    const cat = state.category === 'misturar'
+        ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
+        : state.category;
+    if (cat === 'ingles') return englishQuestion(count);
+    if (cat === 'matematica') return mathQuestion(count);
+    return classicQuestion(cat, count);
 }
 
 function newQuestion() {
-    const catId = state.category === 'misturar'
-        ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
-        : state.category;
+    const count = optionCount();
+    let q = buildQuestion(count);
+    for (let tries = 0; tries < 8 && q.key === lastKey; tries++) q = buildQuestion(count);
+    lastKey = q.key;
 
-    const pool = poolForCategory(catId);
-    const count = Math.min(optionCount(), pool.length);
-
-    let candidates = pool.filter((it) => it.id !== lastCorrectId);
-    if (candidates.length === 0) candidates = pool;
-    const correct = randomFrom(candidates);
-    lastCorrectId = correct.id;
-
-    const distractors = sample(pool.filter((it) => it.id !== correct.id), count - 1);
-    const options = shuffle([correct, ...distractors]);
-
-    state.correctItem = correct;
+    state.question = q;
     state.firstTry = true;
-
-    renderQuestion(correct, options, count);
+    renderQuestion(q);
 }
 
-function renderQuestion(correct, options, count) {
+function renderQuestion(q) {
     const dragMode = state.mode === 'arrastar';
 
-    el.promptText.innerHTML = buildPrompt(correct, state.mode).html;
+    stopSpeech();
+    el.promptText.innerHTML = q.prompt(state.mode).html;
+    el.promptText.classList.toggle('is-big', !!q.big);
 
     // Zona de soltar só aparece no modo arrastar.
     el.dropZone.hidden = !dragMode;
-    el.dropZone.classList.remove('is-over', 'is-filled');
+    el.dropZone.classList.remove('is-over');
+    clearDropPiece();
 
-    el.options.setAttribute('data-count', String(count));
+    el.options.setAttribute('data-count', String(q.options.length));
     el.options.classList.toggle('is-drag', dragMode);
     el.options.classList.remove('is-busy');
     el.options.innerHTML = '';
 
-    options.forEach((item) => {
+    q.options.forEach((item) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'option';
@@ -433,9 +698,27 @@ function onDragEnd(e) {
     d.tile.classList.remove('is-dragging-src');
     el.dropZone.classList.remove('is-over');
 
-    if (isOverDrop(e.clientX, e.clientY)) {
-        handleSelection(d.item, d.tile);
+    if (e.type !== 'pointercancel' && isOverDrop(e.clientX, e.clientY)) {
+        handleSelection(d.item, d.tile, placePieceInZone(d.tile));
     }
+}
+
+// A peça fica DENTRO do alvo enquanto o jogo "confere" a resposta.
+// O lugar de origem fica esmaecido, como se a peça tivesse saído dele.
+function placePieceInZone(tile) {
+    clearDropPiece();
+    const piece = document.createElement('div');
+    piece.className = 'option drop-piece';
+    piece.innerHTML = tile.innerHTML;
+    el.dropZone.appendChild(piece);
+    el.dropZone.classList.add('is-filled');
+    tile.classList.add('is-ghosted');
+    return piece;
+}
+
+function clearDropPiece() {
+    el.dropZone.querySelectorAll('.drop-piece').forEach((p) => p.remove());
+    el.dropZone.classList.remove('is-filled');
 }
 
 /* -----------------------------------------------------------
@@ -445,26 +728,27 @@ function onDragEnd(e) {
 const CHEERS = ['Muito bem! 🎉', 'Isso! 🌟', 'Você acertou! 👏', 'Boa! 🥳', 'Perfeito! ✨'];
 const TRY_AGAIN = ['Quase! Tenta de novo. 💪', 'Ops! Procura de novo. 🙂', 'Não foi essa. Tenta outra! 👀'];
 
-function handleSelection(item, sourceEl) {
+// sourceEl = a opção escolhida; pieceEl = quem mostra o resultado
+// (no modo clicar é a própria opção; no arrastar, a peça dentro do alvo).
+function handleSelection(item, sourceEl, pieceEl) {
     if (busy) return;
     busy = true;
+    const piece = pieceEl || sourceEl;
 
     el.options.classList.add('is-busy');
-    if (state.mode === 'arrastar') el.dropZone.classList.add('is-filled');
-    sourceEl.classList.add('is-checking');
+    piece.classList.add('is-checking');
     el.feedback.textContent = '🤔 Vamos ver...';
     el.feedback.className = 'feedback is-checking';
 
     schedule(() => {
-        sourceEl.classList.remove('is-checking');
-        const isCorrect = item.id === state.correctItem.id;
-        if (isCorrect) revealCorrect(sourceEl);
-        else revealWrong(sourceEl);
+        piece.classList.remove('is-checking');
+        if (item.id === state.question.correct.id) revealCorrect(piece);
+        else revealWrong(sourceEl, piece);
     }, SUSPENSE_MS);
 }
 
-function revealCorrect(sourceEl) {
-    sourceEl.classList.add('is-correct');
+function revealCorrect(piece) {
+    piece.classList.add('is-correct');
     el.feedback.textContent = randomFrom(CHEERS);
     el.feedback.className = 'feedback is-correct';
     playSound(el.correctSound);
@@ -478,16 +762,28 @@ function revealCorrect(sourceEl) {
     schedule(nextStep, ADVANCE_MS); // busy volta a false em renderQuestion
 }
 
-function revealWrong(sourceEl) {
+function revealWrong(sourceEl, piece) {
     state.firstTry = false;
-    sourceEl.classList.add('is-wrong', 'is-dimmed');
-    sourceEl.disabled = true;
     el.feedback.textContent = randomFrom(TRY_AGAIN);
     el.feedback.className = 'feedback is-wrong';
     playSound(el.wrongSound);
-    el.dropZone.classList.remove('is-filled');
-    el.options.classList.remove('is-busy');
-    busy = false; // permite tentar de novo
+
+    const release = () => {
+        sourceEl.classList.remove('is-ghosted');
+        sourceEl.classList.add('is-wrong', 'is-dimmed');
+        sourceEl.disabled = true;
+        clearDropPiece();
+        el.options.classList.remove('is-busy');
+        busy = false; // permite tentar de novo
+    };
+
+    if (piece === sourceEl) {
+        release();
+    } else {
+        // Arrastar: a peça errada balança no alvo e só então "volta" ao lugar.
+        piece.classList.add('is-wrong');
+        schedule(release, WRONG_SHOW_MS);
+    }
 }
 
 function nextStep() {
@@ -508,7 +804,7 @@ function updateHud() {
 
 function showResults() {
     cancelPending();
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    stopSpeech();
 
     const answered = state.answered;
     const correct = state.correctFirstTry;
@@ -526,6 +822,9 @@ function showResults() {
     el.resultsAnswered.textContent = answered;
     el.resultsStars.textContent = correct <= 12 ? ('⭐'.repeat(correct) || '—') : `⭐ x ${correct}`;
 
+    // Texto do botão "ouvir resultado" (para quem ainda não lê).
+    let speech = `${title} Você acertou de primeira ${correct} de ${answered}. `;
+
     // Acumula estrelas no perfil.
     if (state.profile) {
         state.profile.stars = (state.profile.stars || 0) + correct;
@@ -534,7 +833,12 @@ function showResults() {
         updateProfileBar();
         el.resultsName.textContent = state.profile.name;
         el.resultsProfileStars.textContent = state.profile.stars;
+
+        const total = state.profile.stars;
+        speech = `${state.profile.name}! ` + speech
+            + `Agora você tem ${total} ${total === 1 ? 'estrela' : 'estrelas'} no total. `;
     }
+    state.resultSpeech = speech + phrase;
 
     showScreen('results');
     if (pct >= 0.5) setTimeout(() => burstConfetti(true), 300);
@@ -741,11 +1045,42 @@ function buildChoice(container, meta, onSelect, isSelected) {
     container.appendChild(btn);
 }
 
+// "Como jogar?" só aparece onde o arrastar existe; nos outros jogos volta para "clicar".
+function refreshModePanel() {
+    const canDrag = DRAG_CATEGORIES.includes(state.category);
+    el.panelMode.hidden = !canDrag;
+    if (!canDrag && state.mode !== 'clicar') {
+        state.mode = 'clicar';
+        el.modeGrid.querySelectorAll('.choice').forEach((c, i) => {   // MODES[0] = clicar
+            c.classList.toggle('is-selected', i === 0);
+            c.setAttribute('aria-checked', String(i === 0));
+        });
+    }
+}
+
+// Mostra a escolha extra (tipo de inglês / operação) só quando faz sentido.
+function refreshSubPanel() {
+    const cfg = SUB_OPTIONS[state.category];
+    el.panelSub.hidden = !cfg;
+    if (!cfg) return;
+
+    el.subTitle.textContent = cfg.title;
+    el.subListen.dataset.say = cfg.say;
+    el.subListen.setAttribute('aria-label', 'Ouvir: ' + cfg.title);
+    el.subGrid.innerHTML = '';
+    el.subGrid.className = 'choice-grid' + (cfg.items.length === 3 ? ' choice-grid--3' : '');
+    cfg.items.forEach((it) => buildChoice(
+        el.subGrid,
+        { value: it.id, label: it.label, emoji: it.emoji, sub: it.sub },
+        (v) => { state.sub[state.category] = v; },
+        it.id === state.sub[state.category]));
+}
+
 function buildMenu() {
     CATEGORY_META.forEach((c, i) => buildChoice(
         el.categoryGrid,
         { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
-        (v) => { state.category = v; }, i === 0));
+        (v) => { state.category = v; refreshSubPanel(); refreshModePanel(); }, i === 0));
 
     DIFFICULTIES.forEach((d, i) => buildChoice(
         el.difficultyGrid,
@@ -766,6 +1101,8 @@ function buildMenu() {
     state.difficulty = 'facil';
     state.mode = 'clicar';
     state.totalQuestions = 10;
+    refreshSubPanel();
+    refreshModePanel();
 }
 
 el.customCount.addEventListener('input', () => {
@@ -779,9 +1116,9 @@ el.customCount.addEventListener('input', () => {
     }
 });
 
-// Botões de "ouvir" do menu (acessibilidade): falam mesmo se mudo.
+// Botões de "ouvir" do menu (acessibilidade).
 document.querySelectorAll('.listen-btn').forEach((b) => {
-    b.addEventListener('click', () => speak(b.dataset.say, true));
+    b.addEventListener('click', () => speak(b.dataset.say));
 });
 
 /* -----------------------------------------------------------
@@ -792,23 +1129,17 @@ function startGame() {
     if (!state.totalQuestions || state.totalQuestions < 1) state.totalQuestions = 10;
     state.totalQuestions = Math.min(state.totalQuestions, 99);
 
+    if (!DRAG_CATEGORIES.includes(state.category)) state.mode = 'clicar';
+
     cancelPending();
     state.answered = 0;
     state.correctFirstTry = 0;
-    lastCorrectId = null;
+    lastKey = null;
     busy = false;
 
     showScreen('game');
     updateHud();
     newQuestion();
-}
-
-function toggleSound() {
-    state.muted = !state.muted;
-    el.soundToggle.textContent = state.muted ? '🔈' : '🔊';
-    el.soundToggle.classList.toggle('is-muted', state.muted);
-    el.soundToggle.setAttribute('aria-pressed', String(state.muted));
-    if (state.muted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
 }
 
 /* -----------------------------------------------------------
@@ -818,9 +1149,9 @@ function toggleSound() {
 el.startBtn.addEventListener('click', startGame);
 el.quitBtn.addEventListener('click', showResults);
 el.repeatBtn.addEventListener('click', () => {
-    if (state.correctItem) speak(buildPrompt(state.correctItem, state.mode).speak, true);
+    if (state.question) speak(state.question.prompt(state.mode).speak);
 });
-el.soundToggle.addEventListener('click', toggleSound);
+el.resultsListen.addEventListener('click', () => speak(state.resultSpeech));
 el.playAgainBtn.addEventListener('click', startGame);
 el.menuBtn.addEventListener('click', () => showScreen('menu'));
 el.switchProfile.addEventListener('click', () => { renderProfiles(); showScreen('profiles'); });

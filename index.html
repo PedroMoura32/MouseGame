@@ -7,16 +7,13 @@
     <title>Jogo dos Cliques 🎀</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Barra superior sempre visível -->
     <header class="topbar">
         <div class="brand">🎀 Jogo dos Cliques</div>
-        <div class="topbar-actions">
-            <button id="sound-toggle" class="icon-btn" aria-pressed="false" title="Ligar/desligar sons do jogo" aria-label="Ligar ou desligar os sons do jogo">🔊</button>
-        </div>
     </header>
 
     <main class="stage">
@@ -58,6 +55,14 @@
                 <div id="category-grid" class="choice-grid" role="radiogroup" aria-label="Categoria"></div>
             </div>
 
+            <!-- Escolha extra: aparece só para Inglês (tipo) e Matemática (operação) -->
+            <div id="panel-sub" class="panel" hidden>
+                <h2 class="panel-title"><span id="sub-title">Que tipo?</span>
+                    <button id="sub-listen" class="listen-btn" data-say="" aria-label="Ouvir">🔊</button>
+                </h2>
+                <div id="sub-grid" class="choice-grid" role="radiogroup" aria-label="Tipo de pergunta"></div>
+            </div>
+
             <div class="panel">
                 <h2 class="panel-title">2. Escolha o nível
                     <button class="listen-btn" data-say="Escolha o nível de dificuldade" aria-label="Ouvir: escolha o nível">🔊</button>
@@ -76,7 +81,8 @@
                 </div>
             </div>
 
-            <div class="panel">
+            <!-- Só aparece para Formas, Cores e Animais (arrastar não existe nos outros jogos) -->
+            <div id="panel-mode" class="panel">
                 <h2 class="panel-title">4. Como jogar?
                     <button class="listen-btn" data-say="Como você quer jogar? Clicar ou arrastar?" aria-label="Ouvir: como jogar">🔊</button>
                 </h2>
@@ -124,6 +130,7 @@
                 <h2 id="results-title" class="results-title">Muito bem!</h2>
                 <p class="results-score">Você acertou de primeira <b><span id="results-correct">0</span></b> de <b><span id="results-answered">0</span></b>!</p>
                 <div id="results-stars" class="results-stars"></div>
+                <button id="results-listen" class="listen-pill" aria-label="Ouvir o resultado">🔊 Ouvir meu resultado</button>
                 <p class="results-total">Total de estrelas de <b><span id="results-name">você</span></b>: <b><span id="results-profile-stars">0</span></b> ⭐</p>
                 <div class="results-actions">
                     <button id="play-again-btn" class="big-btn">Jogar de novo 🔁</button>
