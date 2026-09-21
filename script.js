@@ -304,6 +304,7 @@ const el = {
     promptText: $('#prompt-text'),
     repeatBtn: $('#repeat-btn'),
     dropZone: $('#drop-zone'),
+    optionsArea: $('#options-area'),
     options: $('#options'),
     feedback: $('#feedback'),
     quitBtn: $('#quit-btn'),
@@ -345,6 +346,7 @@ function showScreen(name) {
     stopSpeech();
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
+    document.body.classList.toggle('is-playing', name === 'game');   // tela do jogo cabe na janela (sem rolar)
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -430,8 +432,12 @@ function renderItemInner(item) {
     switch (item.kind) {
         case 'shape': return shapeSVG(item.shape, item.color);
         case 'color': return `<span class="swatch" style="background:${item.hex}"></span>`;
-        case 'emoji':
-        case 'char':  return `<span class="glyph">${item.glyph}</span>`;
+        case 'emoji': return `<span class="glyph">${item.glyph}</span>`;
+        case 'char': {
+            // números com mais dígitos usam letra menor para caberem na peça
+            const n = item.glyph.length;
+            return `<span class="glyph" style="--k:${n >= 3 ? 0.36 : n === 2 ? 0.44 : 0.5}">${item.glyph}</span>`;
+        }
         case 'text':  return `<span class="label-text">${item.label}</span>`;
         default:      return '';
     }
@@ -621,7 +627,6 @@ function renderQuestion(q) {
     el.dropZone.classList.remove('is-over');
     clearDropPiece();
 
-    el.options.setAttribute('data-count', String(q.options.length));
     el.options.classList.toggle('is-drag', dragMode);
     el.options.classList.remove('is-busy');
     el.options.innerHTML = '';
@@ -645,8 +650,38 @@ function renderQuestion(q) {
 
     busy = false;
     updateHud();
+    layoutOptions();
     // Sem narração automática: a criança lê. Fala só se clicar no 🔊.
 }
+
+/* Tamanho das opções: cabem SEMPRE no espaço disponível (largura e altura da
+   janela). Testa quantas colunas usar (1, 2, 3...) e fica com o arranjo que dá
+   as peças maiores; as linhas quebram sozinhas e ficam centralizadas. */
+const OPTION_MAX = 240;   // lado máximo da peça (px)
+
+function layoutOptions() {
+    const n = el.options.children.length;
+    const W = el.optionsArea.clientWidth;
+    const H = el.optionsArea.clientHeight;
+    if (!n || !W || !H) return;   // tela do jogo não está visível
+
+    const gap = W < 520 || H < 420 ? 10 : 16;
+    let best = { s: 0, cols: 1 };
+    for (let cols = 1; cols <= n; cols++) {
+        const rows = Math.ceil(n / cols);
+        const s = Math.min((W - (cols - 1) * gap) / cols, (H - (rows - 1) * gap) / rows, OPTION_MAX);
+        if (s > best.s + 0.5) best = { s, cols };   // empate: fica com menos colunas (linhas mais equilibradas)
+    }
+
+    const s = Math.max(48, Math.floor(best.s));
+    el.options.style.setProperty('--s', s + 'px');
+    el.options.style.setProperty('--gap', gap + 'px');
+    el.options.style.maxWidth = (best.cols * s + (best.cols - 1) * gap) + 'px';
+}
+
+// Recalcula quando a janela muda de tamanho (girar o tablet, redimensionar, zoom...).
+if ('ResizeObserver' in window) new ResizeObserver(layoutOptions).observe(el.optionsArea);
+else window.addEventListener('resize', layoutOptions);
 
 /* -----------------------------------------------------------
    9) MODO ARRASTAR (pointer events: mouse + toque)
