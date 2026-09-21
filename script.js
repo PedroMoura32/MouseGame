@@ -1,46 +1,32 @@
 /* ============================================================
    Jogo dos Cliques
-   Um joguinho para crianças treinarem o uso do mouse,
-   associando objetos/nomes às respostas certas.
+   Joguinho para crianças treinarem o uso do mouse (clicar e
+   arrastar), associando objetos/nomes às respostas certas.
 
-   Como adicionar conteúdo novo:
-   - Formas:  adicione um item em CONTENT.formas (função shapeItem)
-   - Cores:   adicione um item em CONTENT.cores  (função colorItem)
-   - Animais: adicione um item em CONTENT.animais (função animalItem)
-   - Números/Letras: geradas automaticamente mais abaixo
-   Cada categoria é totalmente independente e escalável.
+   Como adicionar conteúdo novo (é só editar CONTENT):
+   - Formas:  shapeItem(id, NOME, genero, forma, cor)
+   - Cores:   colorItem(id, NOME, hex)
+   - Animais: animalItem(id, NOME, genero, emoji)
+   - Números/Letras: gerados automaticamente
+   "genero" é 'o' ou 'a' (para montar "Clique NO..." e "Arraste O...").
    ============================================================ */
 
 'use strict';
 
 /* -----------------------------------------------------------
    1) CONSTRUTORES DE ITENS
-   Cada item sabe: como aparecer (kind + payload), qual é a
-   pergunta (promptHTML) e como ser falado (speak).
+   Cada item guarda gênero + o "nome" (nounHTML/nounText) e o
+   jogo monta a frase conforme o modo (clicar/arrastar).
 ----------------------------------------------------------- */
 
-function shapeItem(id, name, article, shape, color) {
-    return {
-        id, name, kind: 'shape', shape, color,
-        promptHTML: `Clique ${article} <b>${name}</b>`,
-        speak: `Clique ${article} ${name}`,
-    };
+function shapeItem(id, name, gender, shape, color) {
+    return { id, name, gender, kind: 'shape', shape, color, nounHTML: `<b>${name}</b>`, nounText: name };
 }
-
 function colorItem(id, name, hex) {
-    return {
-        id, name, kind: 'color', hex,
-        promptHTML: `Clique na cor <b>${name}</b>`,
-        speak: `Clique na cor ${name}`,
-    };
+    return { id, name, gender: 'a', kind: 'color', hex, nounHTML: `cor <b>${name}</b>`, nounText: `cor ${name}` };
 }
-
-function animalItem(id, name, article, emoji) {
-    return {
-        id, name, kind: 'emoji', glyph: emoji,
-        promptHTML: `Clique ${article} <b>${name}</b>`,
-        speak: `Clique ${article} ${name}`,
-    };
+function animalItem(id, name, gender, emoji) {
+    return { id, name, gender, kind: 'emoji', glyph: emoji, nounHTML: `<b>${name}</b>`, nounText: name };
 }
 
 /* -----------------------------------------------------------
@@ -49,67 +35,59 @@ function animalItem(id, name, article, emoji) {
 
 const NUMBERS = [];
 for (let n = 0; n <= 10; n++) {
-    NUMBERS.push({
-        id: 'num-' + n, name: String(n), kind: 'char', glyph: String(n),
-        promptHTML: `Clique no número <b>${n}</b>`,
-        speak: `Clique no número ${n}`,
-    });
+    NUMBERS.push({ id: 'num-' + n, name: String(n), gender: 'o', kind: 'char', glyph: String(n),
+        nounHTML: `número <b>${n}</b>`, nounText: `número ${n}` });
 }
 
 const LETTERS = [];
 for (let i = 0; i < 26; i++) {
     const L = String.fromCharCode(65 + i);
-    LETTERS.push({
-        id: 'let-' + L, name: L, kind: 'char', glyph: L,
-        promptHTML: `Clique na letra <b>${L}</b>`,
-        speak: `Clique na letra ${L}`,
-    });
+    LETTERS.push({ id: 'let-' + L, name: L, gender: 'a', kind: 'char', glyph: L,
+        nounHTML: `letra <b>${L}</b>`, nounText: `letra ${L}` });
 }
 
 const CONTENT = {
     formas: [
-        shapeItem('circulo',   'CÍRCULO',   'no', 'circle',    '#e74c3c'),
-        shapeItem('quadrado',  'QUADRADO',  'no', 'square',    '#3498db'),
-        shapeItem('triangulo', 'TRIÂNGULO', 'no', 'triangle',  '#2ecc71'),
-        shapeItem('retangulo', 'RETÂNGULO', 'no', 'rectangle', '#f39c12'),
-        shapeItem('estrela',   'ESTRELA',   'na', 'star',      '#f1c40f'),
-        shapeItem('coracao',   'CORAÇÃO',   'no', 'heart',     '#e84393'),
-        shapeItem('losango',   'LOSANGO',   'no', 'diamond',   '#9b59b6'),
+        shapeItem('circulo',   'CÍRCULO',   'o', 'circle',    '#e64980'),
+        shapeItem('quadrado',  'QUADRADO',  'o', 'square',    '#4dabf7'),
+        shapeItem('triangulo', 'TRIÂNGULO', 'o', 'triangle',  '#38d9a9'),
+        shapeItem('retangulo', 'RETÂNGULO', 'o', 'rectangle', '#ffa94d'),
+        shapeItem('estrela',   'ESTRELA',   'a', 'star',      '#ffd43b'),
+        shapeItem('coracao',   'CORAÇÃO',   'o', 'heart',     '#f06595'),
+        shapeItem('losango',   'LOSANGO',   'o', 'diamond',   '#9775fa'),
     ],
     cores: [
-        colorItem('vermelha', 'VERMELHA', '#e74c3c'),
-        colorItem('azul',     'AZUL',     '#3498db'),
-        colorItem('amarela',  'AMARELA',  '#f1c40f'),
-        colorItem('verde',    'VERDE',    '#2ecc71'),
-        colorItem('laranja',  'LARANJA',  '#e67e22'),
-        colorItem('roxa',     'ROXA',     '#9b59b6'),
-        colorItem('rosa',     'ROSA',     '#ff6fb5'),
+        colorItem('vermelha', 'VERMELHA', '#e03131'),
+        colorItem('azul',     'AZUL',     '#1c7ed6'),
+        colorItem('amarela',  'AMARELA',  '#f2c81e'),
+        colorItem('verde',    'VERDE',    '#2f9e44'),
+        colorItem('laranja',  'LARANJA',  '#e8590c'),
+        colorItem('roxa',     'ROXA',     '#9c36b5'),
+        colorItem('rosa',     'ROSA',     '#f06595'),
         colorItem('marrom',   'MARROM',   '#8b5a2b'),
-        colorItem('cinza',    'CINZA',    '#95a5a6'),
-        colorItem('preta',    'PRETA',    '#2c3e50'),
+        colorItem('cinza',    'CINZA',    '#adb5bd'),
+        colorItem('preta',    'PRETA',    '#343a40'),
     ],
     animais: [
-        animalItem('cachorro', 'CACHORRO', 'no', '🐶'),
-        animalItem('gato',     'GATO',     'no', '🐱'),
-        animalItem('leao',     'LEÃO',     'no', '🦁'),
-        animalItem('cavalo',   'CAVALO',   'no', '🐴'),
-        animalItem('vaca',     'VACA',     'na', '🐮'),
-        animalItem('porco',    'PORCO',    'no', '🐷'),
-        animalItem('galinha',  'GALINHA',  'na', '🐔'),
-        animalItem('pato',     'PATO',     'no', '🦆'),
-        animalItem('sapo',     'SAPO',     'no', '🐸'),
-        animalItem('macaco',   'MACACO',   'no', '🐵'),
-        animalItem('elefante', 'ELEFANTE', 'no', '🐘'),
-        animalItem('peixe',    'PEIXE',    'no', '🐟'),
-        animalItem('coelho',   'COELHO',   'no', '🐰'),
-        animalItem('urso',     'URSO',     'no', '🐻'),
-        animalItem('tigre',    'TIGRE',    'no', '🐯'),
-        animalItem('abelha',   'ABELHA',   'na', '🐝'),
-        animalItem('borboleta','BORBOLETA','na', '🦋'),
-        animalItem('cobra',    'COBRA',    'na', '🐍'),
+        animalItem('cachorro', 'CACHORRO', 'o', '🐶'),
+        animalItem('gato',     'GATO',     'o', '🐱'),
+        animalItem('leao',     'LEÃO',     'o', '🦁'),
+        animalItem('cavalo',   'CAVALO',   'o', '🐴'),
+        animalItem('vaca',     'VACA',     'a', '🐮'),
+        animalItem('porco',    'PORCO',    'o', '🐷'),
+        animalItem('galinha',  'GALINHA',  'a', '🐔'),
+        animalItem('pato',     'PATO',     'o', '🦆'),
+        animalItem('sapo',     'SAPO',     'o', '🐸'),
+        animalItem('macaco',   'MACACO',   'o', '🐵'),
+        animalItem('elefante', 'ELEFANTE', 'o', '🐘'),
+        animalItem('peixe',    'PEIXE',    'o', '🐟'),
+        animalItem('coelho',   'COELHO',   'o', '🐰'),
+        animalItem('urso',     'URSO',     'o', '🐻'),
+        animalItem('tigre',    'TIGRE',    'o', '🐯'),
+        animalItem('abelha',   'ABELHA',   'a', '🐝'),
+        animalItem('borboleta','BORBOLETA','a', '🦋'),
+        animalItem('cobra',    'COBRA',    'a', '🐍'),
     ],
-    // números e letras compartilham a mesma "categoria" no menu,
-    // mas cada pergunta usa só um dos dois grupos (tudo número ou tudo letra).
     numletras: { num: NUMBERS, let: LETTERS },
 };
 
@@ -127,61 +105,107 @@ const DIFFICULTIES = [
     { id: 'dificil', label: 'Difícil', emoji: '🤓', options: 6 },
 ];
 
+const MODES = [
+    { id: 'clicar',   label: 'Clicar',   emoji: '👆', sub: 'clique na resposta' },
+    { id: 'arrastar', label: 'Arrastar', emoji: '✊', sub: 'arraste até o alvo' },
+];
+
 const COUNT_OPTIONS = [5, 10, 20, 30];
 
+const AVATARS = ['🦄', '🌸', '🦋', '🌈', '🐱', '🐰', '🐼', '⭐', '🐬', '🍓', '🌷', '🐞'];
+
+/* Tempos de experiência */
+const SUSPENSE_MS = 1100;  // "aguardar a validação" após escolher
+const ADVANCE_MS = 1300;   // depois do acerto, antes da próxima
+
 /* -----------------------------------------------------------
-   3) ESTADO DO JOGO
+   3) ESTADO
 ----------------------------------------------------------- */
 
 const state = {
     category: 'formas',
     difficulty: 'facil',
+    mode: 'clicar',
     totalQuestions: 10,
-    answered: 0,        // quantas perguntas já foram respondidas corretamente (avançadas)
-    correctFirstTry: 0, // acertos sem errar antes (viram estrela)
-    firstTry: true,     // se ainda não errou na pergunta atual
+    answered: 0,
+    correctFirstTry: 0,
+    firstTry: true,
     correctItem: null,
     muted: false,
+    profile: null,
 };
 
+let busy = false;        // trava durante o "suspense"/comemoração
+let lastCorrectId = null;
+
+// Só existe um timer de jogo por vez (suspense OU avanço). Guardado para
+// poder cancelar ao encerrar/reiniciar e não vazar para outra tela/partida.
+let pendingTimer = null;
+function schedule(fn, ms) {
+    clearTimeout(pendingTimer);
+    pendingTimer = setTimeout(() => { pendingTimer = null; fn(); }, ms);
+}
+function cancelPending() {
+    clearTimeout(pendingTimer);
+    pendingTimer = null;
+}
+
 /* -----------------------------------------------------------
-   4) ATALHOS PARA O DOM
+   4) DOM
 ----------------------------------------------------------- */
 
 const $ = (sel) => document.querySelector(sel);
 
 const screens = {
+    profiles: $('#screen-profiles'),
     menu: $('#screen-menu'),
     game: $('#screen-game'),
     results: $('#screen-results'),
 };
 
 const el = {
+    // perfis
+    profilesList: $('#profiles-list'),
+    profileCreate: $('#profile-create'),
+    newName: $('#new-name'),
+    avatarPicker: $('#avatar-picker'),
+    createConfirm: $('#create-confirm'),
+    createCancel: $('#create-cancel'),
+    // barra de perfil
+    pbAvatar: $('#pb-avatar'),
+    pbName: $('#pb-name'),
+    pbStars: $('#pb-stars'),
+    switchProfile: $('#switch-profile'),
+    // menu
     categoryGrid: $('#category-grid'),
     difficultyGrid: $('#difficulty-grid'),
     countGrid: $('#count-grid'),
+    modeGrid: $('#mode-grid'),
     customCount: $('#custom-count-input'),
     startBtn: $('#start-btn'),
     soundToggle: $('#sound-toggle'),
-
+    // jogo
     qCurrent: $('#q-current'),
     qTotal: $('#q-total'),
     qScore: $('#q-score'),
     progressBar: $('#progress-bar'),
     promptText: $('#prompt-text'),
     repeatBtn: $('#repeat-btn'),
+    dropZone: $('#drop-zone'),
     options: $('#options'),
     feedback: $('#feedback'),
     quitBtn: $('#quit-btn'),
-
+    // resultado
     resultsEmoji: $('#results-emoji'),
     resultsTitle: $('#results-title'),
     resultsCorrect: $('#results-correct'),
     resultsAnswered: $('#results-answered'),
     resultsStars: $('#results-stars'),
+    resultsName: $('#results-name'),
+    resultsProfileStars: $('#results-profile-stars'),
     playAgainBtn: $('#play-again-btn'),
     menuBtn: $('#menu-btn'),
-
+    // sons
     correctSound: $('#correct-sound'),
     wrongSound: $('#wrong-sound'),
 };
@@ -193,7 +217,6 @@ const el = {
 function randInt(max) { return Math.floor(Math.random() * max); }
 function randomFrom(arr) { return arr[randInt(arr.length)]; }
 
-// Embaralha uma cópia do array (Fisher–Yates).
 function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -202,11 +225,7 @@ function shuffle(arr) {
     }
     return a;
 }
-
-// Sorteia n itens distintos de um array.
-function sample(arr, n) {
-    return shuffle(arr).slice(0, n);
-}
+function sample(arr, n) { return shuffle(arr).slice(0, n); }
 
 function showScreen(name) {
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
@@ -214,27 +233,35 @@ function showScreen(name) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Monta a frase da pergunta conforme o modo de jogo.
+function buildPrompt(item, mode) {
+    if (mode === 'arrastar') {
+        return { html: `Arraste ${item.gender} ${item.nounHTML}`, speak: `Arraste ${item.gender} ${item.nounText}` };
+    }
+    const prep = item.gender === 'o' ? 'no' : 'na';
+    return { html: `Clique ${prep} ${item.nounHTML}`, speak: `Clique ${prep} ${item.nounText}` };
+}
+
 /* -----------------------------------------------------------
-   6) NARRAÇÃO (Web Speech API)
+   6) NARRAÇÃO (só sob demanda) + SONS
 ----------------------------------------------------------- */
 
 let ptVoice = null;
-
 function loadVoice() {
     if (!('speechSynthesis' in window)) return;
     const voices = window.speechSynthesis.getVoices();
     ptVoice = voices.find((v) => /pt[-_]BR/i.test(v.lang))
-        || voices.find((v) => /^pt/i.test(v.lang))
-        || null;
+        || voices.find((v) => /^pt/i.test(v.lang)) || null;
 }
-
 if ('speechSynthesis' in window) {
     loadVoice();
     window.speechSynthesis.onvoiceschanged = loadVoice;
 }
 
-function speak(text) {
-    if (state.muted || !('speechSynthesis' in window)) return;
+// "force" = narração pedida por um botão de acessibilidade (toca mesmo mudo).
+function speak(text, force) {
+    if (!force && state.muted) return;
+    if (!('speechSynthesis' in window)) return;
     try {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
@@ -251,7 +278,7 @@ function playSound(audio) {
     try {
         audio.currentTime = 0;
         const p = audio.play();
-        if (p && p.catch) p.catch(() => {}); // ignora bloqueio de autoplay
+        if (p && p.catch) p.catch(() => {});
     } catch (_) { /* som é opcional */ }
 }
 
@@ -272,7 +299,6 @@ function shapeSVG(shape, color) {
     return `<svg viewBox="0 0 100 100" fill="${color}" aria-hidden="true">${shapes[shape] || ''}</svg>`;
 }
 
-// Devolve o HTML interno de um botão de opção.
 function renderItemInner(item) {
     switch (item.kind) {
         case 'shape': return shapeSVG(item.shape, item.color);
@@ -284,10 +310,9 @@ function renderItemInner(item) {
 }
 
 /* -----------------------------------------------------------
-   8) GERAÇÃO DE PERGUNTAS
+   8) GERAÇÃO E RENDER DA PERGUNTA
 ----------------------------------------------------------- */
 
-// Escolhe o "pool" de itens conforme a categoria da rodada.
 function poolForCategory(catId) {
     if (catId === 'numletras') {
         return Math.random() < 0.5 ? CONTENT.numletras.num : CONTENT.numletras.let;
@@ -295,15 +320,12 @@ function poolForCategory(catId) {
     return CONTENT[catId];
 }
 
-let lastCorrectId = null;
-
 function optionCount() {
     const diff = DIFFICULTIES.find((d) => d.id === state.difficulty);
     return diff ? diff.options : 4;
 }
 
 function newQuestion() {
-    // No modo "misturar", cada pergunta usa uma categoria sorteada.
     const catId = state.category === 'misturar'
         ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
         : state.category;
@@ -311,7 +333,6 @@ function newQuestion() {
     const pool = poolForCategory(catId);
     const count = Math.min(optionCount(), pool.length);
 
-    // Evita repetir a mesma resposta correta duas vezes seguidas.
     let candidates = pool.filter((it) => it.id !== lastCorrectId);
     if (candidates.length === 0) candidates = pool;
     const correct = randomFrom(candidates);
@@ -327,9 +348,17 @@ function newQuestion() {
 }
 
 function renderQuestion(correct, options, count) {
-    el.promptText.innerHTML = correct.promptHTML;
+    const dragMode = state.mode === 'arrastar';
+
+    el.promptText.innerHTML = buildPrompt(correct, state.mode).html;
+
+    // Zona de soltar só aparece no modo arrastar.
+    el.dropZone.hidden = !dragMode;
+    el.dropZone.classList.remove('is-over', 'is-filled');
 
     el.options.setAttribute('data-count', String(count));
+    el.options.classList.toggle('is-drag', dragMode);
+    el.options.classList.remove('is-busy');
     el.options.innerHTML = '';
 
     options.forEach((item) => {
@@ -338,79 +367,148 @@ function renderQuestion(correct, options, count) {
         btn.className = 'option';
         btn.innerHTML = renderItemInner(item);
         btn.setAttribute('aria-label', item.name);
-        btn.addEventListener('click', () => onOptionClick(btn, item));
+        if (dragMode) {
+            btn.addEventListener('pointerdown', (e) => startDrag(e, btn, item));
+        } else {
+            btn.addEventListener('click', () => handleSelection(item, btn));
+        }
         el.options.appendChild(btn);
     });
 
     el.feedback.textContent = '';
     el.feedback.className = 'feedback';
 
+    busy = false;
     updateHud();
-    // Fala a pergunta (pequeno atraso para não cortar a transição).
-    setTimeout(() => speak(correct.speak), 250);
+    // Sem narração automática: a criança lê. Fala só se clicar no 🔊.
 }
 
 /* -----------------------------------------------------------
-   9) INTERAÇÃO
+   9) MODO ARRASTAR (pointer events: mouse + toque)
+----------------------------------------------------------- */
+
+let drag = null;
+
+function startDrag(e, tile, item) {
+    if (busy || tile.classList.contains('is-dimmed')) return;
+    e.preventDefault();
+    const rect = tile.getBoundingClientRect();
+    const ghost = tile.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.classList.remove('is-dragging-src');
+    ghost.style.width = rect.width + 'px';
+    ghost.style.height = rect.height + 'px';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    document.body.appendChild(ghost);
+    tile.classList.add('is-dragging-src');
+
+    drag = { ghost, item, tile, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    window.addEventListener('pointermove', onDragMove);
+    window.addEventListener('pointerup', onDragEnd);
+    window.addEventListener('pointercancel', onDragEnd);
+}
+
+function isOverDrop(x, y) {
+    const r = el.dropZone.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+}
+
+function onDragMove(e) {
+    if (!drag) return;
+    drag.ghost.style.left = (e.clientX - drag.offsetX) + 'px';
+    drag.ghost.style.top = (e.clientY - drag.offsetY) + 'px';
+    el.dropZone.classList.toggle('is-over', isOverDrop(e.clientX, e.clientY));
+}
+
+function onDragEnd(e) {
+    if (!drag) return;
+    window.removeEventListener('pointermove', onDragMove);
+    window.removeEventListener('pointerup', onDragEnd);
+    window.removeEventListener('pointercancel', onDragEnd);
+
+    const d = drag;
+    drag = null;
+    d.ghost.remove();
+    d.tile.classList.remove('is-dragging-src');
+    el.dropZone.classList.remove('is-over');
+
+    if (isOverDrop(e.clientX, e.clientY)) {
+        handleSelection(d.item, d.tile);
+    }
+}
+
+/* -----------------------------------------------------------
+   10) VALIDAÇÃO (com delay de "suspense")
 ----------------------------------------------------------- */
 
 const CHEERS = ['Muito bem! 🎉', 'Isso! 🌟', 'Você acertou! 👏', 'Boa! 🥳', 'Perfeito! ✨'];
 const TRY_AGAIN = ['Quase! Tenta de novo. 💪', 'Ops! Procura de novo. 🙂', 'Não foi essa. Tenta outra! 👀'];
 
-function onOptionClick(btn, item) {
-    if (btn.disabled) return;
+function handleSelection(item, sourceEl) {
+    if (busy) return;
+    busy = true;
 
-    const isCorrect = item.id === state.correctItem.id;
+    el.options.classList.add('is-busy');
+    if (state.mode === 'arrastar') el.dropZone.classList.add('is-filled');
+    sourceEl.classList.add('is-checking');
+    el.feedback.textContent = '🤔 Vamos ver...';
+    el.feedback.className = 'feedback is-checking';
 
-    if (isCorrect) {
-        btn.classList.add('is-correct');
-        el.feedback.textContent = randomFrom(CHEERS);
-        el.feedback.className = 'feedback is-correct';
-        playSound(el.correctSound);
-        speak('Muito bem!');
-        burstConfetti();
+    schedule(() => {
+        sourceEl.classList.remove('is-checking');
+        const isCorrect = item.id === state.correctItem.id;
+        if (isCorrect) revealCorrect(sourceEl);
+        else revealWrong(sourceEl);
+    }, SUSPENSE_MS);
+}
 
-        // Trava todas as opções e conta o acerto.
-        el.options.querySelectorAll('.option').forEach((b) => { b.disabled = true; });
-        state.answered++;
-        if (state.firstTry) state.correctFirstTry++;
-        updateHud();
+function revealCorrect(sourceEl) {
+    sourceEl.classList.add('is-correct');
+    el.feedback.textContent = randomFrom(CHEERS);
+    el.feedback.className = 'feedback is-correct';
+    playSound(el.correctSound);
+    burstConfetti();
 
-        setTimeout(nextStep, 1300);
-    } else {
-        state.firstTry = false;
-        btn.classList.add('is-wrong');
-        btn.classList.add('is-dimmed'); // some suavemente para ajudar por eliminação
-        btn.disabled = true;
-        el.feedback.textContent = randomFrom(TRY_AGAIN);
-        el.feedback.className = 'feedback is-wrong';
-        playSound(el.wrongSound);
-    }
+    el.options.querySelectorAll('.option').forEach((b) => { b.disabled = true; b.classList.add('is-locked'); });
+    state.answered++;
+    if (state.firstTry) state.correctFirstTry++;
+    updateHud();
+
+    schedule(nextStep, ADVANCE_MS); // busy volta a false em renderQuestion
+}
+
+function revealWrong(sourceEl) {
+    state.firstTry = false;
+    sourceEl.classList.add('is-wrong', 'is-dimmed');
+    sourceEl.disabled = true;
+    el.feedback.textContent = randomFrom(TRY_AGAIN);
+    el.feedback.className = 'feedback is-wrong';
+    playSound(el.wrongSound);
+    el.dropZone.classList.remove('is-filled');
+    el.options.classList.remove('is-busy');
+    busy = false; // permite tentar de novo
 }
 
 function nextStep() {
-    if (state.answered >= state.totalQuestions) {
-        showResults();
-    } else {
-        newQuestion();
-    }
+    if (state.answered >= state.totalQuestions) showResults();
+    else newQuestion();
 }
 
 function updateHud() {
-    // "Pergunta X de N": mostra a pergunta em andamento.
     el.qCurrent.textContent = Math.min(state.answered + 1, state.totalQuestions);
     el.qTotal.textContent = state.totalQuestions;
     el.qScore.textContent = state.correctFirstTry;
-    const pct = (state.answered / state.totalQuestions) * 100;
-    el.progressBar.style.width = pct + '%';
+    el.progressBar.style.width = ((state.answered / state.totalQuestions) * 100) + '%';
 }
 
 /* -----------------------------------------------------------
-   10) RESULTADO
+   11) RESULTADO
 ----------------------------------------------------------- */
 
 function showResults() {
-    window.speechSynthesis && window.speechSynthesis.cancel();
+    cancelPending();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 
     const answered = state.answered;
     const correct = state.correctFirstTry;
@@ -426,21 +524,24 @@ function showResults() {
     el.resultsTitle.textContent = title;
     el.resultsCorrect.textContent = correct;
     el.resultsAnswered.textContent = answered;
+    el.resultsStars.textContent = correct <= 12 ? ('⭐'.repeat(correct) || '—') : `⭐ x ${correct}`;
 
-    // Mostra até 10 estrelas para não estourar a tela; acima disso, resume.
-    if (correct <= 12) {
-        el.resultsStars.textContent = '⭐'.repeat(correct) || '—';
-    } else {
-        el.resultsStars.textContent = `⭐ x ${correct}`;
+    // Acumula estrelas no perfil.
+    if (state.profile) {
+        state.profile.stars = (state.profile.stars || 0) + correct;
+        state.profile.games = (state.profile.games || 0) + 1;
+        saveProfiles(profiles);
+        updateProfileBar();
+        el.resultsName.textContent = state.profile.name;
+        el.resultsProfileStars.textContent = state.profile.stars;
     }
 
     showScreen('results');
-    speak(`${phrase} Você acertou ${correct} de ${answered}.`);
     if (pct >= 0.5) setTimeout(() => burstConfetti(true), 300);
 }
 
 /* -----------------------------------------------------------
-   11) CONFETE (canvas, sem dependências)
+   12) CONFETE (canvas, sem dependências)
 ----------------------------------------------------------- */
 
 const confettiCanvas = $('#confetti');
@@ -455,7 +556,7 @@ function resizeConfetti() {
 window.addEventListener('resize', resizeConfetti);
 resizeConfetti();
 
-const CONFETTI_COLORS = ['#e74c3c', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#ff6fb5', '#fdcb6e'];
+const CONFETTI_COLORS = ['#e0559b', '#f783ac', '#b197fc', '#74c0fc', '#ffd43b', '#ff922b', '#63e6be'];
 
 function burstConfetti(big) {
     const amount = big ? 160 : 70;
@@ -478,10 +579,7 @@ function burstConfetti(big) {
 function drawConfetti() {
     ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
     confettiPieces.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.05; // gravidade
-        p.rot += p.vr;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.rot += p.vr;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
@@ -489,9 +587,7 @@ function drawConfetti() {
         ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
         ctx.restore();
     });
-    // Remove peças que saíram da tela.
     confettiPieces = confettiPieces.filter((p) => p.y < confettiCanvas.height + 30);
-
     if (confettiPieces.length > 0) {
         confettiRAF = requestAnimationFrame(drawConfetti);
     } else {
@@ -501,16 +597,134 @@ function drawConfetti() {
 }
 
 /* -----------------------------------------------------------
-   12) MENU: construção e seleção
+   13) PERFIS (localStorage)
 ----------------------------------------------------------- */
 
-function buildChoice(container, meta, group, isSelected) {
+const STORE_KEY = 'mousegame.profiles.v1';
+const CUR_KEY = 'mousegame.current.v1';
+
+function loadProfiles() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+    catch (_) { return []; }
+}
+function saveProfiles(list) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch (_) {}
+}
+function getCurrentId() { try { return localStorage.getItem(CUR_KEY); } catch (_) { return null; } }
+function setCurrentId(id) { try { localStorage.setItem(CUR_KEY, id); } catch (_) {} }
+
+let profiles = loadProfiles();
+let pendingAvatar = AVATARS[0];
+
+function renderProfiles() {
+    el.profileCreate.hidden = true;
+    el.profilesList.innerHTML = '';
+
+    profiles.forEach((p) => {
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        // Nome vem de um campo de texto: monta via DOM (textContent), sem innerHTML.
+        const del = document.createElement('button');
+        del.className = 'pc-delete';
+        del.title = 'Apagar';
+        del.setAttribute('aria-label', `Apagar ${p.name}`);
+        del.textContent = '🗑';
+        del.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteProfile(p);
+        });
+
+        const avatar = document.createElement('span');
+        avatar.className = 'pc-avatar';
+        avatar.textContent = p.avatar;
+
+        const name = document.createElement('div');
+        name.className = 'pc-name';
+        name.textContent = p.name;
+
+        const stars = document.createElement('div');
+        stars.className = 'pc-stars';
+        stars.textContent = `⭐ ${p.stars || 0}`;
+
+        card.append(del, avatar, name, stars);
+        card.addEventListener('click', () => selectProfile(p));
+        el.profilesList.appendChild(card);
+    });
+
+    const add = document.createElement('div');
+    add.className = 'profile-card profile-card--add';
+    add.innerHTML = `<span class="pc-plus">＋</span><span>Nova jogadora</span>`;
+    add.addEventListener('click', openCreate);
+    el.profilesList.appendChild(add);
+}
+
+function openCreate() {
+    el.newName.value = '';
+    pendingAvatar = AVATARS[0];
+    renderAvatarPicker();
+    el.profileCreate.hidden = false;
+    el.profileCreate.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.newName.focus();
+}
+
+function renderAvatarPicker() {
+    el.avatarPicker.innerHTML = '';
+    AVATARS.forEach((a) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'avatar-opt' + (a === pendingAvatar ? ' is-selected' : '');
+        b.textContent = a;
+        b.addEventListener('click', () => {
+            pendingAvatar = a;
+            renderAvatarPicker();
+        });
+        el.avatarPicker.appendChild(b);
+    });
+}
+
+function createProfile() {
+    const name = (el.newName.value || '').trim() || 'Jogadora';
+    const p = { id: 'p' + Date.now() + randInt(1000), name, avatar: pendingAvatar, stars: 0, games: 0 };
+    profiles.push(p);
+    saveProfiles(profiles);
+    selectProfile(p);
+}
+
+function selectProfile(p) {
+    state.profile = p;
+    setCurrentId(p.id);
+    updateProfileBar();
+    showScreen('menu');
+}
+
+function deleteProfile(p) {
+    if (!window.confirm(`Apagar a jogadora "${p.name}"? As estrelas dela serão perdidas.`)) return;
+    profiles = profiles.filter((x) => x.id !== p.id);
+    saveProfiles(profiles);
+    if (state.profile && state.profile.id === p.id) {
+        state.profile = null;
+        setCurrentId('');
+    }
+    renderProfiles();
+}
+
+function updateProfileBar() {
+    if (!state.profile) return;
+    el.pbAvatar.textContent = state.profile.avatar;
+    el.pbName.textContent = state.profile.name;
+    el.pbStars.textContent = state.profile.stars || 0;
+}
+
+/* -----------------------------------------------------------
+   14) MENU: construção e seleção
+----------------------------------------------------------- */
+
+function buildChoice(container, meta, onSelect, isSelected) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'choice' + (isSelected ? ' is-selected' : '');
     btn.setAttribute('role', 'radio');
     btn.setAttribute('aria-checked', String(isSelected));
-    btn.dataset.value = meta.value;
     btn.innerHTML =
         (meta.emoji ? `<span class="choice-emoji">${meta.emoji}</span>` : '') +
         `<span>${meta.label}</span>` +
@@ -522,43 +736,38 @@ function buildChoice(container, meta, group, isSelected) {
         });
         btn.classList.add('is-selected');
         btn.setAttribute('aria-checked', 'true');
-        group.onSelect(meta.value);
+        onSelect(meta.value);
     });
     container.appendChild(btn);
 }
 
 function buildMenu() {
-    // Categorias
     CATEGORY_META.forEach((c, i) => buildChoice(
         el.categoryGrid,
         { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
-        { onSelect: (v) => { state.category = v; } },
-        i === 0,
-    ));
+        (v) => { state.category = v; }, i === 0));
 
-    // Dificuldades
     DIFFICULTIES.forEach((d, i) => buildChoice(
         el.difficultyGrid,
         { value: d.id, label: d.label, emoji: d.emoji, sub: d.options + ' opções' },
-        { onSelect: (v) => { state.difficulty = v; } },
-        i === 0,
-    ));
+        (v) => { state.difficulty = v; }, i === 0));
 
-    // Quantidade de perguntas
     COUNT_OPTIONS.forEach((n, i) => buildChoice(
         el.countGrid,
         { value: String(n), label: String(n), sub: 'perguntas' },
-        { onSelect: (v) => { state.totalQuestions = parseInt(v, 10); el.customCount.value = ''; } },
-        i === 1, // padrão: 10 perguntas
-    ));
+        (v) => { state.totalQuestions = parseInt(v, 10); el.customCount.value = ''; }, i === 1));
 
-    // Estado inicial coerente com as seleções padrão
+    MODES.forEach((m, i) => buildChoice(
+        el.modeGrid,
+        { value: m.id, label: m.label, emoji: m.emoji, sub: m.sub },
+        (v) => { state.mode = v; }, i === 0));
+
     state.category = 'formas';
     state.difficulty = 'facil';
+    state.mode = 'clicar';
     state.totalQuestions = 10;
 }
 
-// Número personalizado desmarca os botões e ajusta o total.
 el.customCount.addEventListener('input', () => {
     const v = parseInt(el.customCount.value, 10);
     if (!isNaN(v) && v > 0) {
@@ -570,26 +779,28 @@ el.customCount.addEventListener('input', () => {
     }
 });
 
+// Botões de "ouvir" do menu (acessibilidade): falam mesmo se mudo.
+document.querySelectorAll('.listen-btn').forEach((b) => {
+    b.addEventListener('click', () => speak(b.dataset.say, true));
+});
+
 /* -----------------------------------------------------------
-   13) CONTROLE DE FLUXO
+   15) CONTROLE DE FLUXO
 ----------------------------------------------------------- */
 
 function startGame() {
-    // Garante um total válido.
     if (!state.totalQuestions || state.totalQuestions < 1) state.totalQuestions = 10;
     state.totalQuestions = Math.min(state.totalQuestions, 99);
 
+    cancelPending();
     state.answered = 0;
     state.correctFirstTry = 0;
     lastCorrectId = null;
+    busy = false;
 
     showScreen('game');
     updateHud();
     newQuestion();
-}
-
-function quitGame() {
-    showResults();
 }
 
 function toggleSound() {
@@ -601,21 +812,34 @@ function toggleSound() {
 }
 
 /* -----------------------------------------------------------
-   14) EVENTOS
+   16) EVENTOS
 ----------------------------------------------------------- */
 
 el.startBtn.addEventListener('click', startGame);
-el.quitBtn.addEventListener('click', quitGame);
+el.quitBtn.addEventListener('click', showResults);
 el.repeatBtn.addEventListener('click', () => {
-    if (state.correctItem) speak(state.correctItem.speak);
+    if (state.correctItem) speak(buildPrompt(state.correctItem, state.mode).speak, true);
 });
 el.soundToggle.addEventListener('click', toggleSound);
 el.playAgainBtn.addEventListener('click', startGame);
 el.menuBtn.addEventListener('click', () => showScreen('menu'));
+el.switchProfile.addEventListener('click', () => { renderProfiles(); showScreen('profiles'); });
+
+el.createConfirm.addEventListener('click', createProfile);
+el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true; });
+el.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
 
 /* -----------------------------------------------------------
-   15) INICIALIZAÇÃO
+   17) INICIALIZAÇÃO
 ----------------------------------------------------------- */
 
 buildMenu();
-showScreen('menu');
+
+state.profile = profiles.find((p) => p.id === getCurrentId()) || null;
+if (state.profile) {
+    updateProfileBar();
+    showScreen('menu');
+} else {
+    renderProfiles();
+    showScreen('profiles');
+}
