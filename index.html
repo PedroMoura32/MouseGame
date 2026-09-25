@@ -46,22 +46,31 @@
             </div>
         </section>
 
-        <!-- ========================= TELA: MENU ========================= -->
-        <section id="screen-menu" class="screen">
-            <div class="profile-bar">
-                <span class="profile-badge"><span id="pb-avatar">🦄</span> <span id="pb-name">Jogadora</span></span>
-                <span class="profile-stars">⭐ <span id="pb-stars">0</span></span>
-                <button id="switch-profile" class="chip-btn">Trocar</button>
-            </div>
+        <!-- Barra do perfil: aparece nas telas de menu e de configuração do jogo (JS liga/desliga) -->
+        <div id="profile-bar" class="profile-bar">
+            <span class="profile-badge"><span id="pb-avatar">🦄</span> <span id="pb-name">Jogadora</span></span>
+            <span class="profile-stars">⭐ <span id="pb-stars">0</span></span>
+            <button id="switch-profile" class="chip-btn">Trocar</button>
+        </div>
 
+        <!-- ================= TELA: ESCOLHER O JOGO ================= -->
+        <section id="screen-menu" class="screen">
             <h1 class="title">Vamos brincar? 🐭</h1>
-            <p class="subtitle">Escolha as opções e clique em Começar!</p>
+            <p class="subtitle">Escolha um jogo para começar!</p>
 
             <div class="panel">
-                <h2 class="panel-title">1. Escolha o jogo
+                <h2 class="panel-title">Escolha o jogo
                     <button class="listen-btn" data-say="Escolha o jogo" aria-label="Ouvir: escolha o jogo">🔊</button>
                 </h2>
                 <div id="category-grid" class="choice-grid" role="radiogroup" aria-label="Categoria"></div>
+            </div>
+        </section>
+
+        <!-- ============== TELA: CONFIGURAR O JOGO ESCOLHIDO ============== -->
+        <section id="screen-config" class="screen">
+            <div class="config-header">
+                <button id="config-back-btn" class="chip-btn">← Voltar</button>
+                <h1 id="config-title" class="config-title">🔷 Formas</h1>
             </div>
 
             <!-- Escolha extra: aparece só para Inglês (tipo), Matemática (operação) e Treino do mouse -->
@@ -72,15 +81,23 @@
                 <div id="sub-grid" class="choice-grid" role="radiogroup" aria-label="Tipo de pergunta"></div>
             </div>
 
+            <!-- Só aparece em Matemática > Multiplicar -->
+            <div id="panel-extra" class="panel" hidden>
+                <h2 class="panel-title">Qual tabuada?
+                    <button class="listen-btn" data-say="Escolha uma tabuada para treinar, ou todas misturadas" aria-label="Ouvir: qual tabuada">🔊</button>
+                </h2>
+                <div id="extra-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Tabuada"></div>
+            </div>
+
             <div class="panel">
-                <h2 class="panel-title">2. Escolha o nível
+                <h2 class="panel-title">Nível
                     <button class="listen-btn" data-say="Escolha o nível de dificuldade" aria-label="Ouvir: escolha o nível">🔊</button>
                 </h2>
                 <div id="difficulty-grid" class="choice-grid choice-grid--3" role="radiogroup" aria-label="Nível"></div>
             </div>
 
             <div class="panel">
-                <h2 class="panel-title"><span id="count-title">3. Quantas perguntas?</span>
+                <h2 class="panel-title"><span id="count-title">Quantas perguntas?</span>
                     <button id="count-listen" class="listen-btn" data-say="Quantas perguntas você quer responder?" aria-label="Ouvir: quantas perguntas">🔊</button>
                 </h2>
                 <div id="count-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Número de perguntas"></div>
@@ -92,7 +109,7 @@
 
             <!-- Só aparece para Formas, Cores e Animais (arrastar não existe nos outros jogos) -->
             <div id="panel-mode" class="panel">
-                <h2 class="panel-title">4. Como jogar?
+                <h2 class="panel-title">Como jogar?
                     <button class="listen-btn" data-say="Como você quer jogar? Clicar ou arrastar?" aria-label="Ouvir: como jogar">🔊</button>
                 </h2>
                 <div id="mode-grid" class="choice-grid choice-grid--2" role="radiogroup" aria-label="Modo de jogo"></div>

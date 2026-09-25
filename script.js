@@ -93,6 +93,19 @@ const CONTENT = {
     numletras: { num: NUMBERS, let: LETTERS },
 };
 
+// Objetos para contar (F2-08 "Contar com emojis") — pensado para quem ainda não lê.
+// "gender": 'o' ou 'a', para "Quantos morangos" vs "Quantas estrelas".
+const COUNTABLES = [
+    { id: 'morango',   glyph: '🍓', plural: 'morangos',   gender: 'o' },
+    { id: 'estrela',   glyph: '⭐', plural: 'estrelas',   gender: 'a' },
+    { id: 'bola',      glyph: '⚽', plural: 'bolas',      gender: 'a' },
+    { id: 'coracao',   glyph: '💗', plural: 'corações',   gender: 'o' },
+    { id: 'borboleta', glyph: '🦋', plural: 'borboletas', gender: 'a' },
+    { id: 'abelha',    glyph: '🐝', plural: 'abelhas',    gender: 'a' },
+    { id: 'flor',      glyph: '🌸', plural: 'flores',     gender: 'a' },
+    { id: 'balao',     glyph: '🎈', plural: 'balões',     gender: 'o' },
+];
+
 /* ---------- Inglês básico ----------
    Cada grupo tem "prefix" (usado na frase: "Click on THE dog") e
    itens [inglês, português, figura]. A figura pode ser um emoji,
@@ -136,7 +149,16 @@ const EN_VOCAB = {
     things: { prefix: 'the ', items: [
         ['House', 'Casa', '🏠'], ['Car', 'Carro', '🚗'], ['Book', 'Livro', '📖'], ['Ball', 'Bola', '⚽'],
         ['Tree', 'Árvore', '🌳'], ['Flower', 'Flor', '🌸'], ['Sun', 'Sol', '☀️'], ['Moon', 'Lua', '🌙'],
-        ['Star', 'Estrela', '⭐'], ['Cake', 'Bolo', '🎂'], ['Bread', 'Pão', '🍞'], ['Milk', 'Leite', '🥛'],
+        ['Star', 'Estrela', '⭐'],
+    ] },
+    foods: { prefix: 'the ', items: [
+        ['Bread', 'Pão', '🍞'], ['Milk', 'Leite', '🥛'], ['Cake', 'Bolo', '🎂'], ['Pizza', 'Pizza', '🍕'],
+        ['Rice', 'Arroz', '🍚'], ['Egg', 'Ovo', '🥚'], ['Cheese', 'Queijo', '🧀'], ['Juice', 'Suco', '🧃'],
+        ['Ice cream', 'Sorvete', '🍦'], ['Popcorn', 'Pipoca', '🍿'],
+    ] },
+    body: { prefix: 'the ', items: [
+        ['Hand', 'Mão', '✋'], ['Foot', 'Pé', '🦶'], ['Eye', 'Olho', '👁️'], ['Ear', 'Orelha', '👂'],
+        ['Nose', 'Nariz', '👃'], ['Mouth', 'Boca', '👄'], ['Arm', 'Braço', '💪'], ['Leg', 'Perna', '🦵'],
     ] },
 };
 
@@ -157,6 +179,12 @@ const EN_PHRASES = [
     ['How are you?', 'Como vai você?'],
 ].map(([en, pt], i) => ({ id: 'en-phrase-' + i, group: 'phrases', en, pt, name: en }));
 
+// Dias da semana: só entram na tradução (não têm uma figura que faça sentido mostrar).
+const EN_DAYS = [
+    ['Monday', 'Segunda-feira'], ['Tuesday', 'Terça-feira'], ['Wednesday', 'Quarta-feira'],
+    ['Thursday', 'Quinta-feira'], ['Friday', 'Sexta-feira'], ['Saturday', 'Sábado'], ['Sunday', 'Domingo'],
+].map(([en, pt], i) => ({ id: 'en-day-' + i, group: 'days', en, pt, name: en }));
+
 /* ---------- Matemática ---------- */
 
 const MATH_OPS = {
@@ -165,6 +193,15 @@ const MATH_OPS = {
     multiplicar: { sym: '×', say: 'vezes' },
     dividir:     { sym: '÷', say: 'dividido por' },
 };
+
+// Nomes e objetos usados nos problemas com enunciado (F2-13). Sempre com
+// quantidades >= 2 nas contas (ver wordProblemOperands), então o plural do
+// objeto está sempre certo — não precisa lidar com singular/plural aqui.
+const WORD_CHARACTERS = ['Ana', 'Pedro', 'Lucas', 'Sofia', 'Miguel', 'Laura', 'Davi', 'Júlia', 'Beatriz', 'Théo'];
+const WORD_OBJECTS = [
+    { plural: 'carrinhos' }, { plural: 'bolinhas' }, { plural: 'figurinhas' }, { plural: 'balões' },
+    { plural: 'docinhos' }, { plural: 'lápis' }, { plural: 'adesivos' }, { plural: 'bonecos' },
+];
 
 /* ---------- Menu ---------- */
 
@@ -181,6 +218,16 @@ const CATEGORY_META = [
 
 // Escolha extra que aparece só para algumas categorias.
 const SUB_OPTIONS = {
+    numletras: {
+        title: 'O que praticar?',
+        say: 'Escolha o que praticar',
+        items: [
+            { id: 'reconhecer', label: 'Reconhecer',   emoji: '🔢', sub: 'clique no certo' },
+            { id: 'contar',     label: 'Contar',       emoji: '🍓', sub: 'quantos tem aqui?' },
+            { id: 'inicial',    label: 'Letra inicial', emoji: '🔤', sub: 'com que letra começa?' },
+            { id: 'misturar',   label: 'Misturar',     emoji: '🎲', sub: 'um pouco de cada' },
+        ],
+    },
     ingles: {
         title: 'Que tipo de inglês?',
         say: 'Escolha o tipo de pergunta em inglês',
@@ -199,6 +246,8 @@ const SUB_OPTIONS = {
             { id: 'multiplicar', label: 'Multiplicar', emoji: '✖️', sub: 'vezes' },
             { id: 'dividir',     label: 'Dividir',     emoji: '➗', sub: 'dividido' },
             { id: 'misturar',    label: 'Misturar',    emoji: '🎲', sub: 'todas' },
+            { id: 'numero_faltando', label: 'Número que falta', emoji: '❓', sub: '5 + ? = 8' },
+            { id: 'problemas',   label: 'Problemas',   emoji: '📖', sub: 'com historinha' },
         ],
     },
     // Os ids são as chaves de MINIGAMES (minigames.js)
@@ -249,7 +298,8 @@ const WRONG_SHOW_MS = 800;  // (arrastar) peça errada fica no alvo antes de vol
 
 const state = {
     category: 'formas',
-    sub: { ingles: 'misturar', matematica: 'somar', mouse: 'misturar' },
+    sub: { ingles: 'misturar', matematica: 'somar', mouse: 'misturar', numletras: 'misturar' },
+    table: 'todas',        // tabuada específica (só usado quando matematica === 'multiplicar')
     difficulty: 'facil',
     mode: 'clicar',
     totalQuestions: 10,
@@ -286,6 +336,7 @@ const $ = (sel) => document.querySelector(sel);
 const screens = {
     profiles: $('#screen-profiles'),
     menu: $('#screen-menu'),
+    config: $('#screen-config'),
     game: $('#screen-game'),
     results: $('#screen-results'),
 };
@@ -298,17 +349,22 @@ const el = {
     avatarPicker: $('#avatar-picker'),
     createConfirm: $('#create-confirm'),
     createCancel: $('#create-cancel'),
-    // barra de perfil
+    // barra de perfil (compartilhada entre as telas de menu e configuração)
+    profileBar: $('#profile-bar'),
     pbAvatar: $('#pb-avatar'),
     pbName: $('#pb-name'),
     pbStars: $('#pb-stars'),
     switchProfile: $('#switch-profile'),
-    // menu
+    // menu / configuração do jogo
     categoryGrid: $('#category-grid'),
+    configBackBtn: $('#config-back-btn'),
+    configTitle: $('#config-title'),
     panelSub: $('#panel-sub'),
     subTitle: $('#sub-title'),
     subListen: $('#sub-listen'),
     subGrid: $('#sub-grid'),
+    panelExtra: $('#panel-extra'),
+    extraGrid: $('#extra-grid'),
     difficultyGrid: $('#difficulty-grid'),
     countTitle: $('#count-title'),
     countListen: $('#count-listen'),
@@ -378,6 +434,7 @@ function showScreen(name) {
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
     document.body.classList.toggle('is-playing', name === 'game');   // tela do jogo cabe na janela (sem rolar)
+    el.profileBar.hidden = !(name === 'menu' || name === 'config');   // só faz sentido junto do menu/configuração
     updateScrollbarWidth();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -504,6 +561,59 @@ function classicQuestion(catId, count) {
     return { key: correct.id, correct, options, prompt: (mode) => buildPrompt(correct, mode) };
 }
 
+// Quantos [n] cabem no nível escolhido (fácil/médio/difícil).
+function countRangeForDifficulty(difficulty) {
+    const lvl = { facil: 0, medio: 1, dificil: 2 }[difficulty] || 0;
+    return [[2, 5], [3, 7], [5, 10]][lvl];
+}
+
+// F2-08 "Contar com emojis": mostra um grupo de figuras e pergunta quantas tem.
+// Pensado para quem ainda não lê — a pergunta inteira também é falada.
+function countingQuestion(count) {
+    const obj = randomFrom(COUNTABLES);
+    const [min, max] = countRangeForDifficulty(state.difficulty);
+    const n = randRange(min, max);
+    const options = nearbyNumberOptions(n, count);
+    const correct = options.find((o) => o.name === String(n));
+    const cluster = Array(n).fill(`<span>${obj.glyph}</span>`).join('');
+    const quantos = obj.gender === 'a' ? 'Quantas' : 'Quantos';
+    return {
+        key: `contar:${obj.id}:${n}`, correct, options,
+        prompt: () => ({
+            html: `<span class="count-cluster">${cluster}</span>${quantos} <b>${obj.plural}</b> tem aqui?`,
+            speak: `${quantos} ${obj.plural} tem aqui?`,
+        }),
+    };
+}
+
+// F2-09 "Letra inicial": mostra um bichinho e pergunta com que letra o nome começa.
+function initialLetterQuestion(count) {
+    const item = randomFrom(CONTENT.animais);
+    const letter = item.name[0];
+    const alphabet = LETTERS.map((l) => l.name);
+    const toOpt = (l) => ({ id: 'il-' + l, name: l, kind: 'char', glyph: l });
+    const correct = toOpt(letter);
+    const options = shuffle([correct, ...sample(alphabet.filter((l) => l !== letter), count - 1).map(toOpt)]);
+    const prep = item.gender === 'o' ? 'o' : 'a';
+    return {
+        key: `inicial:${item.id}`, correct, options,
+        prompt: () => ({
+            html: `<span class="glyph-hero">${item.glyph}</span>Com que letra ${prep} <b>${item.name}</b> começa?`,
+            speak: `Com que letra ${prep} ${item.name} começa?`,
+        }),
+    };
+}
+
+// Números e Letras: dependendo da escolha extra, ou é o reconhecimento clássico
+// (clicar no número/letra) ou uma das duas novas atividades.
+function numLetrasQuestion(count) {
+    const sub = state.sub.numletras;
+    const mode = sub === 'misturar' ? randomFrom(['reconhecer', 'contar', 'inicial']) : sub;
+    if (mode === 'contar') return countingQuestion(count);
+    if (mode === 'inicial') return initialLetterQuestion(count);
+    return classicQuestion('numletras', count);
+}
+
 /* ---------- inglês ---------- */
 
 // Fala em inglês: "Click on the dog" -> figuras.
@@ -513,7 +623,7 @@ function englishFigures(count) {
     const correct = randomFrom(items);
     const options = shuffle([correct, ...sample(items.filter((it) => it.id !== correct.id), n - 1)]);
     return {
-        key: 'fig:' + correct.id, correct, options,
+        key: 'fig:' + correct.id, correct, options, speakEn: correct.en,
         prompt: () => ({
             html: `Click on ${prefix}<b>${correct.en}</b>`,
             speak: [{ text: `Click on ${prefix}${correct.en}`, lang: 'en-US' }],
@@ -522,9 +632,12 @@ function englishFigures(count) {
 }
 
 // "O que significa Good morning?" / "Como se diz Bom dia em inglês?" -> textos.
+// Além do vocabulário com figura (EN_GROUPS), entram frases e dias da semana
+// (que não têm uma figura que faça sentido mostrar, por isso só aparecem aqui).
 function englishTranslation(count) {
-    const groupKey = Math.random() < 0.4 ? 'phrases' : randomFrom(Object.keys(EN_GROUPS));
-    const items = groupKey === 'phrases' ? EN_PHRASES : EN_GROUPS[groupKey].items;
+    const pick = Math.random();
+    const groupKey = pick < 0.25 ? 'phrases' : pick < 0.4 ? 'days' : randomFrom(Object.keys(EN_GROUPS));
+    const items = groupKey === 'phrases' ? EN_PHRASES : groupKey === 'days' ? EN_DAYS : EN_GROUPS[groupKey].items;
     const toPt = Math.random() < 0.5;   // true: inglês -> português
     const n = Math.min(count, items.length);
 
@@ -537,7 +650,7 @@ function englishTranslation(count) {
     const options = shuffle([correct, ...sample(items.filter((it) => it.id !== source.id), n - 1).map(asOption)]);
 
     return {
-        key: `tr:${source.id}:${toPt ? 'pt' : 'en'}`, correct, options,
+        key: `tr:${source.id}:${toPt ? 'pt' : 'en'}`, correct, options, speakEn: source.en,
         prompt: () => (toPt
             ? { html: `O que significa <b>${source.en}</b>?`,
                 speak: [{ text: 'O que significa', lang: 'pt-BR' }, { text: source.en, lang: 'en-US' }] }
@@ -554,7 +667,8 @@ function englishQuestion(count) {
 /* ---------- matemática ---------- */
 
 // Números de cada operação por nível (fácil / médio / difícil).
-function mathOperands(op, difficulty) {
+// "table" (opcional): tabuada específica escolhida (F2-10) — só vale para multiplicar.
+function mathOperands(op, difficulty, table) {
     const lvl = { facil: 0, medio: 1, dificil: 2 }[difficulty] || 0;
     switch (op) {
         case 'somar': {
@@ -569,7 +683,8 @@ function mathOperands(op, difficulty) {
         }
         case 'multiplicar': {
             const [[aMin, aMax], [bMin, bMax]] = [[[1, 5], [1, 3]], [[2, 10], [2, 10]], [[6, 12], [6, 12]]][lvl];
-            const a = randRange(aMin, aMax), b = randRange(bMin, bMax);
+            const a = table && table !== 'todas' ? Number(table) : randRange(aMin, aMax);
+            const b = randRange(bMin, bMax);
             return { a, b, answer: a * b };
         }
         default: { // dividir: sempre divisão exata
@@ -582,6 +697,21 @@ function mathOperands(op, difficulty) {
 
 function numberOption(v) {
     return { id: 'ans-' + v, name: String(v), kind: 'char', glyph: String(v) };
+}
+
+// Opções numéricas "perto" de um valor certo (reaproveitado por matemática e contagem).
+function nearbyNumberOptions(value, count) {
+    const near = [], far = [];
+    [1, 2, 3, 4, 5, 6].forEach((d) => near.push(value + d, value - d));
+    [10].forEach((d) => far.push(value + d, value - d));
+    const distractors = [...shuffle(near), ...shuffle(far)].filter((v) => v >= 0);
+
+    const values = [value];
+    for (const v of distractors) {
+        if (values.length >= count) break;
+        if (!values.includes(v)) values.push(v);
+    }
+    return shuffle(values.map(numberOption));
 }
 
 // Conta "armada": um número em cima do outro, sinal à esquerda, linha embaixo.
@@ -598,24 +728,16 @@ function mathStackHTML(a, sym, b) {
 }
 
 function mathQuestion(count) {
-    const opKey = state.sub.matematica === 'misturar' ? randomFrom(Object.keys(MATH_OPS)) : state.sub.matematica;
+    const sub = state.sub.matematica;
+    if (sub === 'numero_faltando') return missingOperandQuestion(count);
+    if (sub === 'problemas') return wordProblemQuestion(count);
+
+    const opKey = sub === 'misturar' ? randomFrom(Object.keys(MATH_OPS)) : sub;
     const op = MATH_OPS[opKey];
-    const { a, b, answer } = mathOperands(opKey, state.difficulty);
+    const { a, b, answer } = mathOperands(opKey, state.difficulty, opKey === 'multiplicar' ? state.table : undefined);
 
-    // Respostas erradas: números "perto" da certa (primeiro os mais próximos).
-    const near = [], far = [];
-    [1, 2, 3, 4, 5, 6].forEach((d) => near.push(answer + d, answer - d));
-    [10].forEach((d) => far.push(answer + d, answer - d));
-    const distractors = [...shuffle(near), ...shuffle(far)].filter((v) => v >= 0);
-
-    const values = [answer];
-    for (const v of distractors) {
-        if (values.length >= count) break;
-        if (!values.includes(v)) values.push(v);
-    }
-
-    const correct = numberOption(answer);
-    const options = shuffle(values.map(numberOption));
+    const options = nearbyNumberOptions(answer, count);
+    const correct = options.find((o) => o.name === String(answer));
     return {
         key: `${a}${op.sym}${b}`, correct, options, big: true,
         prompt: () => ({
@@ -625,14 +747,68 @@ function mathQuestion(count) {
     };
 }
 
+// F2-11 "Número que falta": "5 + ? = 8" em vez de sempre pedir o resultado.
+// O segundo número (b) é sempre o que falta, para manter simples de ler.
+function missingOperandQuestion(count) {
+    const opKey = randomFrom(Object.keys(MATH_OPS));
+    const op = MATH_OPS[opKey];
+    const { a, b, answer } = mathOperands(opKey, state.difficulty);
+    const options = nearbyNumberOptions(b, count);
+    const correct = options.find((o) => o.name === String(b));
+    return {
+        key: `falta:${a}${op.sym}?=${answer}`, correct, options, big: true,
+        prompt: () => ({
+            html: `${a} <span class="math-op">${op.sym}</span> <span class="math-blank">?</span> = ${answer}`,
+            speak: `${a} ${op.say} quanto é ${answer}?`,
+        }),
+    };
+}
+
+// F2-13 "Problemas com enunciado": historinha curta em vez da conta pronta.
+// Números sempre >= 2 (ver wordProblemOperands), então o plural do objeto
+// nunca erra e não precisa de lógica de concordância.
+function wordProblemOperands(opKey, difficulty) {
+    const lvl = { facil: 0, medio: 1, dificil: 2 }[difficulty] || 0;
+    switch (opKey) {
+        case 'somar': { const [min, max] = [[2, 6], [2, 10], [5, 20]][lvl]; const a = randRange(min, max), b = randRange(min, max); return { a, b, answer: a + b }; }
+        case 'subtrair': { const [min, max] = [[4, 8], [6, 15], [10, 30]][lvl]; const a = randRange(min, max), b = randRange(2, a - 1); return { a, b, answer: a - b }; }
+        case 'multiplicar': { const max = [4, 6, 9][lvl]; const a = randRange(2, max), b = randRange(2, max); return { a, b, answer: a * b }; }
+        default: { const b = randRange(2, [3, 5, 8][lvl]), q = randRange(2, [4, 6, 9][lvl]); return { a: b * q, b, answer: q }; } // dividir
+    }
+}
+
+function wordProblemSentence(opKey, name, a, b, plural) {
+    switch (opKey) {
+        case 'somar':       return `${name} tinha ${a} ${plural} e ganhou mais ${b}. Com quantos ${plural} ${name} ficou?`;
+        case 'subtrair':    return `${name} tinha ${a} ${plural} e deu ${b}. Com quantos ${plural} ${name} ficou?`;
+        case 'multiplicar': return `${name} tem ${a} sacolinhas com ${b} ${plural} em cada uma. Quantos ${plural} tem ao todo?`;
+        default:            return `${name} tem ${a} ${plural} para dividir entre ${b} amigos, em partes iguais. Quantos ${plural} cada amigo ganha?`;
+    }
+}
+
+function wordProblemQuestion(count) {
+    const opKey = randomFrom(Object.keys(MATH_OPS));
+    const { a, b, answer } = wordProblemOperands(opKey, state.difficulty);
+    const name = randomFrom(WORD_CHARACTERS);
+    const obj = randomFrom(WORD_OBJECTS);
+    const sentence = wordProblemSentence(opKey, name, a, b, obj.plural);
+    const options = nearbyNumberOptions(answer, count);
+    const correct = options.find((o) => o.name === String(answer));
+    return {
+        key: `problema:${opKey}:${a}:${b}:${name}:${obj.plural}`, correct, options,
+        prompt: () => ({ html: sentence, speak: sentence }),
+    };
+}
+
 /* ---------- escolhe o jogo ---------- */
 
 function buildQuestion(count) {
+    if (state.category === 'ingles') return englishQuestion(count);
+    if (state.category === 'matematica') return mathQuestion(count);
+    if (state.category === 'numletras') return numLetrasQuestion(count);
     const cat = state.category === 'misturar'
         ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
         : state.category;
-    if (cat === 'ingles') return englishQuestion(count);
-    if (cat === 'matematica') return mathQuestion(count);
     return classicQuestion(cat, count);
 }
 
@@ -911,6 +1087,10 @@ function revealCorrect(piece) {
     playSound(el.correctSound);
     burstConfetti();
 
+    // Inglês (F2-12): fala a palavra/frase certa em inglês, para reforçar a pronúncia.
+    // Timer solto (não usa schedule()) para não cancelar o avanço para a próxima pergunta.
+    if (state.question.speakEn) setTimeout(() => speak([{ text: state.question.speakEn, lang: 'en-US' }]), 550);
+
     el.options.querySelectorAll('.option').forEach((b) => { b.disabled = true; b.classList.add('is-locked'); });
     state.answered++;
     if (state.firstTry) state.correctFirstTry++;
@@ -1082,6 +1262,68 @@ function setCurrentId(id) { try { localStorage.setItem(CUR_KEY, id); } catch (_)
 let profiles = loadProfiles();
 let pendingAvatar = AVATARS[0];
 
+/* -----------------------------------------------------------
+   13b) TEMPO DE JOGO (por perfil — para o futuro painel dos pais)
+   Conta desde que o perfil é escolhido até trocar de perfil ou fechar
+   a aba/app. Pausa sozinha quando a aba fica em segundo plano, para
+   não contar tempo com o app esquecido aberto. Guardado por dia
+   (chave "AAAA-MM-DD") dentro do próprio perfil, em profiles[].playtime.
+   Não aparece em lugar nenhum ainda — só junta dado para o painel dos
+   pais (mais para frente); nada disto é visível para a criança.
+----------------------------------------------------------- */
+
+const PLAYTIME_FLUSH_MS = 15000;   // grava no localStorage a cada 15s (perde no máximo isso se fechar de repente)
+
+let playtimeTickHandle = null;
+let playtimeLastMark = 0;   // performance.now() da última vez que o tempo foi somado
+
+function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function addPlaytime(ms) {
+    if (!state.profile || ms <= 0) return;
+    const p = state.profile;
+    p.playtime = p.playtime || { days: {} };
+    const key = todayKey();
+    p.playtime.days[key] = (p.playtime.days[key] || 0) + ms;
+    saveProfiles(profiles);
+}
+
+// Soma o tempo desde a última marcação e reinicia a marcação (chamado a cada "tick" e nas pausas).
+function playtimeFlush() {
+    if (!playtimeLastMark) return;
+    const now = performance.now();
+    addPlaytime(now - playtimeLastMark);
+    playtimeLastMark = now;
+}
+
+function startPlaytimeTracking() {
+    stopPlaytimeTracking();
+    playtimeLastMark = performance.now();
+    playtimeTickHandle = setInterval(playtimeFlush, PLAYTIME_FLUSH_MS);
+}
+
+function stopPlaytimeTracking() {
+    if (playtimeTickHandle) { playtimeFlush(); clearInterval(playtimeTickHandle); playtimeTickHandle = null; }
+    playtimeLastMark = 0;
+}
+
+// Aba em segundo plano (trocou de app, minimizou...): pausa; ao voltar, retoma.
+document.addEventListener('visibilitychange', () => {
+    if (!state.profile) return;
+    if (document.hidden) {
+        if (playtimeTickHandle) { playtimeFlush(); clearInterval(playtimeTickHandle); playtimeTickHandle = null; }
+    } else if (!playtimeTickHandle) {
+        playtimeLastMark = performance.now();
+        playtimeTickHandle = setInterval(playtimeFlush, PLAYTIME_FLUSH_MS);
+    }
+});
+// Último esforço para não perder os segundos desde o flush anterior ao fechar a aba.
+window.addEventListener('pagehide', playtimeFlush);
+window.addEventListener('beforeunload', playtimeFlush);
+
 function renderProfiles() {
     el.profileCreate.hidden = true;
     el.profilesList.innerHTML = '';
@@ -1160,6 +1402,7 @@ function selectProfile(p) {
     state.profile = p;
     setCurrentId(p.id);
     updateProfileBar();
+    startPlaytimeTracking();
     showScreen('menu');
 }
 
@@ -1168,6 +1411,7 @@ function deleteProfile(p) {
     profiles = profiles.filter((x) => x.id !== p.id);
     saveProfiles(profiles);
     if (state.profile && state.profile.id === p.id) {
+        stopPlaytimeTracking();
         state.profile = null;
         setCurrentId('');
     }
@@ -1234,8 +1478,15 @@ function refreshSubPanel() {
     cfg.items.forEach((it) => buildChoice(
         el.subGrid,
         { value: it.id, label: it.label, emoji: it.emoji, sub: it.sub },
-        (v) => { state.sub[state.category] = v; },
+        (v) => { state.sub[state.category] = v; refreshExtraPanel(); },
         it.id === state.sub[state.category]));
+}
+
+// F2-10 "Tabuada específica": só aparece dentro de Matemática > Multiplicar.
+// O grid (1 a 10 + Todas) é montado uma única vez em buildMenu(); aqui só
+// mostra/esconde, igual ao panel-mode.
+function refreshExtraPanel() {
+    el.panelExtra.hidden = !(state.category === 'matematica' && state.sub.matematica === 'multiplicar');
 }
 
 // Treino do mouse conta "rodadas" (não "perguntas") e o nível muda tamanho/velocidade.
@@ -1254,7 +1505,7 @@ function refreshKindPanels() {
 
     // quantidade
     const list = COUNTS[kind];
-    el.countTitle.textContent = mouse ? '3. Quantas rodadas?' : '3. Quantas perguntas?';
+    el.countTitle.textContent = mouse ? 'Quantas rodadas?' : 'Quantas perguntas?';
     el.countListen.dataset.say = mouse ? 'Quantas rodadas você quer jogar?' : 'Quantas perguntas você quer responder?';
     el.countGrid.innerHTML = '';
     el.customCount.value = '';
@@ -1269,13 +1520,19 @@ function refreshMenuForCategory() {
     refreshSubPanel();
     refreshModePanel();
     refreshKindPanels();
+    refreshExtraPanel();
 }
 
 function buildMenu() {
     CATEGORY_META.forEach((c, i) => buildChoice(
         el.categoryGrid,
         { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
-        (v) => { state.category = v; refreshMenuForCategory(); }, i === 0));
+        (v) => {
+            state.category = v;
+            refreshMenuForCategory();
+            el.configTitle.textContent = `${c.emoji} ${c.label}`;
+            showScreen('config');   // escolheu o jogo: vai para a tela de configurar esse jogo
+        }, i === 0));
 
     DIFFICULTIES.forEach((d, i) => buildChoice(
         el.difficultyGrid,
@@ -1286,6 +1543,14 @@ function buildMenu() {
         el.modeGrid,
         { value: m.id, label: m.label, emoji: m.emoji, sub: m.sub },
         (v) => { state.mode = v; }, i === 0));
+
+    // Tabuada específica (F2-10): "Todas" + 1 a 10. Só fica visível via refreshExtraPanel().
+    const tableItems = [{ id: 'todas', label: 'Todas', sub: 'misturadas' }]
+        .concat(Array.from({ length: 10 }, (_, i) => ({ id: String(i + 1), label: String(i + 1), sub: 'tabuada' })));
+    tableItems.forEach((it, i) => buildChoice(
+        el.extraGrid,
+        { value: it.id, label: it.label, sub: it.sub },
+        (v) => { state.table = v; }, i === 0));
 
     state.category = 'formas';
     state.difficulty = 'facil';
@@ -1346,7 +1611,8 @@ el.repeatBtn.addEventListener('click', () => {
 el.resultsListen.addEventListener('click', () => speak(state.resultSpeech));
 el.playAgainBtn.addEventListener('click', startGame);
 el.menuBtn.addEventListener('click', () => showScreen('menu'));
-el.switchProfile.addEventListener('click', () => { renderProfiles(); showScreen('profiles'); });
+el.switchProfile.addEventListener('click', () => { stopPlaytimeTracking(); renderProfiles(); showScreen('profiles'); });
+el.configBackBtn.addEventListener('click', () => showScreen('menu'));
 
 el.createConfirm.addEventListener('click', createProfile);
 el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true; });
@@ -1389,6 +1655,7 @@ buildMenu();
 state.profile = profiles.find((p) => p.id === getCurrentId()) || null;
 if (state.profile) {
     updateProfileBar();
+    startPlaytimeTracking();
     showScreen('menu');
 } else {
     renderProfiles();

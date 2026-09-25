@@ -402,6 +402,21 @@ body.is-playing #screen-game > .options-area { flex: 1 1 0; }
     box-shadow: var(--shadow);
     color: var(--plum);
 }
+
+/* ---------- Tela de configurar o jogo escolhido ---------- */
+.config-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 6px 0 18px;
+}
+.config-header .chip-btn { flex: none; margin-left: 0; }
+.config-title {
+    margin: 0;
+    color: var(--plum);
+    font-size: clamp(1.3rem, 5vw, 2.1rem);
+    text-shadow: 0 2px 12px rgba(255, 255, 255, 0.65);
+}
 .profile-badge { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 6px; }
 .profile-badge #pb-avatar { font-size: 1.5rem; }
 .profile-stars { color: var(--ink-soft); font-weight: 600; }
@@ -415,6 +430,7 @@ body.is-playing #screen-game > .options-area { flex: 1 1 0; }
     padding: 6px 14px;
     border-radius: 999px;
     cursor: pointer;
+    white-space: nowrap;
     transition: background 0.2s ease;
 }
 .chip-btn:hover { background: var(--accent-soft); }
@@ -494,6 +510,36 @@ body.is-playing #screen-game > .options-area { flex: 1 1 0; }
     border-radius: 99px;
 }
 .math-stack .mrow--answer { color: var(--accent); }
+
+/* Matemática: "número que falta" (5 + ? = 8), formato em linha, não empilhado */
+.math-op { color: var(--accent); }
+.math-blank {
+    display: inline-block;
+    min-width: 0.9em;
+    color: var(--accent);
+    border-bottom: 0.1em dashed var(--accent);
+    padding: 0 0.1em;
+}
+
+/* F2-08 "Contar com emojis": grupo de figuras acima da pergunta */
+.count-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2em;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    line-height: 1;
+    margin-bottom: 12px;
+}
+
+/* F2-09 "Letra inicial": bichinho grande acima da pergunta */
+.glyph-hero {
+    display: block;
+    text-align: center;
+    font-size: clamp(3rem, 12vw, 4.5rem);
+    line-height: 1;
+    margin-bottom: 8px;
+}
 
 /* ---------- Zona de soltar (modo arrastar) ---------- */
 .drop-zone {
@@ -691,7 +737,18 @@ body.is-mouse .feedback {
 .listen-pill:active { transform: scale(0.96); }
 .results-total { color: var(--ink-soft); margin: 0 0 22px; }
 .results-total b { color: var(--plum); }
-.results-actions { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+/* Lado a lado e do mesmo tamanho: nenhum dos dois deve parecer "o botão certo" */
+.results-actions { display: flex; flex-direction: row; gap: 12px; align-items: stretch; }
+.results-actions .big-btn,
+.results-actions .ghost-btn {
+    flex: 1 1 0;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 14px 10px;
+    font-size: 1rem;
+    white-space: normal;
+}
 
 /* ---------- Confete ---------- */
 .confetti-canvas {
