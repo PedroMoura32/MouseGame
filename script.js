@@ -213,6 +213,7 @@ const CATEGORY_META = [
     { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…' },
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
     { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…' },
+    { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade' },
     { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…' },
 ];
 
@@ -259,6 +260,7 @@ const SUB_OPTIONS = {
             { id: 'alvos',    label: 'Alvos',    emoji: '🎯', sub: 'que se mexem' },
             { id: 'rolar',    label: 'Rolar',    emoji: '📜', sub: 'a rodinha' },
             { id: 'caminho',  label: 'Caminho',  emoji: '🐭', sub: 'arrastar' },
+            { id: 'memoria',  label: 'Memória',  emoji: '🃏', sub: 'ache os pares' },
             { id: 'misturar', label: 'Misturar', emoji: '🎲', sub: 'todos' },
         ],
     },
@@ -350,6 +352,7 @@ const screens = {
     menu: $('#screen-menu'),
     config: $('#screen-config'),
     game: $('#screen-game'),
+    draw: $('#screen-draw'),
     results: $('#screen-results'),
 };
 
@@ -385,10 +388,16 @@ const el = {
     modeGrid: $('#mode-grid'),
     customCount: $('#custom-count-input'),
     startBtn: $('#start-btn'),
+    // pintura livre (F2-21)
+    drawPalette: $('#draw-palette'),
+    drawCanvas: $('#draw-canvas'),
+    drawClearBtn: $('#draw-clear-btn'),
+    drawExitBtn: $('#draw-exit-btn'),
     // jogo
     hudLabel: $('#hud-label'),
     playfield: $('#playfield'),
     installBtn: $('#install-btn'),
+    themeToggle: $('#theme-toggle'),
     qCurrent: $('#q-current'),
     qTotal: $('#q-total'),
     qScore: $('#q-score'),
@@ -452,6 +461,7 @@ function showScreen(name) {
     Object.values(screens).forEach((s) => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
     document.body.classList.toggle('is-playing', name === 'game');   // tela do jogo cabe na janela (sem rolar)
+    document.body.classList.toggle('is-drawing', name === 'draw');   // pintura livre também cabe na janela inteira
     el.profileBar.hidden = !(name === 'menu' || name === 'config');   // só faz sentido junto do menu/configuração
     updateScrollbarWidth();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1388,6 +1398,91 @@ function drawConfetti() {
 }
 
 /* -----------------------------------------------------------
+   12b) PINTURA LIVRE (F2-21)
+   Sem certo ou errado, só pra desenhar. Não passa pela tela de
+   configuração (sem nível/quantidade — não faz sentido aqui).
+----------------------------------------------------------- */
+
+const DRAW_COLORS = ['#4a2f4a', '#e0559b', '#6fc3ee', '#ffd76a', '#b596ee', '#38d9a9', '#ff922b', '#ffffff'];
+
+let drawCtx = null;
+let drawColor = DRAW_COLORS[0];
+let drawing = false;
+let drawLast = null;
+
+function drawLocalPoint(e) {
+    const r = el.drawCanvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function resizeDrawCanvas() {
+    // Sem isso, o canvas fica borrado/errado se o tamanho em CSS não bater com o buffer.
+    const rect = el.drawCanvas.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return;
+    el.drawCanvas.width = rect.width;
+    el.drawCanvas.height = rect.height;
+    drawCtx = el.drawCanvas.getContext('2d');
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+}
+window.addEventListener('resize', () => { if (screens.draw.classList.contains('is-active')) resizeDrawCanvas(); });
+
+function renderDrawPalette() {
+    el.drawPalette.innerHTML = '';
+    DRAW_COLORS.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'draw-swatch' + (i === 0 ? ' is-selected' : '');
+        b.style.background = c;
+        b.setAttribute('aria-label', 'Cor ' + (i + 1));
+        b.addEventListener('click', () => {
+            drawColor = c;
+            el.drawPalette.querySelectorAll('.draw-swatch').forEach((s) => s.classList.remove('is-selected'));
+            b.classList.add('is-selected');
+        });
+        el.drawPalette.appendChild(b);
+    });
+}
+
+function openDrawScreen() {
+    showScreen('draw');
+    // o canvas só tem o tamanho final depois do layout da tela acontecer
+    requestAnimationFrame(() => { resizeDrawCanvas(); });
+}
+
+function drawStart(e) {
+    e.preventDefault();
+    drawing = true;
+    const p = drawLocalPoint(e);
+    drawLast = p;
+    drawCtx.fillStyle = drawColor;
+    drawCtx.beginPath();
+    drawCtx.arc(p.x, p.y, 4, 0, Math.PI * 2);   // um pontinho ao tocar, mesmo sem arrastar
+    drawCtx.fill();
+}
+function drawMove(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = drawLocalPoint(e);
+    drawCtx.strokeStyle = drawColor;
+    drawCtx.lineWidth = 8;
+    drawCtx.beginPath();
+    drawCtx.moveTo(drawLast.x, drawLast.y);
+    drawCtx.lineTo(p.x, p.y);
+    drawCtx.stroke();
+    drawLast = p;
+}
+function drawEnd() { drawing = false; }
+
+el.drawCanvas.addEventListener('pointerdown', drawStart);
+el.drawCanvas.addEventListener('pointermove', drawMove);
+window.addEventListener('pointerup', drawEnd);
+window.addEventListener('pointercancel', drawEnd);
+el.drawClearBtn.addEventListener('click', () => drawCtx && drawCtx.clearRect(0, 0, el.drawCanvas.width, el.drawCanvas.height));
+el.drawExitBtn.addEventListener('click', () => showScreen('menu'));
+renderDrawPalette();
+
+/* -----------------------------------------------------------
    13) PERFIS (localStorage)
 ----------------------------------------------------------- */
 
@@ -1702,6 +1797,7 @@ function buildMenu() {
         { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
         (v) => {
             state.category = v;
+            if (v === 'pintura') { openDrawScreen(); return; }   // sem opções pra configurar: vai direto desenhar
             refreshMenuForCategory();
             el.configTitle.textContent = `${c.emoji} ${c.label}`;
             showScreen('config');   // escolheu o jogo: vai para a tela de configurar esse jogo
@@ -1799,6 +1895,40 @@ el.configBackBtn.addEventListener('click', () => showScreen('menu'));
 el.createConfirm.addEventListener('click', createProfile);
 el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true; });
 el.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
+
+/* -----------------------------------------------------------
+   16a2) MODO NOTURNO (F2-22)
+   Sem escolha salva, segue a preferência do sistema (@media prefers-color-
+   scheme no CSS). Clicar no botão salva uma escolha explícita, que passa
+   a valer independente do sistema, até a pessoa mudar de novo.
+----------------------------------------------------------- */
+
+const THEME_KEY = 'mousegame.theme.v1';
+
+function isDarkNow() {
+    const chosen = document.documentElement.getAttribute('data-theme');
+    if (chosen === 'dark') return true;
+    if (chosen === 'light') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+function updateThemeToggleIcon() {
+    const dark = isDarkNow();
+    el.themeToggle.textContent = dark ? '☀️' : '🌙';
+    el.themeToggle.setAttribute('aria-label', dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro');
+}
+el.themeToggle.addEventListener('click', () => {
+    const next = isDarkNow() ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, next); } catch (_) {}
+    document.documentElement.setAttribute('data-theme', next);
+    updateThemeToggleIcon();
+});
+// Se a pessoa nunca escolheu manualmente, o ícone acompanha o sistema mudando ao vivo.
+if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        try { if (!localStorage.getItem(THEME_KEY)) updateThemeToggleIcon(); } catch (_) { updateThemeToggleIcon(); }
+    });
+}
+updateThemeToggleIcon();
 
 /* -----------------------------------------------------------
    16b) APP INSTALÁVEL (PWA)

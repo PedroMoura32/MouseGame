@@ -17,6 +17,7 @@
      alvos    -> clicar com precisão em alvos que se mexem
      rolar    -> usar a rodinha do mouse (rolar a página)
      caminho  -> arrastar sem sair do trilho (controle fino)
+     memoria  -> cliques + memória visual (achar os pares)
    ============================================================ */
 
 'use strict';
@@ -29,6 +30,12 @@ const MINIGAMES = (() => {
     const randInt = (a, b) => Math.floor(rand(a, b + 1));
     const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+    }
+    const sample = (arr, n) => shuffle(arr).slice(0, n);
 
     // Laço de animação com passo de tempo (dt em segundos). Devolve a função "parar".
     function loop(step) {
@@ -515,10 +522,81 @@ const MINIGAMES = (() => {
         return { prompt, start, destroy };
     }
 
+    /* ============================================================
+       5) MEMÓRIA — achar os pares (F2-20)
+       ============================================================ */
+
+    const MEMORY_GLYPHS = ['🐶', '🐱', '🦁', '🐴', '🐮', '🐷', '🦆', '🐸', '🐵', '🐰', '🐻', '🐟', '🍓', '⭐', '🎈', '🌸', '🦋', '🐝'];
+    const MEMORY_GRID = [[3, 2], [4, 2], [4, 3]];   // [colunas, linhas] por nível — colunas×linhas = pares×2
+
+    function memoria(api) {
+        const [cols, rows] = MEMORY_GRID[api.level];
+        const pairs = (cols * rows) / 2;
+        const prompt = { html: `Encontre os ${pairs} pares iguais! 🃏`, speak: `Encontre os ${pairs} pares de cartas iguais` };
+        let flipped = [], matched = 0, locked = false;
+
+        function start() {
+            destroy();
+            api.field.innerHTML = '';
+            const { w, h } = api.size();
+            const items = sample(MEMORY_GLYPHS, pairs);
+            const deck = shuffle([...items, ...items]);
+            matched = 0; flipped = []; locked = false;
+
+            const gap = 10;
+            const size = clamp(Math.min((w - gap * (cols - 1)) / cols, (h - gap * (rows - 1)) / rows), 44, 190);
+            const gridW = size * cols + gap * (cols - 1), gridH = size * rows + gap * (rows - 1);
+            const ox = (w - gridW) / 2, oy = (h - gridH) / 2;
+
+            deck.forEach((glyph, i) => {
+                const col = i % cols, row = Math.floor(i / cols);
+                const card = el('button', 'mg-card', api.field);
+                card.type = 'button';
+                card.style.cssText = `width:${size}px; height:${size}px; left:${ox + col * (size + gap)}px; top:${oy + row * (size + gap)}px; font-size:${size * 0.5}px`;
+                const inner = el('div', 'mg-card-inner', card);
+                el('div', 'mg-card-face mg-card-back', inner).textContent = '❓';
+                el('div', 'mg-card-face mg-card-front', inner).textContent = glyph;
+                const c = { glyph, el: card, matched: false };
+                card.addEventListener('pointerdown', (e) => { e.preventDefault(); flip(c); });
+            });
+            api.hint(`Ache os ${pairs} pares 🃏`);
+        }
+
+        function flip(c) {
+            if (locked || c.matched || c.el.classList.contains('is-flipped') || flipped.length >= 2) return;
+            c.el.classList.add('is-flipped');
+            flipped.push(c);
+            if (flipped.length < 2) return;
+
+            locked = true;
+            const [a, b] = flipped;
+            if (a.glyph === b.glyph) {
+                a.matched = b.matched = true;
+                a.el.classList.add('is-matched'); b.el.classList.add('is-matched');
+                matched++;
+                flipped = []; locked = false;
+                blipSfx(560 + matched * 60);
+                if (matched === pairs) api.done();
+                else api.hint(`Boa! Faltam ${pairs - matched} ${pairs - matched === 1 ? 'par' : 'pares'}`);
+            } else {
+                setTimeout(() => {
+                    a.el.classList.remove('is-flipped'); b.el.classList.remove('is-flipped');
+                    flipped = []; locked = false;
+                    api.mistake('Quase! Tenta lembrar onde estava 🧠');
+                }, 800);
+            }
+        }
+
+        function destroy() { flipped = []; api.field.innerHTML = ''; }
+
+        return { prompt, start, destroy };
+    }
+
     return {
         baloes:  { create: baloes },
         alvos:   { create: alvos },
         rolar:   { create: rolar },
         caminho: { create: caminho },
+        memoria: { create: memoria },
     };
 })();

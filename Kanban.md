@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 23/09/2026
+Atualizado em: 24/09/2026
 
 **Regras para o Claude Code**
 
@@ -63,21 +63,6 @@ Atualizado em: 23/09/2026
 - Prioridade: Baixa
 - Pronto quando: existe um jeito simples dos pais mandarem sugestão/opinião sobre o app, acessível do painel dos pais
 - Nota: site é estático sem servidor; caminho mais simples é um link mailto: ou um formulário externo (Google Forms) — confirmar com o Pedro
-
-### F2-20 · Jogo da memória (pares)
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: existe um minijogo de virar cartas em pares, usando conteúdo já existente (formas, animais, etc.) como imagem das cartas
-
-### F2-21 · Pintura livre
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: existe uma tela de desenho livre com o mouse/dedo, sem certo ou errado, só para brincar
-
-### F2-22 · Modo noturno
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: existe um tema com cores escuras, selecionável ou automático pela preferência do sistema
 
 ### F2-23 · Divisão com "pausinhos" nas caixinhas
 - Fase: 2 · Ideias e melhorias
@@ -174,6 +159,26 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-22 · Modo noturno
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existe um tema com cores escuras, selecionável ou automático pela preferência do sistema
+- Nota: botão 🌙/☀️ na barra superior alterna entre claro/escuro; sem escolha explícita, segue a preferência do sistema (e reage se o sistema mudar em tempo real); a escolha explícita fica salva e persiste entre sessões. Aplicado antes da primeira pintura da página, pra não "piscar" o tema errado. Paleta escura cobre todas as telas (perfis, menu, config, jogo, resultado, pintura, treino do mouse)
+- Nota: implementado com variáveis CSS (`--bg`, `--card`, `--ink`, cores de acerto/erro, fundo dos cartões de escolha, etc.) redefinidas num bloco `@media (prefers-color-scheme: dark)` e espelhadas em `:root[data-theme="dark"]` para a escolha manual. Testado contraste de texto em ~9 elementos-chave (razões de 6.4 a 12.05, bem acima do mínimo de 4.5 do WCAG AA); revisão visual pegou um bug real (cards de escolha tipo "Subtrair"/"Multiplicar" ficaram ilegíveis no escuro por causa de uma cor de fundo fixa que o teste de contraste automático não cobria) e foi corrigido
+- Nota: decisão deliberada — o campo de jogo do Treino do mouse (baloẽs, alvos, memória etc.) permanece com fundo claro fixo nos dois temas, tratado como uma "folha de papel" à parte; evita uma auditoria muito maior de cor por minijogo e mantém o conteúdo sempre legível
+
+### F2-21 · Pintura livre
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existe uma tela de desenho livre com o mouse/dedo, sem certo ou errado, só para brincar
+- Nota: implementado como uma nova categoria "Pintura Livre" no menu principal, que pula a tela de configuração e vai direto para uma tela de desenho em tela cheia (canvas), com paleta de 8 cores, botão limpar e botão sair (volta ao menu, não à config). Testado mouse e toque, troca de cor, traço contínuo suave, limpar apaga tudo, sem rolagem lateral no celular
+
+### F2-20 · Jogo da memória (pares)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existe um minijogo de virar cartas em pares, usando conteúdo já existente (formas, animais, etc.) como imagem das cartas
+- Nota: implementado como novo minijogo "Memória" dentro do Treino do mouse, com flip 3D nas cartas e grade que cresce por nível (3x2/4x2/4x3 = 3/4/6 pares), sorteando emojis de um banco de 18. Cada rodada completa = um tabuleiro; segue a mesma contagem de estrelas 1:1 do treino do mouse (fora da regra do F2-17). Testado sequência completa de várias rodadas, acerto/erro de par, centralização da grade em desktop e celular
 
 ### F2-17 · Regra de estrelas por acerto ajustável
 - Fase: 2 · Ideias e melhorias

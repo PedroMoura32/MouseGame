@@ -16,13 +16,24 @@
     <meta name="apple-mobile-web-app-title" content="Jogo dos Cliques">
 
     <link rel="stylesheet" href="styles.css">
+    <!-- F2-22: aplica o tema salvo antes de pintar a página, pra não "piscar" o tema errado -->
+    <script>
+        try {
+            var t = localStorage.getItem('mousegame.theme.v1');
+            if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+    </script>
 </head>
 <body>
     <!-- Barra superior sempre visível -->
     <header class="topbar">
         <div class="brand">🎀 Jogo dos Cliques</div>
-        <!-- só aparece se o navegador permitir instalar o app -->
-        <button id="install-btn" class="chip-btn" hidden>📲 Instalar app</button>
+        <div class="topbar-actions">
+            <!-- F2-22: claro/escuro. Sem escolha salva, segue o tema do sistema -->
+            <button id="theme-toggle" class="icon-btn" title="Mudar tema claro/escuro">🌙</button>
+            <!-- só aparece se o navegador permitir instalar o app -->
+            <button id="install-btn" class="chip-btn" hidden>📲 Instalar app</button>
+        </div>
     </header>
 
     <main class="stage">
@@ -155,6 +166,16 @@
             </div>
 
             <div id="feedback" class="feedback" aria-live="polite"></div>
+        </section>
+
+        <!-- ======================= TELA: PINTURA LIVRE (F2-21) ======================= -->
+        <section id="screen-draw" class="screen">
+            <div class="draw-toolbar">
+                <div id="draw-palette" class="draw-palette"></div>
+                <button id="draw-clear-btn" class="chip-btn">🧹 Limpar</button>
+                <button id="draw-exit-btn" class="chip-btn">✖ Sair</button>
+            </div>
+            <canvas id="draw-canvas" class="draw-canvas"></canvas>
         </section>
 
         <!-- ======================= TELA: RESULTADO ======================= -->
