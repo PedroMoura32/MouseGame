@@ -14,18 +14,6 @@ Atualizado em: 25/09/2026
 
 ## Backlog
 
-### F2-02 · Leitura automática
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: o app lê o conteúdo em voz alta sem a pessoa precisar tocar em nada
-- Nota: já estava pendente antes do mapeamento
-
-### F2-03 · Dica após erros
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: depois de um erro, o app mostra uma dica que ajuda a acertar na próxima
-- Nota: já estava pendente antes do mapeamento
-
 ### F2-05 · Fechar a versão final para produção
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Alta
@@ -153,6 +141,20 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-03 · Dica após erros
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: depois de um erro, o app mostra uma dica que ajuda a acertar na próxima
+- Nota: já estava pendente antes do mapeamento
+- Nota: confirmado com o Pedro — a dica só aparece depois do 2º erro na mesma pergunta (1 erro ainda é tentativa normal), e é genérica pra qualquer categoria: elimina uma opção errada ainda não tentada (fica cinza com um 💡), reduzindo as escolhas restantes. Só 1 dica por pergunta. Em "Fácil" (3 opções) normalmente já não sobra nada pra eliminar depois do 2º erro — o efeito aparece mesmo em Médio/Difícil, testado nos dois. Testado: contador de erros e a dica resetam certinho na pergunta seguinte, e em Fácil não trava mesmo sem ter o que eliminar
+
+### F2-02 · Leitura automática
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: o app lê o conteúdo em voz alta sem a pessoa precisar tocar em nada
+- Nota: já estava pendente antes do mapeamento
+- Nota: confirmado com o Pedro — em vez de ligar pra todo mundo (o que reverteria a decisão anterior de "leitura só sob demanda" que ele tinha gostado), virou uma opção por perfil, desligada por padrão. Quando ligada (na criação da jogadora ou depois, no seletor de avatar), cada pergunta nova é falada sozinha assim que aparece — no jogo clássico e no Treino do mouse — sem precisar tocar no 🔊; o resto do app (menu, resultado) continua manual. Testado: perfil com a opção liga fala sozinho, desligar pelo seletor para na hora, perfil padrão nunca fala sozinho mas o botão manual continua funcionando
 
 ### F2-01 · Backup de perfis
 - Fase: 2 · Ideias e melhorias

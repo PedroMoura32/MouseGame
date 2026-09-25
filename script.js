@@ -320,6 +320,8 @@ const state = {
     reviewMode: false,    // true durante a revisão opcional (não ganha estrela)
     reviewQueue: [],
     firstTry: true,
+    wrongAttempts: 0,      // erros nesta pergunta específica (zera a cada pergunta nova) — ver F2-03
+    hintGiven: false,      // já eliminou uma opção errada como dica nesta pergunta? (só 1 por pergunta)
     question: null,       // pergunta atual (ver "8) PERGUNTAS")
     resultSpeech: '',     // texto lido no botão "ouvir resultado"
     profile: null,
@@ -362,6 +364,7 @@ const el = {
     profileCreate: $('#profile-create'),
     newName: $('#new-name'),
     avatarPicker: $('#avatar-picker'),
+    newAutoread: $('#new-autoread'),
     createConfirm: $('#create-confirm'),
     createCancel: $('#create-cancel'),
     exportProfilesBtn: $('#export-profiles-btn'),
@@ -427,6 +430,7 @@ const el = {
     // trocar de avatar (F2-14)
     avatarSwitcher: $('#avatar-switcher'),
     avatarSwitcherGrid: $('#avatar-switcher-grid'),
+    switcherAutoread: $('#switcher-autoread'),
     avatarSwitcherClose: $('#avatar-switcher-close'),
     // sons
     correctSound: $('#correct-sound'),
@@ -504,6 +508,13 @@ function stopSpeech() {
 // Passamos para minúsculas só na hora de falar; letras soltas (A, B) ficam como estão.
 function speakable(text, lang) {
     return text.replace(/\p{L}{2,}/gu, (w) => w.toLocaleLowerCase(lang));
+}
+
+// F2-02: fala a pergunta/instrução atual sozinha, só se o perfil tiver essa opção ligada
+// (pensada pra quem ainda não lê); o resto do app continua manual, no botão 🔊.
+function autoReadCurrentQuestion() {
+    if (!state.profile || !state.profile.autoRead || !state.question) return;
+    speak(state.question.prompt(state.mode).speak);
 }
 
 // "parts" = texto (pt-BR) ou lista [{ text, lang }] para misturar idiomas.
@@ -852,6 +863,8 @@ function newQuestion() {
 
     state.question = q;
     state.firstTry = true;
+    state.wrongAttempts = 0;
+    state.hintGiven = false;
     renderQuestion(q);
 }
 
@@ -894,7 +907,7 @@ function renderQuestion(q) {
     busy = false;
     updateHud();
     layoutOptions();
-    // Sem narração automática: a criança lê. Fala só se clicar no 🔊.
+    autoReadCurrentQuestion(); // F2-02: só fala sozinho se o perfil tiver a opção ligada
 }
 
 /* Tamanho das opções: cabem SEMPRE no espaço disponível (largura e altura da
@@ -996,6 +1009,7 @@ function newRound() {
     state.firstTry = true;
     busy = false;
     updateHud();
+    autoReadCurrentQuestion(); // F2-02
     startRound();
 }
 
@@ -1156,6 +1170,7 @@ function revealCorrect(piece) {
 
 function revealWrong(sourceEl, piece) {
     state.firstTry = false;
+    state.wrongAttempts++;
     el.feedback.textContent = randomFrom(TRY_AGAIN);
     el.feedback.className = 'feedback is-wrong';
     playSound(el.wrongSound);
@@ -1167,6 +1182,7 @@ function revealWrong(sourceEl, piece) {
         clearDropPiece();
         el.options.classList.remove('is-busy');
         busy = false; // permite tentar de novo
+        maybeGiveHint();
     };
 
     if (piece === sourceEl) {
@@ -1176,6 +1192,22 @@ function revealWrong(sourceEl, piece) {
         piece.classList.add('is-wrong');
         schedule(release, WRONG_SHOW_MS);
     }
+}
+
+// F2-03: depois do 2º erro na mesma pergunta, elimina uma opção errada pra ajudar
+// (só 1 vez por pergunta). Em "fácil" (3 opções) normalmente já não sobra nada pra
+// eliminar nesse ponto — o efeito aparece mais em médio/difícil, que é onde ajuda de fato.
+function maybeGiveHint() {
+    if (state.wrongAttempts < 2 || state.hintGiven || !state.question) return;
+    const candidates = [...el.options.querySelectorAll('.option')]
+        .filter((b) => !b.disabled && b.getAttribute('aria-label') !== state.question.correct.name);
+    if (candidates.length === 0) return;
+    state.hintGiven = true;
+    const pick = randomFrom(candidates);
+    pick.disabled = true;
+    pick.classList.add('is-hint-out');
+    el.feedback.textContent = '💡 Vou te ajudar: essa aqui não é!';
+    el.feedback.className = 'feedback is-checking';
 }
 
 function nextStep() {
@@ -1205,6 +1237,8 @@ function nextReviewQuestion() {
     const q = state.reviewQueue.shift();
     state.question = q;
     state.firstTry = true;
+    state.wrongAttempts = 0;
+    state.hintGiven = false;
     renderQuestion(q);
 }
 
@@ -1612,6 +1646,7 @@ function renderProfiles() {
 function openCreate() {
     el.newName.value = '';
     pendingAvatar = AVATARS[0].glyph;
+    el.newAutoread.checked = false;
     renderAvatarPicker();
     el.profileCreate.hidden = false;
     el.profileCreate.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1640,6 +1675,7 @@ function renderAvatarPicker() {
 function openAvatarSwitcher() {
     if (!state.profile) return;
     const stars = state.profile.stars || 0;
+    el.switcherAutoread.checked = !!state.profile.autoRead;
     el.avatarSwitcherGrid.innerHTML = '';
     AVATARS.forEach((a) => {
         const unlocked = stars >= a.unlockAt;
@@ -1663,7 +1699,8 @@ function openAvatarSwitcher() {
 
 function createProfile() {
     const name = (el.newName.value || '').trim() || 'Jogadora';
-    const p = { id: 'p' + Date.now() + randInt(1000), name, avatar: pendingAvatar, stars: 0, games: 0 };
+    // F2-02: leitura automática das perguntas, desligada por padrão (opt-in por perfil)
+    const p = { id: 'p' + Date.now() + randInt(1000), name, avatar: pendingAvatar, stars: 0, games: 0, autoRead: el.newAutoread.checked };
     profiles.push(p);
     saveProfiles(profiles);
     selectProfile(p);
@@ -1939,6 +1976,11 @@ el.menuBtn.addEventListener('click', () => showScreen('menu'));
 el.switchProfile.addEventListener('click', () => { stopPlaytimeTracking(); renderProfiles(); showScreen('profiles'); });
 el.pbAvatar.addEventListener('click', openAvatarSwitcher);
 el.avatarSwitcherClose.addEventListener('click', () => { el.avatarSwitcher.hidden = true; });
+el.switcherAutoread.addEventListener('change', () => {
+    if (!state.profile) return;
+    state.profile.autoRead = el.switcherAutoread.checked;
+    saveProfiles(profiles);
+});
 el.configBackBtn.addEventListener('click', () => showScreen('menu'));
 
 el.createConfirm.addEventListener('click', createProfile);

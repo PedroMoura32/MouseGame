@@ -57,6 +57,11 @@
                 <input id="new-name" class="name-input" type="text" maxlength="14" placeholder="Escreva o nome" autocomplete="off">
                 <p class="pick-label">Escolha um bichinho:</p>
                 <div id="avatar-picker" class="avatar-picker" role="radiogroup" aria-label="Avatar"></div>
+                <!-- F2-02: pra quem ainda não lê sozinha; desligado por padrão (leitura continua manual, no 🔊) -->
+                <label class="autoread-toggle">
+                    <input id="new-autoread" type="checkbox">
+                    🔊 Ler as perguntas em voz alta sozinho
+                </label>
                 <div class="create-actions">
                     <button id="create-confirm" class="big-btn">Criar ✨</button>
                     <button id="create-cancel" class="ghost-btn ghost-btn--dark">Cancelar</button>
@@ -212,6 +217,11 @@
         <div class="avatar-switcher-card panel">
             <h2 class="panel-title">Escolha seu avatar</h2>
             <div id="avatar-switcher-grid" class="avatar-picker"></div>
+            <!-- F2-02: também dá pra ligar/desligar depois de criar o perfil -->
+            <label class="autoread-toggle">
+                <input id="switcher-autoread" type="checkbox">
+                🔊 Ler as perguntas em voz alta sozinho
+            </label>
             <button id="avatar-switcher-close" class="ghost-btn ghost-btn--dark">Fechar</button>
         </div>
     </div>

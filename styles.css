@@ -458,6 +458,18 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
 }
 .name-input:focus { outline: none; border-color: var(--accent); }
 .pick-label { color: var(--ink-soft); margin: 16px 0 8px; font-weight: 600; }
+/* F2-02: leitura automática das perguntas, opt-in por perfil */
+.autoread-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+.autoread-toggle input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 .avatar-picker {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -758,6 +770,16 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
 .option.is-wrong { border-color: var(--wrong); background: var(--wrong-tint); animation: shake 0.45s ease; }
 .option.is-dimmed { opacity: 0.4; pointer-events: none; }
 .option[disabled] { cursor: default; }
+/* F2-03: opção eliminada como dica (o jogo ajudou, a criança não errou esta) */
+.option.is-hint-out { position: relative; opacity: 0.35; pointer-events: none; filter: grayscale(0.6); }
+.option.is-hint-out::after {
+    content: '💡';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: calc(var(--s) * 0.18);
+    line-height: 1;
+}
 
 @keyframes checking {
     0%, 100% { transform: scale(1); }
