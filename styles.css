@@ -411,7 +411,7 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
     top: 8px;
     right: 8px;
     border: none;
-    background: #f6eef7;
+    background: var(--choice-bg);
     color: var(--ink-soft);
     width: 28px;
     height: 28px;
@@ -434,16 +434,27 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
 }
 .profile-card--add .pc-plus { font-size: 2.6rem; line-height: 1; }
 
+/* F2-01: discreto de propósito — é uma ferramenta pra pais, não faz parte do fluxo da criança */
+.profiles-backup {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    opacity: 0.8;
+}
+.profiles-backup .chip-btn { font-size: 0.85rem; }
+
 .profile-create { max-width: 460px; margin: 0 auto; text-align: center; }
 .name-input {
     width: 100%;
     padding: 14px 16px;
     font-family: inherit;
     font-size: 1.2rem;
-    border: 3px solid #f4ecf6;
+    border: 3px solid var(--choice-border);
     border-radius: 16px;
     text-align: center;
     color: var(--ink);
+    background: var(--card);
 }
 .name-input:focus { outline: none; border-color: var(--accent); }
 .pick-label { color: var(--ink-soft); margin: 16px 0 8px; font-weight: 600; }
@@ -454,7 +465,7 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
     margin-bottom: 8px;
 }
 .avatar-opt {
-    border: 3px solid #f4ecf6;
+    border: 3px solid var(--choice-border);
     background: rgba(var(--frost), 0.95);
     border-radius: 14px;
     font-size: 1.7rem;

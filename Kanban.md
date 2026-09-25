@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 24/09/2026
+Atualizado em: 25/09/2026
 
 **Regras para o Claude Code**
 
@@ -13,12 +13,6 @@ Atualizado em: 24/09/2026
 - Mantenha cada campo em uma única linha e atualize a data acima.
 
 ## Backlog
-
-### F2-01 · Backup de perfis
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: a pessoa consegue salvar os perfis e restaurá-los em outro aparelho
-- Nota: já estava pendente antes do mapeamento
 
 ### F2-02 · Leitura automática
 - Fase: 2 · Ideias e melhorias
@@ -159,6 +153,13 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-01 · Backup de perfis
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: a pessoa consegue salvar os perfis e restaurá-los em outro aparelho
+- Nota: já estava pendente antes do mapeamento
+- Nota: implementado na tela de perfis com dois botões discretos "Exportar backup" (baixa um `.json` com todas as jogadoras do aparelho) e "Importar backup" (escolhe um arquivo `.json` e soma ao que já existe). Importação nunca sobrescreve: jogadoras com o mesmo id já salvo são ignoradas, evitando perder estrelas por engano ao importar um backup antigo por cima; sempre mostra quantas foram importadas/ignoradas. Testado exportar, importar arquivo com 1 repetida + 1 nova, importar o mesmo arquivo de novo (nada muda), e dois casos de arquivo inválido (JSON quebrado e JSON sem perfis) sem travar a página. Revisão visual também corrigiu 3 cores fixas que tinham escapado da auditoria do modo escuro (F2-22): botão de apagar jogadora, borda do campo de nome e borda dos avatares na criação de perfil
 
 ### F2-22 · Modo noturno
 - Fase: 2 · Ideias e melhorias
