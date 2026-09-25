@@ -45,27 +45,6 @@ Atualizado em: 23/09/2026
 - Pronto quando: o app só busca atualização em segundo plano de vez em quando, não em toda abertura
 - Nota: não é urgente no volume esperado; hoje o sw.js sempre busca a rede em paralelo ao mostrar o cache
 
-### F2-14 · Avatares desbloqueáveis com estrelas
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: existem avatares extras, além dos atuais, que só ficam disponíveis no seletor depois que o perfil atinge X estrelas
-
-### F2-15 · Conquistas/troféus
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: existem selos por marcos (ex.: "10 acertos seguidos", "jogou 3 dias seguidos"), visíveis no perfil, além da contagem de estrelas
-
-### F2-16 · Revisar o que errou, de forma opcional
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: no fim da rodada, se errou alguma, o app pergunta se quer revisar; se topar, repete só as erradas, mas essas não valem estrela nova
-
-### F2-17 · Regra de estrelas por acerto ajustável
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: no nível Difícil, cada 2 acertos de primeira valem 1 estrela (nos outros níveis continua 1 acerto = 1 estrela)
-- Nota: confirmado com o Pedro — liga ao nível Difícil, vale para qualquer perfil (não é por idade cadastrada)
-
 ### F2-18 · Painel dos pais com histórico de evolução
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Média
@@ -195,6 +174,32 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-17 · Regra de estrelas por acerto ajustável
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: no nível Difícil, cada 2 acertos de primeira valem 1 estrela (nos outros níveis continua 1 acerto = 1 estrela)
+- Nota: confirmado com o Pedro — liga ao nível Difícil, vale para qualquer perfil (não é por idade cadastrada)
+- Nota: implementado com dois contadores separados — correctFirstTry (acertos, usado na mensagem "acertou de primeira X de Y") e starsEarned (estrelas de verdade, usado no HUD e somado ao perfil). Treino do mouse fica de fora da regra (1:1 sempre). Testado: Fácil 10 certas = 10 estrelas; Difícil 10 certas = 5 estrelas; Difícil 5 certas (ímpar) = 2 estrelas, não arredonda para cima
+
+### F2-16 · Revisar o que errou, de forma opcional
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: no fim da rodada, se errou alguma, o app pergunta se quer revisar; se topar, repete só as erradas, mas essas não valem estrela nova
+- Nota: implementado com um botão "Revisar o que errei (N)" que só aparece se algo foi errado nesta rodada. A revisão reaproveita as perguntas exatas (autossuficientes: prompt/correta/opções já geradas), sem gerar de novo. Termina numa tela simples "Revisão concluída!", sem mexer em estrelas nem no contador de partidas do perfil. Testado: revisão não duplica estrelas nem partidas, revisa exatamente as que errou
+
+### F2-15 · Conquistas/troféus
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: existem selos por marcos (ex.: "10 acertos seguidos", "jogou 3 dias seguidos"), visíveis no perfil, além da contagem de estrelas
+- Nota: 7 conquistas implementadas (partidas, estrelas, sequência de 10 acertos numa rodada, 3 dias seguidos jogando — reaproveitando o cronômetro do F2-27). Guardadas em profile.achievements; aparecem num banner dourado no resultado só quando desbloqueadas na hora. Testado: desbloqueia certo, não repete depois de já desbloqueada, sequência e dias consecutivos calculam certo
+- Nota: ainda não tem uma tela própria para ver todas as conquistas já ganhas — só o aviso na hora que desbloqueia. Fica pro painel dos pais (F2-18) ou uma versão futura
+
+### F2-14 · Avatares desbloqueáveis com estrelas
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: existem avatares extras, além dos atuais, que só ficam disponíveis no seletor depois que o perfil atinge X estrelas
+- Nota: 6 avatares livres desde o início + 6 que destravam em 10/20/30/50/75/100 estrelas. Criar perfil novo só mostra os 6 livres (os outros aparecem com cadeado, à mostra). Depois de criado, clicar no avatar da barra de perfil abre um seletor com os que já destravou. Testado: bloqueio certo em cada faixa, troca persiste no localStorage, sem rolagem lateral no celular
 
 ### F2-08 · Contar com emojis
 - Fase: 2 · Ideias e melhorias

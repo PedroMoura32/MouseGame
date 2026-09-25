@@ -388,6 +388,25 @@ body.is-playing #screen-game > .options-area { flex: 1 1 0; }
 }
 .avatar-opt:hover { transform: scale(1.1); }
 .avatar-opt.is-selected { border-color: var(--accent); background: var(--accent-soft); }
+/* F2-14: avatar ainda não desbloqueado */
+.avatar-opt.is-locked { cursor: default; opacity: 0.55; background: #f1eaf3; }
+.avatar-opt.is-locked:hover { transform: none; }
+.avatar-opt .avatar-lock { display: block; font-size: 1.2rem; line-height: 1; }
+.avatar-opt .avatar-lock-req { display: block; font-size: 0.6rem; font-weight: 700; color: var(--ink-soft); margin-top: 2px; }
+
+/* Avatar da barra de perfil: clicável para trocar (F2-14) */
+#pb-avatar { cursor: pointer; }
+.avatar-switcher-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(74, 47, 74, 0.55);
+}
+.avatar-switcher-card { max-width: 420px; width: 100%; text-align: center; margin: 0; }
 .create-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 16px; }
 
 /* ---------- Barra de perfil no menu ---------- */
@@ -735,6 +754,20 @@ body.is-mouse .feedback {
 }
 .listen-pill:hover { background: #fbd0e6; transform: scale(1.04); }
 .listen-pill:active { transform: scale(0.96); }
+/* F2-15: aviso de conquista nova desbloqueada */
+.achievement-banner {
+    display: inline-block;
+    margin: 6px 0 4px;
+    padding: 10px 20px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--plum);
+    background: linear-gradient(135deg, #fff3cf, #ffe3b0);
+    border: 2px solid var(--gold);
+    border-radius: 999px;
+}
+/* F2-16: revisar o que errou */
+#review-btn { margin-bottom: 14px; }
 .results-total { color: var(--ink-soft); margin: 0 0 22px; }
 .results-total b { color: var(--plum); }
 /* Lado a lado e do mesmo tamanho: nenhum dos dois deve parecer "o botão certo" */

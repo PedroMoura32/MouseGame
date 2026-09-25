@@ -285,7 +285,13 @@ const COUNT_DEFAULT_INDEX = 1;
 // Texto do nível no treino do mouse (nos outros jogos o nível muda o nº de opções).
 const DIFF_SUB_MOUSE = ['grande e devagar', 'tamanho normal', 'pequeno e rápido'];
 
-const AVATARS = ['🦄', '🌸', '🦋', '🌈', '🐱', '🐰', '🐼', '⭐', '🐬', '🍓', '🌷', '🐞'];
+// F2-14: 6 avatares disponíveis desde o início; os outros 6 destravam com estrelas.
+const AVATARS = [
+    { glyph: '🦄', unlockAt: 0 }, { glyph: '🌸', unlockAt: 0 }, { glyph: '🐱', unlockAt: 0 },
+    { glyph: '🐰', unlockAt: 0 }, { glyph: '🐼', unlockAt: 0 }, { glyph: '🍓', unlockAt: 0 },
+    { glyph: '🦋', unlockAt: 10 }, { glyph: '🌈', unlockAt: 20 }, { glyph: '⭐', unlockAt: 30 },
+    { glyph: '🐬', unlockAt: 50 }, { glyph: '🌷', unlockAt: 75 }, { glyph: '🐞', unlockAt: 100 },
+];
 
 /* Tempos de experiência */
 const SUSPENSE_MS = 1100;   // "aguardar a validação" após escolher
@@ -304,7 +310,13 @@ const state = {
     mode: 'clicar',
     totalQuestions: 10,
     answered: 0,
-    correctFirstTry: 0,
+    correctFirstTry: 0,   // quantas perguntas acertou de primeira (mostrado na mensagem de resultado)
+    starsEarned: 0,       // estrelas ganhas de verdade nesta rodada (ver F2-17: no nível Difícil, 2 acertos = 1 estrela)
+    curStreak: 0,         // sequência atual de acertos de primeira seguidos (F2-15)
+    bestStreak: 0,        // maior sequência desta rodada
+    missed: [],           // perguntas erradas ao menos uma vez, pra revisar depois (F2-16)
+    reviewMode: false,    // true durante a revisão opcional (não ganha estrela)
+    reviewQueue: [],
     firstTry: true,
     question: null,       // pergunta atual (ver "8) PERGUNTAS")
     resultSpeech: '',     // texto lido no botão "ouvir resultado"
@@ -396,8 +408,14 @@ const el = {
     resultsName: $('#results-name'),
     resultsProfileStars: $('#results-profile-stars'),
     resultsListen: $('#results-listen'),
+    resultsAchievement: $('#results-achievement'),
+    reviewBtn: $('#review-btn'),
     playAgainBtn: $('#play-again-btn'),
     menuBtn: $('#menu-btn'),
+    // trocar de avatar (F2-14)
+    avatarSwitcher: $('#avatar-switcher'),
+    avatarSwitcherGrid: $('#avatar-switcher-grid'),
+    avatarSwitcherClose: $('#avatar-switcher-close'),
     // sons
     correctSound: $('#correct-sound'),
     wrongSound: $('#wrong-sound'),
@@ -976,7 +994,14 @@ function completeRound() {
     playSound(el.correctSound);
     burstConfetti();
     state.answered++;
-    if (state.firstTry) state.correctFirstTry++;
+    if (state.firstTry) {
+        state.correctFirstTry++;
+        state.starsEarned++;   // treino do mouse fica de fora da regra "2 acertos = 1 estrela" (F2-17)
+        state.curStreak++;
+        state.bestStreak = Math.max(state.bestStreak, state.curStreak);
+    } else {
+        state.curStreak = 0;
+    }
     updateHud();
     schedule(nextStep, ADVANCE_MS + 500);
 }
@@ -1093,7 +1118,24 @@ function revealCorrect(piece) {
 
     el.options.querySelectorAll('.option').forEach((b) => { b.disabled = true; b.classList.add('is-locked'); });
     state.answered++;
-    if (state.firstTry) state.correctFirstTry++;
+
+    if (state.firstTry) {
+        state.correctFirstTry++;
+        state.curStreak++;
+        state.bestStreak = Math.max(state.bestStreak, state.curStreak);
+        if (!state.reviewMode) {
+            // F2-17: no nível Difícil, cada 2 acertos de primeira valem 1 estrela.
+            if (state.difficulty === 'dificil') {
+                if (state.correctFirstTry % 2 === 0) state.starsEarned++;
+            } else {
+                state.starsEarned++;
+            }
+        }
+    } else {
+        state.curStreak = 0;
+        // F2-16: errou ao menos uma vez — guarda pra oferecer revisão opcional no resultado.
+        if (!state.reviewMode) state.missed.push(state.question);
+    }
     updateHud();
 
     schedule(nextStep, ADVANCE_MS); // busy volta a false em renderQuestion
@@ -1124,15 +1166,102 @@ function revealWrong(sourceEl, piece) {
 }
 
 function nextStep() {
+    if (state.reviewMode) { nextReviewQuestion(); return; }
     if (state.answered >= state.totalQuestions) showResults();
     else newQuestion();
+}
+
+// F2-16: revisão opcional do que errou. Reaproveita as perguntas exatas que
+// já foram geradas (cada uma já é autossuficiente: prompt/correta/opções),
+// então não precisa gerar de novo — só tocar de novo na mesma ordem.
+function startReview() {
+    state.reviewQueue = state.missed.slice();
+    state.missed = [];
+    state.reviewMode = true;
+    state.answered = 0;
+    state.totalQuestions = state.reviewQueue.length;
+    el.hudLabel.textContent = 'Revisão';
+    cancelPending();
+    showScreen('game');
+    updateHud();
+    nextReviewQuestion();
+}
+
+function nextReviewQuestion() {
+    if (state.reviewQueue.length === 0) { showReviewComplete(); return; }
+    const q = state.reviewQueue.shift();
+    state.question = q;
+    state.firstTry = true;
+    renderQuestion(q);
+}
+
+// Tela simples ao final da revisão — não mexe em estrelas/partidas do perfil,
+// porque a revisão não vale ponto (combinado com o Pedro).
+function showReviewComplete() {
+    state.reviewMode = false;
+    cancelPending();
+    stopSpeech();
+    el.resultsEmoji.textContent = '👍';
+    el.resultsTitle.textContent = 'Revisão concluída!';
+    el.resultsScore.innerHTML = 'Você revisou o que tinha errado. Continue praticando!';
+    el.resultsStars.textContent = '';
+    el.resultsAchievement.hidden = true;
+    el.reviewBtn.hidden = true;
+    if (state.profile) {
+        el.resultsName.textContent = state.profile.name;
+        el.resultsProfileStars.textContent = state.profile.stars || 0;
+    }
+    state.resultSpeech = 'Revisão concluída! Você revisou o que tinha errado. Continue praticando!';
+    showScreen('results');
 }
 
 function updateHud() {
     el.qCurrent.textContent = Math.min(state.answered + 1, state.totalQuestions);
     el.qTotal.textContent = state.totalQuestions;
-    el.qScore.textContent = state.correctFirstTry;
+    el.qScore.textContent = state.starsEarned;
     el.progressBar.style.width = ((state.answered / state.totalQuestions) * 100) + '%';
+}
+
+/* -----------------------------------------------------------
+   10b) CONQUISTAS (F2-15)
+   Checadas ao final de cada rodada (nunca durante a revisão opcional).
+   Guardadas em profile.achievements — lista de ids já desbloqueados,
+   pra não repetir o aviso depois de desbloqueada uma vez.
+----------------------------------------------------------- */
+
+const ACHIEVEMENTS = [
+    { id: 'primeira_partida',   label: 'Primeira Partida', emoji: '🎉', check: (p) => (p.games || 0) >= 1 },
+    { id: 'cinco_partidas',     label: 'Cinco Partidas',   emoji: '🎮', check: (p) => (p.games || 0) >= 5 },
+    { id: 'vinte_partidas',     label: 'Vinte Partidas',   emoji: '🕹️', check: (p) => (p.games || 0) >= 20 },
+    { id: 'cinquenta_estrelas', label: '50 Estrelas',      emoji: '⭐', check: (p) => (p.stars || 0) >= 50 },
+    { id: 'cem_estrelas',       label: '100 Estrelas',     emoji: '🌟', check: (p) => (p.stars || 0) >= 100 },
+    { id: 'sequencia_10',       label: 'Sequência de 10',  emoji: '🔥', check: (p, s) => (s.bestStreak || 0) >= 10 },
+    { id: 'tres_dias',          label: '3 Dias Seguidos',  emoji: '📅', check: (p) => consecutiveDays(p) >= 3 },
+];
+
+// Quantos dias seguidos (contando hoje) o perfil tem tempo de jogo registrado — usa o
+// cronômetro do F2-27 (profile.playtime.days), sem precisar de nenhum dado novo.
+function consecutiveDays(profile) {
+    const days = (profile.playtime && profile.playtime.days) || {};
+    let streak = 0;
+    for (let i = 0; ; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        if (days[dateKey(d)] > 0) streak++; else break;
+    }
+    return streak;
+}
+
+function checkAchievements(profile, sessionStats) {
+    profile.achievements = profile.achievements || [];
+    const unlocked = [];
+    ACHIEVEMENTS.forEach((a) => {
+        if (!profile.achievements.includes(a.id) && a.check(profile, sessionStats)) {
+            profile.achievements.push(a.id);
+            unlocked.push(a);
+        }
+    });
+    return unlocked;
 }
 
 /* -----------------------------------------------------------
@@ -1144,7 +1273,8 @@ function showResults() {
     stopSpeech();
 
     const answered = state.answered;
-    const correct = state.correctFirstTry;
+    const correct = state.correctFirstTry;   // quantas acertou de primeira (mensagem)
+    const stars = state.starsEarned;         // quantas estrelas isso realmente valeu (F2-17)
     const pct = answered > 0 ? correct / answered : 0;
 
     let emoji, title, phrase;
@@ -1160,17 +1290,23 @@ function showResults() {
     el.resultsScore.innerHTML = mouse
         ? `Você fez <b>${correct}</b> de <b>${answered}</b> rodadas sem errar!`
         : `Você acertou de primeira <b>${correct}</b> de <b>${answered}</b>!`;
-    el.resultsStars.textContent = correct <= 12 ? ('⭐'.repeat(correct) || '—') : `⭐ x ${correct}`;
+    el.resultsStars.textContent = stars <= 12 ? ('⭐'.repeat(stars) || '—') : `⭐ x ${stars}`;
 
     // Texto do botão "ouvir resultado" (para quem ainda não lê).
     let speech = `${title} ` + (mouse
         ? `Você fez ${correct} de ${answered} rodadas sem errar. `
         : `Você acertou de primeira ${correct} de ${answered}. `);
 
-    // Acumula estrelas no perfil.
+    // F2-16: oferece revisar o que errou, só se algo foi errado (não vale estrela extra).
+    el.reviewBtn.hidden = state.missed.length === 0;
+    el.reviewBtn.textContent = `Revisar o que errei (${state.missed.length}) 🔁`;
+
+    // Acumula estrelas no perfil e confere conquistas novas (F2-15).
+    let unlocked = [];
     if (state.profile) {
-        state.profile.stars = (state.profile.stars || 0) + correct;
+        state.profile.stars = (state.profile.stars || 0) + stars;
         state.profile.games = (state.profile.games || 0) + 1;
+        unlocked = checkAchievements(state.profile, { bestStreak: state.bestStreak });
         saveProfiles(profiles);
         updateProfileBar();
         el.resultsName.textContent = state.profile.name;
@@ -1180,6 +1316,15 @@ function showResults() {
         speech = `${state.profile.name}! ` + speech
             + `Agora você tem ${total} ${total === 1 ? 'estrela' : 'estrelas'} no total. `;
     }
+
+    if (unlocked.length) {
+        el.resultsAchievement.hidden = false;
+        el.resultsAchievement.innerHTML = unlocked.map((a) => `${a.emoji} <b>${a.label}</b>`).join(' · ');
+        speech += `Você desbloqueou uma conquista nova: ${unlocked.map((a) => a.label).join(', ')}! `;
+    } else {
+        el.resultsAchievement.hidden = true;
+    }
+
     state.resultSpeech = speech + phrase;
 
     showScreen('results');
@@ -1260,7 +1405,7 @@ function getCurrentId() { try { return localStorage.getItem(CUR_KEY); } catch (_
 function setCurrentId(id) { try { localStorage.setItem(CUR_KEY, id); } catch (_) {} }
 
 let profiles = loadProfiles();
-let pendingAvatar = AVATARS[0];
+let pendingAvatar = AVATARS[0].glyph;
 
 /* -----------------------------------------------------------
    13b) TEMPO DE JOGO (por perfil — para o futuro painel dos pais)
@@ -1277,10 +1422,10 @@ const PLAYTIME_FLUSH_MS = 15000;   // grava no localStorage a cada 15s (perde no
 let playtimeTickHandle = null;
 let playtimeLastMark = 0;   // performance.now() da última vez que o tempo foi somado
 
-function todayKey() {
-    const d = new Date();
+function dateKey(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+function todayKey() { return dateKey(new Date()); }
 
 function addPlaytime(ms) {
     if (!state.profile || ms <= 0) return;
@@ -1368,26 +1513,54 @@ function renderProfiles() {
 
 function openCreate() {
     el.newName.value = '';
-    pendingAvatar = AVATARS[0];
+    pendingAvatar = AVATARS[0].glyph;
     renderAvatarPicker();
     el.profileCreate.hidden = false;
     el.profileCreate.scrollIntoView({ behavior: 'smooth', block: 'center' });
     el.newName.focus();
 }
 
+// F2-14: perfil novo começa com 0 estrelas, então só os avatares "unlockAt: 0" ficam
+// clicáveis aqui; os outros aparecem com cadeado, só pra mostrar que tem mais pra destravar.
 function renderAvatarPicker() {
     el.avatarPicker.innerHTML = '';
     AVATARS.forEach((a) => {
+        const unlocked = a.unlockAt === 0;
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'avatar-opt' + (a === pendingAvatar ? ' is-selected' : '');
-        b.textContent = a;
-        b.addEventListener('click', () => {
-            pendingAvatar = a;
-            renderAvatarPicker();
-        });
+        b.className = 'avatar-opt' + (a.glyph === pendingAvatar ? ' is-selected' : '') + (unlocked ? '' : ' is-locked');
+        b.disabled = !unlocked;
+        b.innerHTML = unlocked ? a.glyph : `<span class="avatar-lock">🔒</span><span class="avatar-lock-req">${a.unlockAt}⭐</span>`;
+        if (unlocked) {
+            b.addEventListener('click', () => { pendingAvatar = a.glyph; renderAvatarPicker(); });
+        }
         el.avatarPicker.appendChild(b);
     });
+}
+
+// F2-14: clicar no avatar da barra de perfil abre a troca (avatares já destravados por estrelas).
+function openAvatarSwitcher() {
+    if (!state.profile) return;
+    const stars = state.profile.stars || 0;
+    el.avatarSwitcherGrid.innerHTML = '';
+    AVATARS.forEach((a) => {
+        const unlocked = stars >= a.unlockAt;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'avatar-opt' + (a.glyph === state.profile.avatar ? ' is-selected' : '') + (unlocked ? '' : ' is-locked');
+        b.disabled = !unlocked;
+        b.innerHTML = unlocked ? a.glyph : `<span class="avatar-lock">🔒</span><span class="avatar-lock-req">${a.unlockAt}⭐</span>`;
+        if (unlocked) {
+            b.addEventListener('click', () => {
+                state.profile.avatar = a.glyph;
+                saveProfiles(profiles);
+                updateProfileBar();
+                el.avatarSwitcher.hidden = true;
+            });
+        }
+        el.avatarSwitcherGrid.appendChild(b);
+    });
+    el.avatarSwitcher.hidden = false;
 }
 
 function createProfile() {
@@ -1588,6 +1761,12 @@ function startGame() {
     stopRound();
     state.answered = 0;
     state.correctFirstTry = 0;
+    state.starsEarned = 0;
+    state.curStreak = 0;
+    state.bestStreak = 0;
+    state.missed = [];
+    state.reviewMode = false;
+    state.reviewQueue = [];
     lastKey = null;
     busy = false;
     el.hudLabel.textContent = state.category === 'mouse' ? 'Rodada' : 'Pergunta';
@@ -1609,9 +1788,12 @@ el.repeatBtn.addEventListener('click', () => {
     if (state.question) speak(state.question.prompt(state.mode).speak);
 });
 el.resultsListen.addEventListener('click', () => speak(state.resultSpeech));
+el.reviewBtn.addEventListener('click', startReview);
 el.playAgainBtn.addEventListener('click', startGame);
 el.menuBtn.addEventListener('click', () => showScreen('menu'));
 el.switchProfile.addEventListener('click', () => { stopPlaytimeTracking(); renderProfiles(); showScreen('profiles'); });
+el.pbAvatar.addEventListener('click', openAvatarSwitcher);
+el.avatarSwitcherClose.addEventListener('click', () => { el.avatarSwitcher.hidden = true; });
 el.configBackBtn.addEventListener('click', () => showScreen('menu'));
 
 el.createConfirm.addEventListener('click', createProfile);

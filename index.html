@@ -164,8 +164,12 @@
                 <h2 id="results-title" class="results-title">Muito bem!</h2>
                 <p id="results-score" class="results-score"></p>
                 <div id="results-stars" class="results-stars"></div>
+                <!-- Só aparece quando alguma conquista nova é desbloqueada nesta rodada -->
+                <div id="results-achievement" class="achievement-banner" hidden></div>
                 <button id="results-listen" class="listen-pill" aria-label="Ouvir o resultado">🔊 Ouvir meu resultado</button>
                 <p class="results-total">Total de estrelas de <b><span id="results-name">você</span></b>: <b><span id="results-profile-stars">0</span></b> ⭐</p>
+                <!-- Só aparece quando errou alguma pergunta nesta rodada; revisar não vale estrela nova -->
+                <button id="review-btn" class="ghost-btn ghost-btn--dark" hidden>Revisar o que errei 🔁</button>
                 <div class="results-actions">
                     <button id="play-again-btn" class="big-btn">Jogar de novo 🔁</button>
                     <button id="menu-btn" class="ghost-btn ghost-btn--dark">Voltar ao início</button>
@@ -174,6 +178,15 @@
         </section>
 
     </main>
+
+    <!-- Trocar de avatar (F2-14): abre ao clicar no avatar da barra de perfil -->
+    <div id="avatar-switcher" class="avatar-switcher-overlay" hidden>
+        <div class="avatar-switcher-card panel">
+            <h2 class="panel-title">Escolha seu avatar</h2>
+            <div id="avatar-switcher-grid" class="avatar-picker"></div>
+            <button id="avatar-switcher-close" class="ghost-btn ghost-btn--dark">Fechar</button>
+        </div>
+    </div>
 
     <!-- Camada de comemoração (confete) -->
     <canvas id="confetti" class="confetti-canvas" aria-hidden="true"></canvas>
