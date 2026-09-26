@@ -71,6 +71,8 @@
 
             <!-- F4-04: discreto, só pra identificar a versão instalada (suporte/depuração) -->
             <p id="app-footer" class="app-footer"></p>
+            <!-- F2-18: painel dos pais — fora do fluxo das crianças, de propósito bem discreto -->
+            <button id="parent-panel-link" class="app-footer-link">👨‍👩‍👧 Painel dos pais</button>
         </section>
 
         <!-- Barra do perfil: aparece nas telas de menu e de configuração do jogo (JS liga/desliga) -->
@@ -228,7 +230,30 @@
             </div>
         </section>
 
+        <!-- ======================= TELA: PAINEL DOS PAIS (F2-18) ======================= -->
+        <section id="screen-parent" class="screen">
+            <div class="config-header">
+                <button id="parent-back-btn" class="chip-btn">← Voltar</button>
+                <h1 class="config-title">👨‍👩‍👧 Painel dos pais</h1>
+            </div>
+            <div id="parent-dashboard" class="parent-dashboard"></div>
+        </section>
+
     </main>
+
+    <!-- F2-18: um desafio simples pra confirmar que é um adulto, antes de abrir o painel -->
+    <div id="parent-gate" class="avatar-switcher-overlay" hidden>
+        <div class="avatar-switcher-card panel">
+            <h2 class="panel-title">Área dos pais</h2>
+            <p id="parent-gate-question" class="parent-gate-question">Quanto é 7 × 8?</p>
+            <input id="parent-gate-input" class="name-input" type="number" inputmode="numeric" placeholder="Resposta">
+            <p id="parent-gate-error" class="parent-gate-error" hidden>Não foi essa. Tenta de novo.</p>
+            <div class="create-actions">
+                <button id="parent-gate-confirm" class="big-btn">Entrar</button>
+                <button id="parent-gate-cancel" class="ghost-btn ghost-btn--dark">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Trocar de avatar (F2-14): abre ao clicar no avatar da barra de perfil -->
     <div id="avatar-switcher" class="avatar-switcher-overlay" hidden>

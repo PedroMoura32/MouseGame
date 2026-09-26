@@ -21,12 +21,6 @@ Atualizado em: 26/09/2026
 - Depende de: F2-01, F2-02, F2-03 e F2-04 (os que forem aprovados)
 - Nota: só esta versão precisa estar realmente pronta; o teste fechado pode rodar antes, com versões intermediárias
 
-### F2-18 · Painel dos pais com histórico de evolução
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Média
-- Pronto quando: existe uma tela separada (fora do fluxo das crianças) mostrando, por perfil, em que ela vai bem/mal e como isso mudou ao longo do tempo, não só o total de hoje
-- Nota: depende de guardar histórico de partidas no localStorage, não só o total acumulado
-
 ### F2-28 · Limite de tempo por sessão/dia
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -124,6 +118,13 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-18 · Painel dos pais com histórico de evolução
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: existe uma tela separada (fora do fluxo das crianças) mostrando, por perfil, em que ela vai bem/mal e como isso mudou ao longo do tempo, não só o total de hoje
+- Nota: depende de guardar histórico de partidas no localStorage, não só o total acumulado
+- Nota: implementado. Link discreto "Painel dos pais" no rodapé da tela de perfis, protegido por um desafio simples (uma multiplicação tipo "quanto é 7×8?" — não é senha de verdade, o app não tem servidor pra guardar uma; só um filtro pra criança pequena não entrar sem querer); uma vez acertado, não pede de novo na mesma sessão. Cada perfil ganhou `profile.history` (data/categoria/nível/acertos/estrelas de cada rodada, guardado a partir de agora, com limite de 300 entradas), alimentando: tempo de jogo (hoje/7 dias/total, reaproveitando o F2-27), gráfico de estrelas dos últimos 14 dias, desempenho por categoria (ordenado do pior pro melhor, pra destacar onde ela precisa de mais atenção) e a lista de conquistas do F2-15 (que antes não tinha nenhuma tela própria pra ver, só o aviso na hora de desbloquear). Testado: portão bloqueia resposta errada e gera desafio novo, libera com a resposta certa, não pede de novo na mesma sessão, uma rodada de verdade jogada pelo menu popula o histórico corretamente e o painel reflete na hora (categoria, estrelas do dia, conquista desbloqueada); visual claro/escuro/mobile com 2 perfis
 
 ### F2-33 · Novo jogo: Leiturinha (historinhas ilustradas)
 - Fase: 2 · Ideias e melhorias
