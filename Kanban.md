@@ -46,12 +46,6 @@ Atualizado em: 26/09/2026
 - Pronto quando: os sons de acerto/erro do jogo clássico (sounds/correct.mp3, sounds/wrong.mp3) são trocados por algo que o Pedro prefira
 - Nota: pedido do Pedro, ainda sem direção definida ("queria testar algo diferente") — falta saber se ele tem arquivos de som em mente, se quer que eu gere sons sintéticos (como já existe no Treino do mouse, com Web Audio API, sem depender de arquivo) ou só uma variação do estilo atual; confirmar direção antes de implementar
 
-### F2-24 · Completar a palavra arrastando a letra que falta
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: mostra uma palavra simples com 1 vogal faltando (+ botão para ouvir a palavra), e a criança arrasta a vogal certa dentre as opções para o espaço vazio
-- Nota: começar só com vogais faltando, como o próprio Pedro sugeriu; fazer depois do F2-09 (Letra inicial) validado com as filhas, para calibrar a dificuldade antes de partir para esta
-
 ### F2-25 · Traçar letras e números com o dedo/mouse
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -123,6 +117,13 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-24 · Completar a palavra arrastando a letra que falta
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: mostra uma palavra simples com 1 vogal faltando (+ botão para ouvir a palavra), e a criança arrasta a vogal certa dentre as opções para o espaço vazio
+- Nota: começar só com vogais faltando, como o próprio Pedro sugeriu; fazer depois do F2-09 (Letra inicial) validado com as filhas, para calibrar a dificuldade antes de partir para esta
+- Nota: implementado como nova categoria "Completar Palavra" reaproveitando a engine clássica de perguntas (igual Leiturinha) — não precisou de componente novo, porque o modo arrastar já existia pronto pra Formas/Cores/Animais; só entrou no mesmo grupo, junto com a opção de clicar também (mesmo padrão de escolha "Como jogar?" das outras 3 categorias que arrastam). Banco de 25 palavras simples (com emoji + "ouvir a palavra" no botão 🔊 já existente); a dificuldade muda o tamanho da palavra (3-5/5-7/6+ letras), não a quantidade de opções — são sempre as 5 vogais. Fica de fora do "Misturar Tudo", mesmo critério do Leiturinha/Inglês/Matemática. Testado: 900 amostras (300×3 níveis) sem opções repetidas e com a vogal certa sempre batendo com a posição na palavra; fluxo completo de acerto/erro/resultado nos dois modos (clicar e arrastar de verdade, simulando o mouse); visual claro/escuro/mobile sem rolagem lateral
 
 ### F2-23 · Divisão com "pausinhos" nas caixinhas
 - Fase: 2 · Ideias e melhorias

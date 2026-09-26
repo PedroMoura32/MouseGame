@@ -740,6 +740,24 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
     padding: 0 0.1em;
 }
 
+/* F2-24 "Completar a palavra": letras grandes com uma lacuna tracejada no lugar da vogal */
+.completar-word {
+    display: inline-flex;
+    gap: 0.06em;
+    font-size: clamp(1.8rem, 7vw, 3.2rem);
+    font-weight: 800;
+    color: var(--plum);
+    vertical-align: middle;
+    line-height: 1;
+}
+.completar-letter { display: inline-block; }
+.completar-blank {
+    display: inline-block;
+    min-width: 0.85em;
+    color: var(--accent);
+    border-bottom: 0.1em dashed var(--accent);
+}
+
 /* F2-08 "Contar com emojis": grupo de figuras acima da pergunta */
 .count-cluster {
     display: flex;

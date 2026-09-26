@@ -219,6 +219,7 @@ const CATEGORY_META = [
     { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…',      gameTitle: 'Jogo de Inglês' },
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷',              gameTitle: 'Jogo de Matemática' },
     { id: 'leiturinha', label: 'Leiturinha',       emoji: '📖', sub: 'historinhas curtas',      gameTitle: 'Jogo da Leiturinha' },
+    { id: 'completar',  label: 'Completar Palavra', emoji: '🔤', sub: 'arraste a vogal',        gameTitle: 'Jogo de Completar a Palavra' },
     { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…',   gameTitle: 'Treino do Mouse' },
     { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade',       gameTitle: 'Pintura Livre' },
     { id: 'mimica',     label: 'Mímica',           emoji: '🎭', sub: 'sorteia e mimica',        gameTitle: 'Jogo da Mímica' },
@@ -288,7 +289,7 @@ const MODES = [
 ];
 
 // O modo arrastar só existe para estes jogos (nos outros, só clicar).
-const DRAG_CATEGORIES = ['formas', 'cores', 'animais'];
+const DRAG_CATEGORIES = ['formas', 'cores', 'animais', 'completar'];
 
 // Quantas perguntas (jogos de quiz) ou rodadas (treino do mouse — cada rodada é mais longa).
 const COUNTS = { quiz: [5, 10, 20, 30], mouse: [3, 5, 8, 10] };
@@ -956,6 +957,53 @@ function leiturinhaQuestion(count) {
     };
 }
 
+/* ---------- completar a palavra (F2-24) ---------- */
+
+// Banco de palavras simples (maiúsculas, sem acento pra simplificar o "achar a vogal").
+// A dificuldade muda o tamanho da palavra, não a quantidade de opções (as vogais são
+// sempre as 5, faz mais sentido do que variar 3/4/6 aqui).
+const PALAVRA_BANK = [
+    { word: 'LUA', emoji: '🌙' }, { word: 'OVO', emoji: '🥚' }, { word: 'UVA', emoji: '🍇' },
+    { word: 'GATO', emoji: '🐱' }, { word: 'PATO', emoji: '🦆' }, { word: 'SAPO', emoji: '🐸' },
+    { word: 'URSO', emoji: '🐻' }, { word: 'VACA', emoji: '🐮' }, { word: 'BOLA', emoji: '⚽' },
+    { word: 'CASA', emoji: '🏠' }, { word: 'MESA', emoji: '🪑' }, { word: 'FLOR', emoji: '🌸' },
+    { word: 'GALO', emoji: '🐓' }, { word: 'PEIXE', emoji: '🐟' }, { word: 'LIVRO', emoji: '📖' },
+    { word: 'COELHO', emoji: '🐰' }, { word: 'ABELHA', emoji: '🐝' }, { word: 'BANANA', emoji: '🍌' },
+    { word: 'PIPOCA', emoji: '🍿' }, { word: 'CAVALO', emoji: '🐴' }, { word: 'GALINHA', emoji: '🐔' },
+    { word: 'MORANGO', emoji: '🍓' }, { word: 'FOGUETE', emoji: '🚀' }, { word: 'SORVETE', emoji: '🍦' },
+    { word: 'CACHORRO', emoji: '🐶' },
+];
+const VOGAIS = ['A', 'E', 'I', 'O', 'U'];
+
+function palavraPoolForDifficulty(difficulty) {
+    const lvl = { facil: 0, medio: 1, dificil: 2 }[difficulty] || 0;
+    const [min, max] = [[3, 5], [5, 7], [6, 99]][lvl];
+    const pool = PALAVRA_BANK.filter((it) => it.word.length >= min && it.word.length <= max);
+    return pool.length ? pool : PALAVRA_BANK;
+}
+
+function completarPalavraQuestion() {
+    const item = randomFrom(palavraPoolForDifficulty(state.difficulty));
+    const vowelIdx = [...item.word].reduce((acc, ch, i) => (VOGAIS.includes(ch) ? [...acc, i] : acc), []);
+    const blankIdx = randomFrom(vowelIdx);
+    const correctLetter = item.word[blankIdx];
+    const letters = [...item.word].map((ch, i) => i === blankIdx
+        ? `<span class="completar-blank">?</span>`
+        : `<span class="completar-letter">${ch}</span>`).join('');
+
+    const toOpt = (l) => ({ id: 'vogal-' + l, name: l, kind: 'char', glyph: l });
+    const correct = toOpt(correctLetter);
+    const options = shuffle(VOGAIS.map(toOpt));   // sempre as 5 vogais, não depende do nível
+
+    return {
+        key: `completar:${item.word}:${blankIdx}`, correct, options,
+        prompt: () => ({
+            html: `<span class="glyph-hero">${item.emoji}</span><span class="completar-word">${letters}</span>`,
+            speak: item.word,   // "ouvir a palavra" (botão 🔊 já existente) fala a palavra inteira, como pista
+        }),
+    };
+}
+
 /* ---------- escolhe o jogo ---------- */
 
 function buildQuestion(count) {
@@ -963,6 +1011,7 @@ function buildQuestion(count) {
     if (state.category === 'matematica') return mathQuestion(count);
     if (state.category === 'numletras') return numLetrasQuestion(count);
     if (state.category === 'leiturinha') return leiturinhaQuestion(count);
+    if (state.category === 'completar') return completarPalavraQuestion();
     const cat = state.category === 'misturar'
         ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
         : state.category;
