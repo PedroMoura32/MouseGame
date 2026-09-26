@@ -59,13 +59,6 @@ Atualizado em: 26/09/2026
 - Nota: ideia do Pedro; é bem maior do que parece — hoje quase todo texto do app (menus, botões, instruções de cada jogo, mensagens de acerto/erro) está em português "cru" espalhado pelo código, não centralizado num dicionário de traduções
 - Nota: falta decidir o escopo antes de estimar esforço: só a interface fixa (menus/botões) ou também o conteúdo pedagógico (Formas/Cores/Animais/Matemática etc.)? E o jogo "Inglês" (que já mistura os dois idiomas de propósito) continua igual nos dois modos?
 
-### F2-32 · Novo jogo: "Atrás dos quadrados" (descobrir a imagem escondida)
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: uma imagem fica escondida atrás de uma grade de quadrados numerados/com letras (linhas e colunas), a criança vai clicando pra revelar quadrados, e existe algum jeito de confirmar o acerto do que é a imagem
-- Nota: ideia do Pedro; ele mesmo já sinalizou que não sabe ainda como pontuar/confirmar o acerto — cogitou uma caixa de texto pra digitar a resposta, mas isso pede teclado num app pensado pra pré-leitoras
-- Nota: alternativa a avaliar: opções clicáveis (múltipla escolha) em vez de digitar, mantendo o padrão do resto do app — decidir a mecânica de acerto com o Pedro antes de estimar esforço
-
 ### F2-33 · Novo jogo: Leiturinha (historinhas ilustradas)
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -138,6 +131,14 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-32 · Novo jogo: "Atrás dos quadrados" (descobrir a imagem escondida)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: uma imagem fica escondida atrás de uma grade de quadrados numerados/com letras (linhas e colunas), a criança vai clicando pra revelar quadrados, e existe algum jeito de confirmar o acerto do que é a imagem
+- Nota: ideia do Pedro; ele mesmo já sinalizou que não sabe ainda como pontuar/confirmar o acerto — cogitou uma caixa de texto pra digitar a resposta, mas isso pede teclado num app pensado pra pré-leitoras
+- Nota: alternativa a avaliar: opções clicáveis (múltipla escolha) em vez de digitar, mantendo o padrão do resto do app — decidir a mecânica de acerto com o Pedro antes de estimar esforço
+- Nota: confirmado com o Pedro — múltipla escolha (não caixa de texto). Implementado como novo minijogo "Atrás dos quadros" dentro do Treino do mouse (mesmo padrão do Memória), reaproveitando de graça toda a engrenagem de rodadas/estrelas/config/HUD que já existia. Um emoji grande fica escondido atrás de uma grade (colunas com letra + linha numérica, tipo A1/B2); clicar revela o quadrado. Embaixo, opções de múltipla escolha (3/4/6 conforme o nível); errar marca a opção como errada, dá uma dica de brinde revelando mais 1 quadrado sozinho, e deixa tentar de novo; acertar revela tudo de uma vez e fecha a rodada (1 estrela, como todo o Treino do mouse). Testado nos 3 níveis (3×3/3 opções, 4×4/4 opções, 5×5/6 opções), fluxo de erro com dica extra, rodada completa até o resultado com estrelas corretas, visual claro/escuro/mobile sem rolagem lateral
 
 ### F2-35 · Botão de leitura devagar no jogo de Inglês
 - Fase: 2 · Ideias e melhorias

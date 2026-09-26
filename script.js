@@ -266,6 +266,7 @@ const SUB_OPTIONS = {
             { id: 'rolar',    label: 'Rolar',    emoji: '📜', sub: 'a rodinha' },
             { id: 'caminho',  label: 'Caminho',  emoji: '🐭', sub: 'arrastar' },
             { id: 'memoria',  label: 'Memória',  emoji: '🃏', sub: 'ache os pares' },
+            { id: 'quadros',  label: 'Atrás dos quadros', emoji: '🔍', sub: 'descubra a imagem' },
             { id: 'misturar', label: 'Misturar', emoji: '🎲', sub: 'todos' },
         ],
     },

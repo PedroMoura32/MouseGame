@@ -18,6 +18,7 @@
      rolar    -> usar a rodinha do mouse (rolar a página)
      caminho  -> arrastar sem sair do trilho (controle fino)
      memoria  -> cliques + memória visual (achar os pares)
+     quadros  -> cliques + adivinhação (descobrir a imagem escondida)
    ============================================================ */
 
 'use strict';
@@ -592,11 +593,104 @@ const MINIGAMES = (() => {
         return { prompt, start, destroy };
     }
 
+    /* ============================================================
+       6) ATRÁS DOS QUADROS — descobrir a imagem escondida (F2-32)
+       Clica nos quadrados (linha numérica + coluna com letra) pra
+       revelar aos poucos o que está por trás, e adivinha entre as
+       opções. Errar uma opção revela mais 1 quadrado de brinde.
+       ============================================================ */
+
+    const QUADROS_BANK = [
+        { e: '🐘', n: 'elefante' }, { e: '🌈', n: 'arco-íris' }, { e: '🍕', n: 'pizza' },
+        { e: '🚗', n: 'carro' }, { e: '🏠', n: 'casa' }, { e: '🌻', n: 'girassol' },
+        { e: '🦋', n: 'borboleta' }, { e: '🐢', n: 'tartaruga' }, { e: '🎈', n: 'balão' },
+        { e: '🌙', n: 'lua' }, { e: '⭐', n: 'estrela' }, { e: '🍎', n: 'maçã' },
+        { e: '🐬', n: 'golfinho' }, { e: '🦁', n: 'leão' }, { e: '🐝', n: 'abelha' },
+        { e: '🍓', n: 'morango' }, { e: '🐼', n: 'panda' }, { e: '🚀', n: 'foguete' },
+    ];
+    const QUADROS_LETTERS = 'ABCDE';
+
+    function quadros(api) {
+        const cfg = [{ cols: 3, rows: 3, opts: 3 }, { cols: 4, rows: 4, opts: 4 }, { cols: 5, rows: 5, opts: 6 }][api.level];
+        const prompt = {
+            html: 'Clique nos quadrados e descubra o que está escondido! 🔍',
+            speak: 'Clique nos quadrados e descubra o que está escondido',
+        };
+        let answered = false;
+
+        function start() {
+            destroy();
+            api.field.innerHTML = '';
+            const { w, h } = api.size();
+
+            const target = pick(QUADROS_BANK);
+            const options = shuffle([target, ...sample(QUADROS_BANK.filter((x) => x !== target), cfg.opts - 1)]);
+
+            // envelope que centraliza tudo (o tabuleiro em cima, as opções embaixo)
+            const wrap = el('div', 'mg-quadros-wrap', api.field);
+
+            // tabuleiro quadrado, deixando uma faixa embaixo pras opções de resposta
+            const optsH = Math.max(56, h * 0.24);
+            const side = clamp(Math.min(w, h - optsH - 14), 120, 520);
+            const board = el('div', 'mg-quadros-board', wrap);
+            board.style.cssText = `width:${side}px; height:${side}px;`;
+
+            const pic = el('div', 'mg-quadros-pic', board);
+            pic.textContent = target.e;
+            pic.style.fontSize = (side * 0.78) + 'px';
+
+            const grid = el('div', 'mg-quadros-grid', board);
+            grid.style.cssText = `grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr);`;
+            const cells = [];
+            const openCell = (cell) => cell.classList.add('is-open');
+            for (let r = 0; r < cfg.rows; r++) {
+                for (let c = 0; c < cfg.cols; c++) {
+                    const cell = el('button', 'mg-quadros-cell', grid);
+                    cell.type = 'button';
+                    cell.textContent = QUADROS_LETTERS[c] + (r + 1);
+                    cell.addEventListener('pointerdown', (e) => { e.preventDefault(); openCell(cell); });
+                    cells.push(cell);
+                }
+            }
+
+            const optsWrap = el('div', 'mg-quadros-opts', wrap);
+            options.forEach((opt) => {
+                const b = el('button', 'mg-quadros-opt', optsWrap);
+                b.type = 'button';
+                b.innerHTML = `<span class="mg-quadros-opt-emoji">${opt.e}</span><span>${opt.n}</span>`;
+                b.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if (answered || b.disabled) return;
+                    if (opt === target) {
+                        answered = true;
+                        cells.forEach(openCell);
+                        b.classList.add('is-correct');
+                        blipSfx(700);
+                        api.done();
+                    } else {
+                        b.disabled = true;
+                        b.classList.add('is-wrong');
+                        const closed = cells.filter((c) => !c.classList.contains('is-open'));
+                        if (closed.length) openCell(pick(closed));   // uma dica de brinde a cada erro
+                        api.mistake(`Não é ${opt.n}! Tenta de novo 🔎`);
+                    }
+                });
+            });
+
+            api.hint('Clique nos quadrados pra revelar a imagem 🔍');
+        }
+
+        function destroy() { answered = false; api.field.innerHTML = ''; }
+
+        return { prompt, start, destroy };
+    }
+
     return {
         baloes:  { create: baloes },
         alvos:   { create: alvos },
         rolar:   { create: rolar },
         caminho: { create: caminho },
         memoria: { create: memoria },
+        quadros: { create: quadros },
     };
 })();

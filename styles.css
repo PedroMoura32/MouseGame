@@ -1108,6 +1108,61 @@ body.is-mouse .feedback {
 .mg-card.is-matched .mg-card-face { box-shadow: 0 0 0 3px var(--correct); }
 .mg-card.is-matched { cursor: default; }
 
+/* F2-32: Atrás dos quadros — imagem escondida atrás de uma grade clicável */
+.mg-quadros-wrap {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px;
+}
+.mg-quadros-board { position: relative; }
+.mg-quadros-pic {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+}
+.mg-quadros-grid {
+    position: absolute; inset: 0;
+    display: grid;
+    gap: 4px;
+}
+.mg-quadros-cell {
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--pink, #f47cb5), var(--lilac, #b596ee));
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, opacity 0.25s ease;
+}
+.mg-quadros-cell:hover { transform: scale(0.96); }
+.mg-quadros-cell.is-open { background: transparent; box-shadow: none; opacity: 0; pointer-events: none; }
+.mg-quadros-opts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+}
+.mg-quadros-opt {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    border: 3px solid #f4ecf6;
+    background: #fbf6fc;
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #6d4a6a;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+}
+.mg-quadros-opt:hover:not(:disabled) { transform: translateY(-3px); }
+.mg-quadros-opt-emoji { font-size: 1.6rem; line-height: 1; }
+.mg-quadros-opt.is-correct { border-color: #087f5b; background: #e7fbf4; }
+.mg-quadros-opt.is-wrong { border-color: #d6336c; background: #ffeef4; opacity: 0.6; }
+.mg-quadros-opt:disabled { cursor: default; }
+
 /* ---------- Responsividade ---------- */
 @media (max-width: 520px) {
     .choice-grid--4 { grid-template-columns: repeat(2, 1fr); }
