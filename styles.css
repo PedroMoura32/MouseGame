@@ -437,12 +437,13 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
 /* F2-01: discreto de propósito — é uma ferramenta pra pais, não faz parte do fluxo da criança */
 .profiles-backup {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     margin-bottom: 22px;
     opacity: 0.8;
 }
-.profiles-backup .chip-btn { font-size: 0.85rem; }
+.profiles-backup .chip-btn { font-size: 0.85rem; margin-left: 0; display: inline-block; text-decoration: none; }
 
 /* F4-04: rodapé discreto (copyright + versão instalada) */
 .app-footer {

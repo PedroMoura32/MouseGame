@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 25/09/2026
+Atualizado em: 26/09/2026
 
 **Regras para o Claude Code**
 
@@ -34,12 +34,6 @@ Atualizado em: 25/09/2026
 - Depende de: F2-27
 - Nota: não é urgente agora, segundo o Pedro; bem mais trabalhoso que o F2-27 (trava de acesso pra adulto, decidir o que acontece ao bater o limite, quando reseta) — desenhar com calma quando chegar a vez
 
-### F2-19 · Canal de feedback dos pais
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: existe um jeito simples dos pais mandarem sugestão/opinião sobre o app, acessível do painel dos pais
-- Nota: site é estático sem servidor; caminho mais simples é um link mailto: ou um formulário externo (Google Forms) — confirmar com o Pedro
-
 ### F2-23 · Divisão com "pausinhos" nas caixinhas
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -65,12 +59,6 @@ Atualizado em: 25/09/2026
 - Nota: a verificação pode levar alguns dias, então vale abrir a conta cedo
 - Nota: passo manual do Pedro (pagamento + identidade); eu não consigo fazer essa parte
 - Nota: o Pedro decidiu esperar terminar a Fase 2 e validar o app antes de abrir a conta
-
-### F3-02 · Escrever e publicar a política de privacidade
-- Fase: 3 · Conta e teste fechado
-- Prioridade: Alta
-- Pronto quando: o texto está publicado em uma URL fixa e pública
-- Nota: será curta, porque o app não coleta nenhum dado
 
 ### F3-03 · Teste fechado com 12 pessoas por 14 dias
 - Fase: 3 · Conta e teste fechado
@@ -129,6 +117,20 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F3-02 · Escrever e publicar a política de privacidade
+- Fase: 3 · Conta e teste fechado
+- Prioridade: Alta
+- Pronto quando: o texto está publicado em uma URL fixa e pública
+- Nota: será curta, porque o app não coleta nenhum dado
+- Nota: publicada em `https://pedromoura32.github.io/privacidade/` (repositório `PedroMoura32.github.io`, mesmo usado pro `assetlinks.json`), com link também na página raiz desse domínio. Texto revisado com o Pedro: sem coleta de dados (tudo fica só no localStorage do aparelho), sem anúncios, sem rastreamento, sem permissões especiais, explica o backup opcional (F2-01), e link de contato pro Google Forms do F2-19. Conferida visualmente claro/escuro/mobile
+
+### F2-19 · Canal de feedback dos pais
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existe um jeito simples dos pais mandarem sugestão/opinião sobre o app, acessível do painel dos pais
+- Nota: site é estático sem servidor; caminho mais simples é um link mailto: ou um formulário externo (Google Forms) — confirmar com o Pedro
+- Nota: confirmado com o Pedro — Google Forms (mantém o e-mail dele fora do código-fonte público). Botão "💌 Enviar sugestão" na tela de perfis, junto dos botões de backup (F2-01), abrindo o formulário numa aba nova. De brinde, corrigi um bug visual real que já existia desde o F2-01: os botões dessa barra usavam uma regra CSS pensada pra outro contexto (`margin-left: auto`) que os empurrava desalinhados; agora ficam devidamente centralizados e agrupados, com quebra de linha no celular
 
 ### F4-04 · Copyright e número de versão no app
 - Fase: 4 · Produção
