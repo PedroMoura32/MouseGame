@@ -46,12 +46,6 @@ Atualizado em: 26/09/2026
 - Pronto quando: os sons de acerto/erro do jogo clássico (sounds/correct.mp3, sounds/wrong.mp3) são trocados por algo que o Pedro prefira
 - Nota: pedido do Pedro, ainda sem direção definida ("queria testar algo diferente") — falta saber se ele tem arquivos de som em mente, se quer que eu gere sons sintéticos (como já existe no Treino do mouse, com Web Audio API, sem depender de arquivo) ou só uma variação do estilo atual; confirmar direção antes de implementar
 
-### F2-23 · Divisão com "pausinhos" nas caixinhas
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: a divisão mostra N caixinhas (N = divisor) e a criança distribui as unidades uma a uma entre as caixinhas até esgotar o total; o resultado é quantos pausinhos ficaram em cada caixinha
-- Nota: é como a filha de 8 anos aprende na escola (não é o formato de "chave"/divisão longa); é uma distribuição visual em grupos, não um novo tipo de pergunta — precisa de um componente interativo novo, mais parecido com um minijogo do treino do mouse do que com a conta armada atual
-
 ### F2-24 · Completar a palavra arrastando a letra que falta
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -129,6 +123,13 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-23 · Divisão com "pausinhos" nas caixinhas
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: a divisão mostra N caixinhas (N = divisor) e a criança distribui as unidades uma a uma entre as caixinhas até esgotar o total; o resultado é quantos pausinhos ficaram em cada caixinha
+- Nota: é como a filha de 8 anos aprende na escola (não é o formato de "chave"/divisão longa); é uma distribuição visual em grupos, não um novo tipo de pergunta — precisa de um componente interativo novo, mais parecido com um minijogo do treino do mouse do que com a conta armada atual
+- Nota: implementado como novo minijogo "Pausinhos" dentro do Treino do mouse (mesmo padrão do Memória/Atrás dos quadros), reaproveitando de graça a engrenagem de rodadas/estrelas/config/HUD já existente. N caixinhas (N = divisor, sorteado por nível) começam vazias; clicar SÓ funciona na(s) caixinha(s) com menos pausinhos no momento (regra de justiça que simula "distribuir um de cada vez, igualzinho"), até esgotar o total. Ao terminar, confirma por múltipla escolha quantos pausinhos sobraram em cada caixinha — errar dá pra tentar de novo, sem perder a rodada. Testado nos 3 níveis (divisor 2-3/2-4/3-6, crescendo com o nível), regra de justiça, fluxo de erro na pergunta final, e 3 rodadas seguidas certas até o resultado com estrelas corretas (1:1, como todo o Treino do mouse); visual claro/escuro/mobile sem rolagem lateral
 
 ### F2-41 · Botão voltar (navegador/Android) saindo do app sem querer
 - Fase: 2 · Ideias e melhorias

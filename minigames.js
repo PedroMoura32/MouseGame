@@ -17,8 +17,9 @@
      alvos    -> clicar com precisão em alvos que se mexem
      rolar    -> usar a rodinha do mouse (rolar a página)
      caminho  -> arrastar sem sair do trilho (controle fino)
-     memoria  -> cliques + memória visual (achar os pares)
-     quadros  -> cliques + adivinhação (descobrir a imagem escondida)
+     memoria    -> cliques + memória visual (achar os pares)
+     quadros    -> cliques + adivinhação (descobrir a imagem escondida)
+     pausinhos  -> cliques + divisão por distribuição (o método da escola)
    ============================================================ */
 
 'use strict';
@@ -706,12 +707,117 @@ const MINIGAMES = (() => {
         return { prompt, start, destroy };
     }
 
+    /* ============================================================
+       7) PAUSINHOS — divisão por distribuição em caixinhas (F2-23)
+       Distribui o total, uma unidade de cada vez, sempre na caixinha
+       que tem menos (o "método da escola" pedido pelo Pedro — não é
+       a conta de "chave"). Ao esgotar o total, confirma por múltipla
+       escolha quantos pausinhos sobraram em cada caixinha.
+       ============================================================ */
+
+    function pausinhosOptions(correct, count) {
+        const opts = new Set([correct]);
+        let guard = 0;
+        while (opts.size < count && guard < 50) {
+            guard++;
+            const cand = correct + randInt(-3, 3);
+            if (cand >= 1) opts.add(cand);
+        }
+        return shuffle([...opts]);
+    }
+
+    function pausinhos(api) {
+        const cfg = [
+            { divisor: [2, 3], quociente: [2, 5], opts: 3 },
+            { divisor: [2, 4], quociente: [3, 6], opts: 4 },
+            { divisor: [3, 6], quociente: [4, 8], opts: 6 },
+        ][api.level];
+
+        // Sorteado uma vez (na criação), igual aos outros minijogos — sobrevive a
+        // um "start()" repetido (ex.: redimensionar a janela não deve trocar a conta).
+        const divisor = randInt(cfg.divisor[0], cfg.divisor[1]);
+        const quociente = randInt(cfg.quociente[0], cfg.quociente[1]);
+        const total = divisor * quociente;
+        const prompt = {
+            html: `Distribua <b>${total}</b> pausinhos em <b>${divisor}</b> caixinhas, uma de cada vez! 🥢`,
+            speak: `Distribua ${total} pausinhos em ${divisor} caixinhas, uma de cada vez`,
+        };
+        let boxes = [], placed = 0, answered = false;
+
+        function start() {
+            destroy();
+            api.field.innerHTML = '';
+            boxes = Array(divisor).fill(0);
+            placed = 0; answered = false;
+
+            const wrap = el('div', 'mg-pausinhos-wrap', api.field);
+            const supply = el('div', 'mg-pausinhos-supply', wrap);
+            const boxesWrap = el('div', 'mg-pausinhos-boxes', wrap);
+
+            function refresh() {
+                supply.textContent = placed < total ? `Faltam distribuir: ${total - placed} 🥢` : 'Tudo distribuído! ✅';
+                const minCount = Math.min(...boxes);
+                boxesWrap.innerHTML = '';
+                boxes.forEach((count, i) => {
+                    const eligible = placed < total && count === minCount;
+                    const box = el('button', 'mg-pausinhos-box' + (eligible ? ' is-eligible' : ''), boxesWrap);
+                    box.type = 'button';
+                    el('div', 'mg-pausinhos-sticks', box).textContent = count ? '🥢'.repeat(count) : '·';
+                    el('div', 'mg-pausinhos-count', box).textContent = count;
+                    box.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();
+                        if (answered || placed >= total || count !== minCount) return;
+                        boxes[i]++; placed++;
+                        blipSfx(480 + placed * 8);
+                        refresh();
+                        if (placed >= total) startQuiz();
+                    });
+                });
+            }
+
+            function startQuiz() {
+                boxesWrap.classList.add('is-done');
+                const q = el('div', 'mg-pausinhos-question', wrap);
+                q.textContent = 'Quantos pausinhos ficaram em cada caixinha?';
+                const optsWrap = el('div', 'mg-quadros-opts', wrap);   // reaproveita o visual das opções do Atrás dos quadros
+                pausinhosOptions(quociente, cfg.opts).forEach((n) => {
+                    const b = el('button', 'mg-quadros-opt', optsWrap);
+                    b.type = 'button';
+                    b.textContent = String(n);
+                    b.addEventListener('pointerdown', (e) => {
+                        e.preventDefault();
+                        if (answered || b.disabled) return;
+                        if (n === quociente) {
+                            answered = true;
+                            b.classList.add('is-correct');
+                            blipSfx(700);
+                            api.done();
+                        } else {
+                            b.disabled = true;
+                            b.classList.add('is-wrong');
+                            api.mistake('Não é esse número — olha nas caixinhas de novo! 🔎');
+                        }
+                    });
+                });
+                api.hint('Escolha quantos pausinhos sobraram em cada caixinha');
+            }
+
+            refresh();
+            api.hint('Clique na caixinha com menos pausinhos, uma de cada vez 🥢');
+        }
+
+        function destroy() { api.field.innerHTML = ''; }
+
+        return { prompt, start, destroy };
+    }
+
     return {
-        baloes:  { create: baloes },
-        alvos:   { create: alvos },
-        rolar:   { create: rolar },
-        caminho: { create: caminho },
-        memoria: { create: memoria },
-        quadros: { create: quadros },
+        baloes:     { create: baloes },
+        alvos:      { create: alvos },
+        rolar:      { create: rolar },
+        caminho:    { create: caminho },
+        memoria:    { create: memoria },
+        quadros:    { create: quadros },
+        pausinhos:  { create: pausinhos },
     };
 })();
