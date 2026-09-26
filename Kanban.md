@@ -59,13 +59,6 @@ Atualizado em: 26/09/2026
 - Nota: ideia do Pedro; é bem maior do que parece — hoje quase todo texto do app (menus, botões, instruções de cada jogo, mensagens de acerto/erro) está em português "cru" espalhado pelo código, não centralizado num dicionário de traduções
 - Nota: falta decidir o escopo antes de estimar esforço: só a interface fixa (menus/botões) ou também o conteúdo pedagógico (Formas/Cores/Animais/Matemática etc.)? E o jogo "Inglês" (que já mistura os dois idiomas de propósito) continua igual nos dois modos?
 
-### F2-33 · Novo jogo: Leiturinha (historinhas ilustradas)
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: existem historinhas curtas ilustradas (emoji ou desenho simples) pra treinar leitura
-- Nota: ideia do Pedro ("crie pequenas historinhas ilustradas com emojis ou o que achar melhor para treinar a leitura")
-- Nota: falta decidir se tem alguma pergunta de compreensão depois (vira uma "pergunta" como o resto do app, com estrela) ou se é só leitura livre, sem pontuação — o F2-13 (problemas de matemática) já mistura leitura com conta e pode servir de referência de formato
-
 ### F3-01 · Criar a conta de desenvolvedor no Google Play Console
 - Fase: 3 · Conta e teste fechado
 - Prioridade: Alta
@@ -131,6 +124,14 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-33 · Novo jogo: Leiturinha (historinhas ilustradas)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existem historinhas curtas ilustradas (emoji ou desenho simples) pra treinar leitura
+- Nota: ideia do Pedro ("crie pequenas historinhas ilustradas com emojis ou o que achar melhor para treinar a leitura")
+- Nota: falta decidir se tem alguma pergunta de compreensão depois (vira uma "pergunta" como o resto do app, com estrela) ou se é só leitura livre, sem pontuação — o F2-13 (problemas de matemática) já mistura leitura com conta e pode servir de referência de formato
+- Nota: seguiu o formato do F2-13, como sugerido — decisão tomada sem precisar perguntar (era só um detalhe de formato, não uma escolha de produto): cada historinha (20 no banco, com emoji ilustrando) vem com 1 pergunta de compreensão simples (onde/o quê/de que cor) e múltipla escolha, valendo estrela como qualquer outra pergunta do app. Nova categoria própria no menu ("Leiturinha"), sem sub-escolha nem modo arrastar (não faz sentido aqui) — fica de fora do "Misturar Tudo", mesmo critério já usado pra Inglês/Matemática. Testado: nenhuma pergunta gerada com opções repetidas ou correta faltando nos 3 níveis (200 amostras cada), fluxo completo de acerto/erro/resultado, Misturar Tudo continua sem Leiturinha, visual claro/escuro/mobile sem rolagem lateral mesmo com 6 opções de texto
 
 ### F2-32 · Novo jogo: "Atrás dos quadrados" (descobrir a imagem escondida)
 - Fase: 2 · Ideias e melhorias

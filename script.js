@@ -216,6 +216,7 @@ const CATEGORY_META = [
     { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…' },
     { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…' },
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
+    { id: 'leiturinha', label: 'Leiturinha',       emoji: '📖', sub: 'historinhas curtas' },
     { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…' },
     { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade' },
     { id: 'mimica',     label: 'Mímica',           emoji: '🎭', sub: 'sorteia e mimica' },
@@ -861,12 +862,58 @@ function wordProblemQuestion(count) {
     };
 }
 
+/* ---------- leiturinha (F2-33) ---------- */
+
+// Historinhas curtas ilustradas com emoji, pra treinar leitura (pensada pra
+// filha de 8 anos, que já lê). Cada uma tem uma pergunta de compreensão simples
+// (onde/o quê/de que cor), igual a um exercício de interpretação de texto da
+// escola — segue o mesmo formato de "pergunta" do resto do app, com estrela.
+const LEITURINHA_BANK = [
+    { emoji: '🐱', story: 'A gata Mel dorme no sofá 🛋️ todas as tardes.', pergunta: 'Onde a gata Mel dorme?', resposta: 'No sofá' },
+    { emoji: '🐶', story: 'O cachorro Rex adora correr atrás da bola ⚽ no quintal.', pergunta: 'Atrás de que o Rex corre?', resposta: 'Da bola' },
+    { emoji: '🐰', story: 'O coelhinho Bolinha gosta muito de comer cenoura 🥕 no jardim.', pergunta: 'O que o coelhinho gosta de comer?', resposta: 'Cenoura' },
+    { emoji: '🐦', story: 'O passarinho fez um ninho 🪺 bem no topo da árvore 🌳.', pergunta: 'Onde o passarinho fez o ninho?', resposta: 'No topo da árvore' },
+    { emoji: '🐠', story: 'O peixinho dourado nada devagar dentro do aquário.', pergunta: 'Onde o peixinho nada?', resposta: 'No aquário' },
+    { emoji: '🧒', story: 'Ana levou seu balão 🎈 amarelo para o parque hoje.', pergunta: 'De que cor era o balão da Ana?', resposta: 'Amarelo' },
+    { emoji: '👦', story: 'Pedro guardou seus lápis de cor 🖍️ dentro da caixinha.', pergunta: 'Onde Pedro guardou os lápis?', resposta: 'Na caixinha' },
+    { emoji: '🌧️', story: 'Hoje choveu muito e Sofia usou seu guarda-chuva 🌂 vermelho.', pergunta: 'De que cor era o guarda-chuva?', resposta: 'Vermelho' },
+    { emoji: '☀️', story: 'No verão, a família foi à praia 🏖️ tomar sol.', pergunta: 'Para onde a família foi?', resposta: 'Para a praia' },
+    { emoji: '🎂', story: 'No aniversário da Clara, todos comeram um bolo de chocolate.', pergunta: 'De que sabor era o bolo?', resposta: 'Chocolate' },
+    { emoji: '📖', story: 'Antes de dormir, o menino gosta de ouvir uma história nova.', pergunta: 'O que o menino gosta de ouvir antes de dormir?', resposta: 'Uma história' },
+    { emoji: '🚲', story: 'Miguel aprendeu a andar de bicicleta no parque com o pai.', pergunta: 'O que Miguel aprendeu a fazer?', resposta: 'Andar de bicicleta' },
+    { emoji: '🦋', story: 'Uma borboleta colorida pousou bem devagar em cima da flor 🌸.', pergunta: 'Onde a borboleta pousou?', resposta: 'Na flor' },
+    { emoji: '🐸', story: 'O sapinho verde pulou direto para dentro da lagoa.', pergunta: 'Para onde o sapinho pulou?', resposta: 'Para a lagoa' },
+    { emoji: '🍦', story: 'No dia quente, Bia escolheu um sorvete de morango.', pergunta: 'De que sabor era o sorvete?', resposta: 'Morango' },
+    { emoji: '🎒', story: 'Antes de ir pra escola, Théo arruma tudo dentro da mochila.', pergunta: 'Onde Théo arruma as coisas?', resposta: 'Na mochila' },
+    { emoji: '🧸', story: 'O ursinho de pelúcia dorme todas as noites em cima da cama.', pergunta: 'Onde o ursinho dorme?', resposta: 'Na cama' },
+    { emoji: '🌻', story: 'O girassol cresce alto e sempre vira o rosto para o sol ☀️.', pergunta: 'Para onde o girassol vira o rosto?', resposta: 'Para o sol' },
+    { emoji: '🧁', story: 'Na festa, as crianças comeram cupcakes com cobertura rosa.', pergunta: 'De que cor era a cobertura?', resposta: 'Rosa' },
+    { emoji: '🐧', story: 'O pinguim escorregou na neve ❄️ e caiu rindo no chão.', pergunta: 'Onde o pinguim escorregou?', resposta: 'Na neve' },
+];
+
+function leiturinhaQuestion(count) {
+    const item = randomFrom(LEITURINHA_BANK);
+    const n = Math.min(count, LEITURINHA_BANK.length);
+    const toOpt = (it) => ({ id: 'leit-' + it.resposta, name: it.resposta, kind: 'text', label: it.resposta });
+    const correct = toOpt(item);
+    const wrongPool = LEITURINHA_BANK.filter((it) => it.resposta !== item.resposta);
+    const options = shuffle([correct, ...sample(wrongPool, n - 1).map(toOpt)]);
+    return {
+        key: `leit:${item.resposta}`, correct, options,
+        prompt: () => ({
+            html: `<span class="glyph-hero">${item.emoji}</span>${item.story}<br><b>${item.pergunta}</b>`,
+            speak: `${item.story} ${item.pergunta}`,
+        }),
+    };
+}
+
 /* ---------- escolhe o jogo ---------- */
 
 function buildQuestion(count) {
     if (state.category === 'ingles') return englishQuestion(count);
     if (state.category === 'matematica') return mathQuestion(count);
     if (state.category === 'numletras') return numLetrasQuestion(count);
+    if (state.category === 'leiturinha') return leiturinhaQuestion(count);
     const cat = state.category === 'misturar'
         ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
         : state.category;
