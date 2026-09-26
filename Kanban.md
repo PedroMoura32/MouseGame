@@ -6,7 +6,7 @@ Atualizado em: 26/09/2026
 
 - Este arquivo é a fonte da verdade do quadro. Atualize-o sempre que uma tarefa mudar de estado.
 - Para mover um cartão, recorte a seção `### ID · Título` inteira e cole embaixo da coluna nova.
-- Colunas, nesta ordem: Backlog, Pendente, Em andamento (limite de 3), Impedimento, Homologação, Concluído.
+- Colunas, nesta ordem: Backlog, Em andamento (limite de 3), Impedimento, Concluído.
 - Não altere os IDs. Um cartão novo recebe o próximo número da fase (exemplo: F2-06).
 - Cartão em Impedimento leva uma linha `- Nota:` dizendo o que está travando.
 - Antes de mover um cartão para Concluído, confira a linha "Pronto quando".
@@ -120,22 +120,22 @@ Atualizado em: 26/09/2026
 - Pronto quando: o app está publicado na Play Store
 - Depende de: F2-05, F3-03, F3-05 e F4-01
 
-## Pendente
-
 ## Em andamento
 
 _(vazio)_
-
 
 ## Impedimento
 
 _(vazio)_
 
-## Homologação
-
-_(vazio)_
-
 ## Concluído
+
+### F2-41 · Botão voltar (navegador/Android) saindo do app sem querer
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: apertar o botão voltar do navegador ou do Android, em qualquer tela do app, navega dentro do app em vez de sair pra página/app anterior
+- Nota: dúvida do Pedro depois de testar — as trocas de tela nunca mexiam no histórico do navegador, então só existia uma entrada pro app inteiro; voltar em qualquer momento saía direto pra fora do jogo
+- Nota: implementado — toda tela que não seja "profiles" (a raiz) empilha uma entrada de histórico ao ser mostrada. Voltar dispara um popstate que decide pra onde ir dentro do app reaproveitando a mesma ação do botão visível de cada tela: config → menu (igual "← Voltar"), jogo em andamento → resultado (igual "Encerrar"), pintura/mímica → menu (igual "Sair"), painel dos pais → perfis (igual "← Voltar"), resultado → menu (igual "Voltar ao início"), menu → perfis (igual "Trocar"). Só ao chegar nos perfis (raiz) o voltar volta a sair da página de verdade. Vale tanto pro navegador quanto pro app instalado/TWA (mesma pilha de histórico por baixo dos panos). Testado simulando `history.back()` de verdade (não só clicando nos botões) em 8 cenários, todos batendo com o botão visível correspondente
 
 ### F2-37 · Balões do Treino do mouse mais rápidos no difícil
 - Fase: 2 · Ideias e melhorias
