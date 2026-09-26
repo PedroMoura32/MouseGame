@@ -444,6 +444,15 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
 }
 .profiles-backup .chip-btn { font-size: 0.85rem; }
 
+/* F4-04: rodapé discreto (copyright + versão instalada) */
+.app-footer {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin-top: 28px;
+}
+
 .profile-create { max-width: 460px; margin: 0 auto; text-align: center; }
 .name-input {
     width: 100%;

@@ -21,12 +21,6 @@ Atualizado em: 25/09/2026
 - Depende de: F2-01, F2-02, F2-03 e F2-04 (os que forem aprovados)
 - Nota: só esta versão precisa estar realmente pronta; o teste fechado pode rodar antes, com versões intermediárias
 
-### F2-06 · Otimizar o service worker para economizar banda
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: o app só busca atualização em segundo plano de vez em quando, não em toda abertura
-- Nota: não é urgente no volume esperado; hoje o sw.js sempre busca a rede em paralelo ao mostrar o cache
-
 ### F2-18 · Painel dos pais com histórico de evolução
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Média
@@ -106,12 +100,6 @@ Atualizado em: 25/09/2026
 - Depende de: F3-01
 - Nota: a classificação indicativa e o público-alvo ficaram no F3-04, para não duplicar
 
-### F4-04 · Copyright e número de versão no app
-- Fase: 4 · Produção
-- Prioridade: Média
-- Pronto quando: existe um rodapé/tela discreta com "© [ano] Pedro Moura" e a versão do app (visível para o Pedro identificar qual build está rodando, útil para suporte/depuração)
-- Nota: ideia do Pedro; ainda não decidido onde exatamente aparece (tela de perfis? menu?) nem o formato do número de versão (ligado ao twa-manifest.json / manifest.webmanifest?) — desenhar quando chegar a vez
-
 ### F4-03 · Decidir estratégia de lançamento: grátis primeiro, pago depois
 - Fase: 4 · Produção
 - Prioridade: Média
@@ -141,6 +129,20 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F4-04 · Copyright e número de versão no app
+- Fase: 4 · Produção
+- Prioridade: Média
+- Pronto quando: existe um rodapé/tela discreta com "© [ano] Pedro Moura" e a versão do app (visível para o Pedro identificar qual build está rodando, útil para suporte/depuração)
+- Nota: ideia do Pedro; ainda não decidido onde exatamente aparece (tela de perfis? menu?) nem o formato do número de versão (ligado ao twa-manifest.json / manifest.webmanifest?) — desenhar quando chegar a vez
+- Nota: implementado como um texto discreto no fim da tela de perfis: "© {ano atual} Pedro Moura · v{APP_VERSION}". Ano calculado na hora (nunca fica desatualizado); versão é uma constante única em `script.js` (`APP_VERSION = '1.0.0'`), pra atualizar manualmente a cada lançamento que valha identificar. Testado visualmente claro e escuro
+
+### F2-06 · Otimizar o service worker para economizar banda
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: o app só busca atualização em segundo plano de vez em quando, não em toda abertura
+- Nota: não é urgente no volume esperado; hoje o sw.js sempre busca a rede em paralelo ao mostrar o cache
+- Nota: implementado — o `fetch` agora serve direto do cache sem tocar na rede; só quando a página em si é aberta/recarregada (navegação, não cada imagem/som isolado) é que verifica em segundo plano se faz mais de 1 dia desde a última checagem, e só então baixa os arquivos de novo. Testado com um servidor local de verdade (não dá pra testar service worker em `file://`): 1ª visita busca tudo (esperado, é a instalação), 1ª reabertura faz a única checagem pendente (sem marcador salvo ainda) e busca de novo, 2ª reabertura não bate na rede nenhuma vez — confirmado contando as requisições reais no log do servidor
 
 ### F2-03 · Dica após erros
 - Fase: 2 · Ideias e melhorias

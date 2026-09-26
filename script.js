@@ -15,6 +15,10 @@
 
 'use strict';
 
+// F4-04: versão exibida no rodapé da tela de perfis — bump manual a cada lançamento
+// que valha a pena identificar (ajuda a saber qual build está rodando em suporte/depuração).
+const APP_VERSION = '1.0.0';
+
 /* -----------------------------------------------------------
    1) CONSTRUTORES DE ITENS
    Cada item guarda gênero + o "nome" (nounHTML/nounText) e o
@@ -370,6 +374,7 @@ const el = {
     exportProfilesBtn: $('#export-profiles-btn'),
     importProfilesBtn: $('#import-profiles-btn'),
     importProfilesInput: $('#import-profiles-input'),
+    appFooter: $('#app-footer'),
     // barra de perfil (compartilhada entre as telas de menu e configuração)
     profileBar: $('#profile-bar'),
     pbAvatar: $('#pb-avatar'),
@@ -1986,6 +1991,8 @@ el.configBackBtn.addEventListener('click', () => showScreen('menu'));
 el.createConfirm.addEventListener('click', createProfile);
 el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true; });
 el.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
+
+el.appFooter.textContent = `© ${new Date().getFullYear()} Pedro Moura · v${APP_VERSION}`;
 
 el.exportProfilesBtn.addEventListener('click', exportProfiles);
 el.importProfilesBtn.addEventListener('click', () => el.importProfilesInput.click());
