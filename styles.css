@@ -203,6 +203,29 @@ body.is-drawing #screen-draw.is-active { display: flex; flex-direction: column; 
     transition: transform 0.15s ease;
 }
 .draw-swatch.is-selected { border-color: var(--plum); transform: scale(1.2); }
+/* F2-30: opção de glitter na paleta — gradiente + brilho, pra se distinguir das cores sólidas */
+.draw-swatch--glitter {
+    background: conic-gradient(from 0deg, #ffd76a, #ff922b, #e0559b, #b596ee, #6fc3ee, #38d9a9, #ffd76a);
+    position: relative;
+}
+.draw-swatch--glitter::after { content: '✨'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+/* F2-30: espessura do pincel — bolinhas crescentes, mesma linguagem visual da paleta */
+.draw-sizes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.draw-size {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background: rgba(var(--frost), 0.9);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+}
+.draw-size.is-selected { border-color: var(--plum); transform: scale(1.15); }
+.draw-size-dot { border-radius: 50%; background: var(--plum); display: block; }
 .draw-canvas {
     flex: 1 1 0;
     min-height: 0;
@@ -851,6 +874,21 @@ body.is-mouse .feedback {
     50% { transform: translateY(-12px); }
 }
 .results-title { font-weight: 800; font-size: 2rem; margin: 8px 0 4px; color: var(--plum); }
+
+/* F2-34: mímica — card simples, sem certo/errado, só um sorteador de palavras */
+.mimica-card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 48px 26px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    max-width: 520px;
+    margin: 40px auto 0;
+    border: 4px solid var(--accent);
+}
+.mimica-emoji { font-size: 5rem; line-height: 1; margin-bottom: 12px; }
+.mimica-word { font-weight: 800; font-size: 2rem; color: var(--plum); margin-bottom: 28px; word-break: break-word; }
+.mimica-card .big-btn { width: 100%; margin-bottom: 12px; }
 .results-score { font-size: 1.2rem; color: var(--ink-soft); margin: 0 0 12px; }
 .results-score b { color: var(--accent); }
 .results-stars { font-size: 2rem; margin: 6px 0 12px; letter-spacing: 4px; word-break: break-word; }

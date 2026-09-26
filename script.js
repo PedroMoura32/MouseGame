@@ -218,6 +218,7 @@ const CATEGORY_META = [
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
     { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…' },
     { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade' },
+    { id: 'mimica',     label: 'Mímica',           emoji: '🎭', sub: 'sorteia e mimica' },
     { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…' },
 ];
 
@@ -297,6 +298,9 @@ const AVATARS = [
     { glyph: '🐰', unlockAt: 0 }, { glyph: '🐼', unlockAt: 0 }, { glyph: '🍓', unlockAt: 0 },
     { glyph: '🦋', unlockAt: 10 }, { glyph: '🌈', unlockAt: 20 }, { glyph: '⭐', unlockAt: 30 },
     { glyph: '🐬', unlockAt: 50 }, { glyph: '🌷', unlockAt: 75 }, { glyph: '🐞', unlockAt: 100 },
+    // F2-29: pedido do Pedro — mais avatares pra continuar destravando depois do 🐞
+    { glyph: '🐢', unlockAt: 125 }, { glyph: '🦊', unlockAt: 150 },
+    { glyph: '🐨', unlockAt: 175 }, { glyph: '🦁', unlockAt: 200 },
 ];
 
 /* Tempos de experiência */
@@ -359,6 +363,7 @@ const screens = {
     config: $('#screen-config'),
     game: $('#screen-game'),
     draw: $('#screen-draw'),
+    mimica: $('#screen-mimica'),
     results: $('#screen-results'),
 };
 
@@ -401,9 +406,15 @@ const el = {
     startBtn: $('#start-btn'),
     // pintura livre (F2-21)
     drawPalette: $('#draw-palette'),
+    drawSizes: $('#draw-sizes'),
     drawCanvas: $('#draw-canvas'),
     drawClearBtn: $('#draw-clear-btn'),
     drawExitBtn: $('#draw-exit-btn'),
+    // mímica (F2-34)
+    mimicaEmoji: $('#mimica-emoji'),
+    mimicaWord: $('#mimica-word'),
+    mimicaNextBtn: $('#mimica-next-btn'),
+    mimicaExitBtn: $('#mimica-exit-btn'),
     // jogo
     hudLabel: $('#hud-label'),
     playfield: $('#playfield'),
@@ -415,6 +426,7 @@ const el = {
     progressBar: $('#progress-bar'),
     promptText: $('#prompt-text'),
     repeatBtn: $('#repeat-btn'),
+    repeatSlowBtn: $('#repeat-slow-btn'),
     dropZone: $('#drop-zone'),
     optionsArea: $('#options-area'),
     options: $('#options'),
@@ -523,7 +535,8 @@ function autoReadCurrentQuestion() {
 }
 
 // "parts" = texto (pt-BR) ou lista [{ text, lang }] para misturar idiomas.
-function speak(parts) {
+// F2-35: passar { slow: true } fala bem mais devagar (pensado pro jogo de Inglês).
+function speak(parts, opts = {}) {
     if (!('speechSynthesis' in window)) return;
     const list = typeof parts === 'string' ? [{ text: parts, lang: 'pt-BR' }] : parts;
     try {
@@ -531,7 +544,7 @@ function speak(parts) {
         list.forEach((seg) => {
             const u = new SpeechSynthesisUtterance(speakable(seg.text, seg.lang));
             u.lang = seg.lang;
-            u.rate = seg.lang === 'en-US' ? 0.85 : 0.95;
+            u.rate = opts.slow ? 0.5 : (seg.lang === 'en-US' ? 0.85 : 0.95);
             u.pitch = 1.1;
             if (voices[seg.lang]) u.voice = voices[seg.lang];
             window.speechSynthesis.speak(u);
@@ -882,6 +895,7 @@ function renderQuestion(q) {
     el.options.hidden = false;
     el.promptText.innerHTML = q.prompt(state.mode).html;
     el.promptText.classList.toggle('is-big', !!q.big);
+    el.repeatSlowBtn.hidden = state.category !== 'ingles'; // F2-35: só faz sentido no jogo de Inglês
 
     // Zona de soltar só aparece no modo arrastar.
     el.dropZone.hidden = !dragMode;
@@ -1009,6 +1023,7 @@ function newRound() {
 
     el.promptText.innerHTML = game.prompt.html;
     el.promptText.classList.remove('is-big');
+    el.repeatSlowBtn.hidden = true; // F2-35: treino do mouse não é o jogo de Inglês
     el.feedback.textContent = '';
     el.feedback.className = 'feedback';
     state.firstTry = true;
@@ -1446,9 +1461,14 @@ function drawConfetti() {
 ----------------------------------------------------------- */
 
 const DRAW_COLORS = ['#4a2f4a', '#e0559b', '#6fc3ee', '#ffd76a', '#b596ee', '#38d9a9', '#ff922b', '#ffffff'];
+// F2-30: espessura do traço (px) e cor especial "glitter" (não é uma cor sólida, é um efeito)
+const DRAW_SIZES = [4, 8, 14, 22];
+const GLITTER = 'glitter';
+const GLITTER_COLORS = ['#ffd76a', '#ff922b', '#e0559b', '#b596ee', '#6fc3ee', '#38d9a9', '#ffffff'];
 
 let drawCtx = null;
 let drawColor = DRAW_COLORS[0];
+let drawSize = DRAW_SIZES[1];
 let drawing = false;
 let drawLast = null;
 
@@ -1471,19 +1491,59 @@ window.addEventListener('resize', () => { if (screens.draw.classList.contains('i
 
 function renderDrawPalette() {
     el.drawPalette.innerHTML = '';
+    const selectSwatch = (c, b) => {
+        drawColor = c;
+        el.drawPalette.querySelectorAll('.draw-swatch').forEach((s) => s.classList.remove('is-selected'));
+        b.classList.add('is-selected');
+    };
     DRAW_COLORS.forEach((c, i) => {
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'draw-swatch' + (i === 0 ? ' is-selected' : '');
         b.style.background = c;
         b.setAttribute('aria-label', 'Cor ' + (i + 1));
-        b.addEventListener('click', () => {
-            drawColor = c;
-            el.drawPalette.querySelectorAll('.draw-swatch').forEach((s) => s.classList.remove('is-selected'));
-            b.classList.add('is-selected');
-        });
+        b.addEventListener('click', () => selectSwatch(c, b));
         el.drawPalette.appendChild(b);
     });
+    // F2-30: opção especial de glitter, por cima das cores (não é sólida)
+    const g = document.createElement('button');
+    g.type = 'button';
+    g.className = 'draw-swatch draw-swatch--glitter';
+    g.setAttribute('aria-label', 'Glitter');
+    g.title = 'Glitter ✨';
+    g.addEventListener('click', () => selectSwatch(GLITTER, g));
+    el.drawPalette.appendChild(g);
+}
+
+// F2-30: espessura do pincel — 4 tamanhos, mostrados como bolinhas crescentes
+function renderDrawSizes() {
+    el.drawSizes.innerHTML = '';
+    DRAW_SIZES.forEach((s, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'draw-size' + (s === drawSize ? ' is-selected' : '');
+        b.setAttribute('aria-label', 'Espessura ' + (i + 1));
+        b.innerHTML = `<span class="draw-size-dot" style="width:${s}px;height:${s}px"></span>`;
+        b.addEventListener('click', () => {
+            drawSize = s;
+            el.drawSizes.querySelectorAll('.draw-size').forEach((x) => x.classList.remove('is-selected'));
+            b.classList.add('is-selected');
+        });
+        el.drawSizes.appendChild(b);
+    });
+}
+
+// F2-30: espalha pontinhos coloridos aleatórios ao redor de um ponto (efeito glitter)
+function glitterDab(x, y, size) {
+    const n = Math.max(2, Math.round(size / 3));
+    for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random() * size * 0.6;
+        drawCtx.fillStyle = randomFrom(GLITTER_COLORS);
+        drawCtx.beginPath();
+        drawCtx.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, Math.max(1, size * 0.12), 0, Math.PI * 2);
+        drawCtx.fill();
+    }
 }
 
 function openDrawScreen() {
@@ -1497,21 +1557,35 @@ function drawStart(e) {
     drawing = true;
     const p = drawLocalPoint(e);
     drawLast = p;
+    if (drawColor === GLITTER) {
+        glitterDab(p.x, p.y, drawSize);
+        return;
+    }
     drawCtx.fillStyle = drawColor;
     drawCtx.beginPath();
-    drawCtx.arc(p.x, p.y, 4, 0, Math.PI * 2);   // um pontinho ao tocar, mesmo sem arrastar
+    drawCtx.arc(p.x, p.y, drawSize / 2, 0, Math.PI * 2);   // um pontinho ao tocar, mesmo sem arrastar
     drawCtx.fill();
 }
 function drawMove(e) {
     if (!drawing) return;
     e.preventDefault();
     const p = drawLocalPoint(e);
-    drawCtx.strokeStyle = drawColor;
-    drawCtx.lineWidth = 8;
-    drawCtx.beginPath();
-    drawCtx.moveTo(drawLast.x, drawLast.y);
-    drawCtx.lineTo(p.x, p.y);
-    drawCtx.stroke();
+    if (drawColor === GLITTER) {
+        // espalha vários pontinhos ao longo do trecho andado, não só no ponto final
+        const dist = Math.hypot(p.x - drawLast.x, p.y - drawLast.y);
+        const steps = Math.max(1, Math.round(dist / 4));
+        for (let i = 1; i <= steps; i++) {
+            const t = i / steps;
+            glitterDab(drawLast.x + (p.x - drawLast.x) * t, drawLast.y + (p.y - drawLast.y) * t, drawSize);
+        }
+    } else {
+        drawCtx.strokeStyle = drawColor;
+        drawCtx.lineWidth = drawSize;
+        drawCtx.beginPath();
+        drawCtx.moveTo(drawLast.x, drawLast.y);
+        drawCtx.lineTo(p.x, p.y);
+        drawCtx.stroke();
+    }
     drawLast = p;
 }
 function drawEnd() { drawing = false; }
@@ -1523,6 +1597,46 @@ window.addEventListener('pointercancel', drawEnd);
 el.drawClearBtn.addEventListener('click', () => drawCtx && drawCtx.clearRect(0, 0, el.drawCanvas.width, el.drawCanvas.height));
 el.drawExitBtn.addEventListener('click', () => showScreen('menu'));
 renderDrawPalette();
+renderDrawSizes();
+
+/* -----------------------------------------------------------
+   12c) MÍMICA (F2-34)
+   Sorteia uma palavra (+ emoji de apoio) pra uma pessoa mimicar.
+   Não é "clique na resposta certa": sem estrela, sem configuração —
+   é só um sorteador pra uma brincadeira física entre as pessoas.
+----------------------------------------------------------- */
+
+const MIMICA_WORDS = [
+    { word: 'Dormir', emoji: '😴' }, { word: 'Correr', emoji: '🏃' }, { word: 'Nadar', emoji: '🏊' },
+    { word: 'Voar', emoji: '✈️' }, { word: 'Chorar', emoji: '😢' }, { word: 'Dançar', emoji: '💃' },
+    { word: 'Pular', emoji: '🤸' }, { word: 'Cantar', emoji: '🎤' }, { word: 'Ler', emoji: '📖' },
+    { word: 'Escrever', emoji: '✍️' }, { word: 'Dirigir', emoji: '🚗' }, { word: 'Comer', emoji: '🍽️' },
+    { word: 'Escovar os dentes', emoji: '🪥' }, { word: 'Tomar banho', emoji: '🚿' }, { word: 'Rir', emoji: '😂' },
+    { word: 'Elefante', emoji: '🐘' }, { word: 'Gato', emoji: '🐱' }, { word: 'Macaco', emoji: '🐒' },
+    { word: 'Coelho', emoji: '🐰' }, { word: 'Passarinho', emoji: '🐦' }, { word: 'Cavalo', emoji: '🐴' },
+    { word: 'Jogar bola', emoji: '⚽' }, { word: 'Andar de bicicleta', emoji: '🚲' }, { word: 'Tocar violão', emoji: '🎸' },
+    { word: 'Sorvete derretendo', emoji: '🍦' }, { word: 'Robô', emoji: '🤖' }, { word: 'Fantasma', emoji: '👻' },
+    { word: 'Abrir um presente', emoji: '🎁' }, { word: 'Escalar uma montanha', emoji: '🧗' }, { word: 'Pescar', emoji: '🎣' },
+];
+
+let lastMimicaIdx = -1;
+
+function nextMimicaWord() {
+    let idx = randInt(MIMICA_WORDS.length);
+    if (MIMICA_WORDS.length > 1) while (idx === lastMimicaIdx) idx = randInt(MIMICA_WORDS.length);
+    lastMimicaIdx = idx;
+    const pick = MIMICA_WORDS[idx];
+    el.mimicaEmoji.textContent = pick.emoji;
+    el.mimicaWord.textContent = pick.word;
+}
+
+function openMimicaScreen() {
+    showScreen('mimica');
+    nextMimicaWord();
+}
+
+el.mimicaNextBtn.addEventListener('click', nextMimicaWord);
+el.mimicaExitBtn.addEventListener('click', () => showScreen('menu'));
 
 /* -----------------------------------------------------------
    13) PERFIS (localStorage)
@@ -1889,6 +2003,7 @@ function buildMenu() {
         (v) => {
             state.category = v;
             if (v === 'pintura') { openDrawScreen(); return; }   // sem opções pra configurar: vai direto desenhar
+            if (v === 'mimica') { openMimicaScreen(); return; }  // idem: vai direto pra tela de mímica
             refreshMenuForCategory();
             el.configTitle.textContent = `${c.emoji} ${c.label}`;
             showScreen('config');   // escolheu o jogo: vai para a tela de configurar esse jogo
@@ -1973,6 +2088,9 @@ el.startBtn.addEventListener('click', startGame);
 el.quitBtn.addEventListener('click', showResults);
 el.repeatBtn.addEventListener('click', () => {
     if (state.question) speak(state.question.prompt(state.mode).speak);
+});
+el.repeatSlowBtn.addEventListener('click', () => {
+    if (state.question) speak(state.question.prompt(state.mode).speak, { slow: true });
 });
 el.resultsListen.addEventListener('click', () => speak(state.resultSpeech));
 el.reviewBtn.addEventListener('click', startReview);

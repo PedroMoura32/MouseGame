@@ -52,6 +52,27 @@ Atualizado em: 26/09/2026
 - Pronto quando: a letra ou número aparece grande na tela e a criança consegue "desenhar" por cima seguindo o traçado correto, com algum feedback se saiu muito do traço
 - Nota: ideia de alfabetização motora (treinar a escrita da letra); é a mais complexa tecnicamente desse brainstorm (detectar se o traço do mouse seguiu o contorno certo) — avaliar viabilidade/esforço antes de estimar prazo
 
+### F2-31 · Idioma da interface: português ou inglês
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: existe uma opção lá em cima (bandeiras 🇧🇷/🇺🇸, perto do botão de tema) que troca o idioma de toda a interface do app entre português e inglês
+- Nota: ideia do Pedro; é bem maior do que parece — hoje quase todo texto do app (menus, botões, instruções de cada jogo, mensagens de acerto/erro) está em português "cru" espalhado pelo código, não centralizado num dicionário de traduções
+- Nota: falta decidir o escopo antes de estimar esforço: só a interface fixa (menus/botões) ou também o conteúdo pedagógico (Formas/Cores/Animais/Matemática etc.)? E o jogo "Inglês" (que já mistura os dois idiomas de propósito) continua igual nos dois modos?
+
+### F2-32 · Novo jogo: "Atrás dos quadrados" (descobrir a imagem escondida)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: uma imagem fica escondida atrás de uma grade de quadrados numerados/com letras (linhas e colunas), a criança vai clicando pra revelar quadrados, e existe algum jeito de confirmar o acerto do que é a imagem
+- Nota: ideia do Pedro; ele mesmo já sinalizou que não sabe ainda como pontuar/confirmar o acerto — cogitou uma caixa de texto pra digitar a resposta, mas isso pede teclado num app pensado pra pré-leitoras
+- Nota: alternativa a avaliar: opções clicáveis (múltipla escolha) em vez de digitar, mantendo o padrão do resto do app — decidir a mecânica de acerto com o Pedro antes de estimar esforço
+
+### F2-33 · Novo jogo: Leiturinha (historinhas ilustradas)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existem historinhas curtas ilustradas (emoji ou desenho simples) pra treinar leitura
+- Nota: ideia do Pedro ("crie pequenas historinhas ilustradas com emojis ou o que achar melhor para treinar a leitura")
+- Nota: falta decidir se tem alguma pergunta de compreensão depois (vira uma "pergunta" como o resto do app, com estrela) ou se é só leitura livre, sem pontuação — o F2-13 (problemas de matemática) já mistura leitura com conta e pode servir de referência de formato
+
 ### F3-01 · Criar a conta de desenvolvedor no Google Play Console
 - Fase: 3 · Conta e teste fechado
 - Prioridade: Alta
@@ -117,6 +138,34 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-35 · Botão de leitura devagar no jogo de Inglês
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: nas perguntas de Inglês, além do botão de ouvir normal, existe uma opção de ouvir mais devagar
+- Nota: ideia do Pedro; dá pra reaproveitar a função `speak()` que já existe, só com uma taxa de fala mais baixa pra voz em inglês
+- Nota: implementado como um segundo botão 🐢 ao lado do 🔊 normal, só visível nas perguntas de Inglês (escondido em qualquer outra categoria, inclusive Treino do mouse). Reaproveita a mesma função de fala, com `rate` fixo em 0.5 em vez do 0.85 padrão do inglês. Testado: escondido fora do Inglês, visível no Inglês, taxa de fala normal (0.85) vs devagar (0.5) conferida diretamente no que chega no `speechSynthesis`
+
+### F2-34 · Novo jogo: Mímica
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: ao entrar nesse jogo, sorteia palavras aleatórias (com imagem de apoio quando fizer sentido) pra uma pessoa mimicar, com um botão pra sortear a próxima
+- Nota: ideia do Pedro; diferente do resto do app — não é "clique na resposta certa", é só um sorteador de palavras pra uma brincadeira física entre as pessoas (offline do app); mais simples de construir que os outros dois jogos novos deste lote
+- Nota: implementado como nova categoria no menu que pula a configuração e vai direto pra uma tela dedicada (igual à Pintura Livre): emoji + palavra grandes, botão "Nova palavra" e "Sair". Banco com 29 palavras (ações, animais, objetos), sem repetir a mesma duas vezes seguidas, sem estrela/pontuação. Testado: entra direto na tela, 15 sorteios seguidos sem repetição imediata e com boa variedade, sai certo pro menu
+
+### F2-30 · Pintura livre: espessura do pincel e paleta com glitter
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: na Pintura Livre (F2-21) dá pra escolher a espessura do traço, e existe uma opção de cor/textura "glitter" na paleta
+- Nota: ideia do Pedro; "glitter" de verdade não existe em canvas 2D — precisa simular com um efeito visual (ex.: pontinhos brilhantes por cima da cor) — avaliar a melhor forma quando chegar a vez
+- Nota: implementado com 4 espessuras (bolinhas crescentes, mesma linguagem visual da paleta de cores) e uma opção extra de "glitter" na paleta (gradiente + ✨), que em vez de um traço sólido espalha pontinhos de cores aleatórias ao longo do percurso do mouse/dedo. Testado: traço grosso pinta bem mais pixels que o fino (3936 vs 656 num traço padrão), traço glitter produz dezenas de cores distintas no mesmo traço (não é uma cor sólida), sem rolagem lateral no celular com a nova linha de espessuras
+
+### F2-29 · Novos avatares de recompensa (incluindo tartaruga)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existem novos avatares no catálogo de desbloqueáveis (F2-14), incluindo pelo menos uma tartaruga
+- Nota: ideia do Pedro; complementa o F2-14 (avatares desbloqueáveis com estrelas) — só adicionar itens ao catálogo `AVATARS`, sem mudar a mecânica de desbloqueio
+- Nota: adicionados 4 avatares novos (🐢 125⭐, 🦊 150⭐, 🐨 175⭐, 🦁 200⭐), estendendo a progressão depois do 🐞 (100⭐). Testado que o catálogo inclui a tartaruga e que a mecânica de desbloqueio/troca do F2-14 continua funcionando normalmente com os itens novos
 
 ### F3-02 · Escrever e publicar a política de privacidade
 - Fase: 3 · Conta e teste fechado

@@ -167,6 +167,8 @@
             <div class="prompt">
                 <p id="prompt-text" class="prompt-text">Clique no <b>círculo</b></p>
                 <button id="repeat-btn" class="icon-btn icon-btn--big" title="Ouvir a pergunta" aria-label="Ouvir a pergunta">🔊</button>
+                <!-- F2-35: só aparece nas perguntas de Inglês -->
+                <button id="repeat-slow-btn" class="icon-btn icon-btn--big" title="Ouvir mais devagar" aria-label="Ouvir mais devagar" hidden>🐢</button>
             </div>
 
             <!-- Alvo do modo arrastar (escondido no modo clicar) -->
@@ -188,10 +190,22 @@
         <section id="screen-draw" class="screen">
             <div class="draw-toolbar">
                 <div id="draw-palette" class="draw-palette"></div>
+                <!-- F2-30: espessura do pincel -->
+                <div id="draw-sizes" class="draw-sizes"></div>
                 <button id="draw-clear-btn" class="chip-btn">🧹 Limpar</button>
                 <button id="draw-exit-btn" class="chip-btn">✖ Sair</button>
             </div>
             <canvas id="draw-canvas" class="draw-canvas"></canvas>
+        </section>
+
+        <!-- ======================= TELA: MÍMICA (F2-34) ======================= -->
+        <section id="screen-mimica" class="screen">
+            <div class="mimica-card">
+                <div id="mimica-emoji" class="mimica-emoji">🎭</div>
+                <div id="mimica-word" class="mimica-word">Toque em "Nova palavra"</div>
+                <button id="mimica-next-btn" class="big-btn">🔀 Nova palavra</button>
+                <button id="mimica-exit-btn" class="ghost-btn ghost-btn--dark">✖ Sair</button>
+            </div>
         </section>
 
         <!-- ======================= TELA: RESULTADO ======================= -->
