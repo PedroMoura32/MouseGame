@@ -28,6 +28,24 @@ Atualizado em: 26/09/2026
 - Depende de: F2-27
 - Nota: não é urgente agora, segundo o Pedro; bem mais trabalhoso que o F2-27 (trava de acesso pra adulto, decidir o que acontece ao bater o limite, quando reseta) — desenhar com calma quando chegar a vez
 
+### F2-38 · Novo nome para o app
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: o app tem um nome novo, decidido pelo Pedro, refletido no título, no manifest.webmanifest e onde mais aparecer "Jogo dos Cliques"
+- Nota: pedido do Pedro — deixado pra depois de propósito; ele ainda vai decidir o nome. Quando decidir, mexe em vários lugares: title do index.html, manifest.webmanifest (name/short_name), Kanban.md, e eventualmente o pacote/ficha da Play Store (F1-03, F4-01) se já estiverem publicados
+
+### F2-39 · Paleta de cores mais neutra (versão para comercializar)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: existe uma opção de paleta mais neutra além da atual (inspirada no álbum Lover), pensada pra agradar um público mais amplo de compradores
+- Nota: pedido do Pedro — ele disse que ama a paleta atual, então a ideia não é substituir e sim oferecer como alternativa. Falta decidir: vira uma segunda opção de tema (como o F2-22 claro/escuro, só que "colorido vs. neutro") ou é uma paleta única nova? Confirmar com o Pedro antes de estimar esforço
+
+### F2-40 · Sons diferentes para acerto e erro
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: os sons de acerto/erro do jogo clássico (sounds/correct.mp3, sounds/wrong.mp3) são trocados por algo que o Pedro prefira
+- Nota: pedido do Pedro, ainda sem direção definida ("queria testar algo diferente") — falta saber se ele tem arquivos de som em mente, se quer que eu gere sons sintéticos (como já existe no Treino do mouse, com Web Audio API, sem depender de arquivo) ou só uma variação do estilo atual; confirmar direção antes de implementar
+
 ### F2-23 · Divisão com "pausinhos" nas caixinhas
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Baixa
@@ -119,6 +137,18 @@ _(vazio)_
 
 ## Concluído
 
+### F2-37 · Balões do Treino do mouse mais rápidos no difícil
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: no nível difícil do minijogo Balões, eles se movem mais rápido do que estava
+- Nota: pedido do Pedro depois de testar — velocidade do difícil subiu de 60 para 80 (fácil e médio continuam iguais)
+
+### F2-36 · Título interno por jogo na tela de configuração
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: ao escolher um jogo, a tela de configuração mostra um nome de jogo (ex.: "Jogo das Formas"), não só o nome da categoria
+- Nota: pedido do Pedro. Cada categoria ganhou um `gameTitle` próprio (respeitando a concordância em português: "Jogo das Formas", "Jogo das Cores", "Jogo dos Animais", "Jogo de Números e Letras", "Jogo de Inglês", "Jogo de Matemática", "Jogo da Leiturinha", "Jogo de Misturar Tudo"; Treino do Mouse e Pintura Livre mantidos como estavam, por já soarem como nome de atividade)
+
 ### F2-18 · Painel dos pais com histórico de evolução
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Média
@@ -141,6 +171,7 @@ _(vazio)_
 - Nota: ideia do Pedro; ele mesmo já sinalizou que não sabe ainda como pontuar/confirmar o acerto — cogitou uma caixa de texto pra digitar a resposta, mas isso pede teclado num app pensado pra pré-leitoras
 - Nota: alternativa a avaliar: opções clicáveis (múltipla escolha) em vez de digitar, mantendo o padrão do resto do app — decidir a mecânica de acerto com o Pedro antes de estimar esforço
 - Nota: confirmado com o Pedro — múltipla escolha (não caixa de texto). Implementado como novo minijogo "Atrás dos quadros" dentro do Treino do mouse (mesmo padrão do Memória), reaproveitando de graça toda a engrenagem de rodadas/estrelas/config/HUD que já existia. Um emoji grande fica escondido atrás de uma grade (colunas com letra + linha numérica, tipo A1/B2); clicar revela o quadrado. Embaixo, opções de múltipla escolha (3/4/6 conforme o nível); errar marca a opção como errada, dá uma dica de brinde revelando mais 1 quadrado sozinho, e deixa tentar de novo; acertar revela tudo de uma vez e fecha a rodada (1 estrela, como todo o Treino do mouse). Testado nos 3 níveis (3×3/3 opções, 4×4/4 opções, 5×5/6 opções), fluxo de erro com dica extra, rodada completa até o resultado com estrelas corretas, visual claro/escuro/mobile sem rolagem lateral
+- Nota: ajustes do Pedro depois de testar — os quadrados tinham canto arredondado e espaço entre eles, dando pra "espiar" a imagem pelas frestas antes mesmo de abrir um quadrado; removidos os dois (cantos retos, sem gap, com uma borda fina só pra separar visualmente). Grade cresceu bastante do fácil pro difícil (4×4→6×6→8×8, era 3×3→4×4→5×5). No nível difícil, as opções erradas agora são escolhidas de propósito da MESMA categoria da imagem certa (ex.: se é um bicho, as opções erradas também são bichos), pra confundir de verdade — testado que ~70% das opções erradas no difícil saem da mesma categoria, contra o que seria puro acaso
 
 ### F2-35 · Botão de leitura devagar no jogo de Inglês
 - Fase: 2 · Ideias e melhorias
@@ -316,6 +347,7 @@ _(vazio)_
 - Prioridade: Média
 - Pronto quando: "Jogar de novo" e "Voltar ao início" ficam com o mesmo tamanho, lado a lado, sem um induzir mais que o outro
 - Nota: pedido do Pedro — o botão "Jogar de novo" gigante parecia empurrar a criança a ficar sempre jogando. Testado em 4 larguras (1366 a 320px), sem rolagem lateral
+- Nota: ajuste do Pedro depois de testar — mesmo do mesmo tamanho, o contraste entre um botão todo preenchido com degradê e o outro só com borda ainda deixava "Jogar de novo" parecendo a opção certa. O "Voltar ao início" ganhou um preenchimento suave (só neste par de botões, os outros usos do mesmo estilo de botão continuam como estavam)
 
 ### F2-07 · Reorganizar o menu em duas etapas
 - Fase: 2 · Ideias e melhorias

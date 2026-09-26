@@ -1007,6 +1007,11 @@ body.is-mouse .feedback {
     font-size: 1rem;
     white-space: normal;
 }
+/* Pedido do Pedro: o contraste entre um botão todo preenchido e o outro só com
+   borda deixava o "Jogar de novo" parecendo o único caminho certo — o ghost
+   ganha um preenchimento suave aqui (só neste par, não nos outros usos de ghost-btn). */
+.results-actions .ghost-btn { background: var(--accent-soft); }
+.results-actions .ghost-btn:hover { background: var(--accent-dark); color: #fff; }
 
 /* ---------- Confete ---------- */
 .confetti-canvas {
@@ -1191,21 +1196,22 @@ body.is-mouse .feedback {
 .mg-quadros-grid {
     position: absolute; inset: 0;
     display: grid;
-    gap: 4px;
+    /* Sem gap e sem canto arredondado: com espaço/curva dava pra "espiar" a cor de
+       baixo pelas frestas antes mesmo de abrir um quadrado (pedido do Pedro). */
+    gap: 0;
+    box-shadow: var(--shadow);
 }
 .mg-quadros-cell {
-    border: none;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 0;
     background: linear-gradient(135deg, var(--pink, #f47cb5), var(--lilac, #b596ee));
     color: #fff;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: transform 0.15s ease, opacity 0.25s ease;
+    transition: opacity 0.25s ease;
 }
-.mg-quadros-cell:hover { transform: scale(0.96); }
-.mg-quadros-cell.is-open { background: transparent; box-shadow: none; opacity: 0; pointer-events: none; }
+.mg-quadros-cell.is-open { background: transparent; border-color: transparent; opacity: 0; pointer-events: none; }
 .mg-quadros-opts {
     display: flex;
     flex-wrap: wrap;

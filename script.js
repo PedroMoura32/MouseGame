@@ -209,18 +209,20 @@ const WORD_OBJECTS = [
 
 /* ---------- Menu ---------- */
 
+// "gameTitle": título mostrado dentro da tela de configuração (pedido do Pedro,
+// pra reforçar "você escolheu isso" com um nome de jogo, não só o nome da categoria).
 const CATEGORY_META = [
-    { id: 'formas',     label: 'Formas',           emoji: '🔷', sub: 'círculo, estrela…' },
-    { id: 'cores',      label: 'Cores',            emoji: '🎨', sub: 'vermelho, azul…' },
-    { id: 'animais',    label: 'Animais',          emoji: '🐶', sub: 'cachorro, gato…' },
-    { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…' },
-    { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…' },
-    { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷' },
-    { id: 'leiturinha', label: 'Leiturinha',       emoji: '📖', sub: 'historinhas curtas' },
-    { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…' },
-    { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade' },
-    { id: 'mimica',     label: 'Mímica',           emoji: '🎭', sub: 'sorteia e mimica' },
-    { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…' },
+    { id: 'formas',     label: 'Formas',           emoji: '🔷', sub: 'círculo, estrela…',      gameTitle: 'Jogo das Formas' },
+    { id: 'cores',      label: 'Cores',            emoji: '🎨', sub: 'vermelho, azul…',        gameTitle: 'Jogo das Cores' },
+    { id: 'animais',    label: 'Animais',          emoji: '🐶', sub: 'cachorro, gato…',        gameTitle: 'Jogo dos Animais' },
+    { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…',            gameTitle: 'Jogo de Números e Letras' },
+    { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…',      gameTitle: 'Jogo de Inglês' },
+    { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷',              gameTitle: 'Jogo de Matemática' },
+    { id: 'leiturinha', label: 'Leiturinha',       emoji: '📖', sub: 'historinhas curtas',      gameTitle: 'Jogo da Leiturinha' },
+    { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…',   gameTitle: 'Treino do Mouse' },
+    { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade',       gameTitle: 'Pintura Livre' },
+    { id: 'mimica',     label: 'Mímica',           emoji: '🎭', sub: 'sorteia e mimica',        gameTitle: 'Jogo da Mímica' },
+    { id: 'misturar',   label: 'Misturar Tudo',    emoji: '🎲', sub: 'formas, cores, animais…', gameTitle: 'Jogo de Misturar Tudo' },
 ];
 
 // Escolha extra que aparece só para algumas categorias.
@@ -2230,7 +2232,7 @@ function buildMenu() {
             if (v === 'pintura') { openDrawScreen(); return; }   // sem opções pra configurar: vai direto desenhar
             if (v === 'mimica') { openMimicaScreen(); return; }  // idem: vai direto pra tela de mímica
             refreshMenuForCategory();
-            el.configTitle.textContent = `${c.emoji} ${c.label}`;
+            el.configTitle.textContent = `${c.emoji} ${c.gameTitle}`;
             showScreen('config');   // escolheu o jogo: vai para a tela de configurar esse jogo
         }, i === 0));
 

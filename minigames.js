@@ -108,7 +108,7 @@ const MINIGAMES = (() => {
     }
 
     function baloes(api) {
-        const cfg = [{ n: 3, size: 120, speed: 26 }, { n: 5, size: 96, speed: 42 }, { n: 7, size: 80, speed: 60 }][api.level];
+        const cfg = [{ n: 3, size: 120, speed: 26 }, { n: 5, size: 96, speed: 42 }, { n: 7, size: 80, speed: 80 }][api.level]; // difícil mais rápido, a pedido do Pedro
         const COLORS = ['#f47cb5', '#6fc3ee', '#ffd76a', '#b596ee', '#63e6be', '#ff922b'];
         const DOUBLE_MS = 550;   // tempo máximo entre os dois cliques
         const prompt = {
@@ -600,18 +600,37 @@ const MINIGAMES = (() => {
        opções. Errar uma opção revela mais 1 quadrado de brinde.
        ============================================================ */
 
+    // "cat" agrupa itens parecidos — usado no nível difícil pra confundir com opções
+    // da mesma família (ex.: outros bichos), em vez de distratores óbvios demais.
     const QUADROS_BANK = [
-        { e: '🐘', n: 'elefante' }, { e: '🌈', n: 'arco-íris' }, { e: '🍕', n: 'pizza' },
-        { e: '🚗', n: 'carro' }, { e: '🏠', n: 'casa' }, { e: '🌻', n: 'girassol' },
-        { e: '🦋', n: 'borboleta' }, { e: '🐢', n: 'tartaruga' }, { e: '🎈', n: 'balão' },
-        { e: '🌙', n: 'lua' }, { e: '⭐', n: 'estrela' }, { e: '🍎', n: 'maçã' },
-        { e: '🐬', n: 'golfinho' }, { e: '🦁', n: 'leão' }, { e: '🐝', n: 'abelha' },
-        { e: '🍓', n: 'morango' }, { e: '🐼', n: 'panda' }, { e: '🚀', n: 'foguete' },
+        { e: '🐘', n: 'elefante', cat: 'animal' }, { e: '🐢', n: 'tartaruga', cat: 'animal' },
+        { e: '🐬', n: 'golfinho', cat: 'animal' }, { e: '🦁', n: 'leão', cat: 'animal' },
+        { e: '🐼', n: 'panda', cat: 'animal' }, { e: '🦋', n: 'borboleta', cat: 'animal' },
+        { e: '🐝', n: 'abelha', cat: 'animal' },
+        { e: '🍕', n: 'pizza', cat: 'comida' }, { e: '🍎', n: 'maçã', cat: 'comida' }, { e: '🍓', n: 'morango', cat: 'comida' },
+        { e: '🚗', n: 'carro', cat: 'veiculo' }, { e: '🚀', n: 'foguete', cat: 'veiculo' },
+        { e: '🏠', n: 'casa', cat: 'objeto' }, { e: '🎈', n: 'balão', cat: 'objeto' },
+        { e: '🌈', n: 'arco-íris', cat: 'natureza' }, { e: '🌻', n: 'girassol', cat: 'natureza' },
+        { e: '🌙', n: 'lua', cat: 'natureza' }, { e: '⭐', n: 'estrela', cat: 'natureza' },
     ];
-    const QUADROS_LETTERS = 'ABCDE';
+    const QUADROS_LETTERS = 'ABCDEFGH';
+
+    // Escolhe as opções erradas. No nível difícil, prefere itens da MESMA categoria do
+    // alvo (mais parecidos, mais fácil de confundir); se não houver suficientes da
+    // mesma categoria, completa com o resto do banco.
+    function quadrosOptions(target, count, biasSimilar) {
+        const rest = QUADROS_BANK.filter((x) => x !== target);
+        if (!biasSimilar) return shuffle([target, ...sample(rest, count - 1)]);
+        const sameCat = rest.filter((x) => x.cat === target.cat);
+        const chosen = sample(sameCat, Math.min(count - 1, sameCat.length));
+        const faltam = count - 1 - chosen.length;
+        if (faltam > 0) chosen.push(...sample(rest.filter((x) => !chosen.includes(x)), faltam));
+        return shuffle([target, ...chosen]);
+    }
 
     function quadros(api) {
-        const cfg = [{ cols: 3, rows: 3, opts: 3 }, { cols: 4, rows: 4, opts: 4 }, { cols: 5, rows: 5, opts: 6 }][api.level];
+        // Pedido do Pedro: mais quadrados cobrindo a imagem do fácil pro difícil.
+        const cfg = [{ cols: 4, rows: 4, opts: 3 }, { cols: 6, rows: 6, opts: 4 }, { cols: 8, rows: 8, opts: 6 }][api.level];
         const prompt = {
             html: 'Clique nos quadrados e descubra o que está escondido! 🔍',
             speak: 'Clique nos quadrados e descubra o que está escondido',
@@ -624,7 +643,7 @@ const MINIGAMES = (() => {
             const { w, h } = api.size();
 
             const target = pick(QUADROS_BANK);
-            const options = shuffle([target, ...sample(QUADROS_BANK.filter((x) => x !== target), cfg.opts - 1)]);
+            const options = quadrosOptions(target, cfg.opts, api.level === 2);
 
             // envelope que centraliza tudo (o tabuleiro em cima, as opções embaixo)
             const wrap = el('div', 'mg-quadros-wrap', api.field);
@@ -641,12 +660,14 @@ const MINIGAMES = (() => {
 
             const grid = el('div', 'mg-quadros-grid', board);
             grid.style.cssText = `grid-template-columns: repeat(${cfg.cols}, 1fr); grid-template-rows: repeat(${cfg.rows}, 1fr);`;
+            const cellFont = Math.max(7, Math.min(side / cfg.cols, side / cfg.rows) * 0.32);   // cabe mesmo em grades grandes (8×8)
             const cells = [];
             const openCell = (cell) => cell.classList.add('is-open');
             for (let r = 0; r < cfg.rows; r++) {
                 for (let c = 0; c < cfg.cols; c++) {
                     const cell = el('button', 'mg-quadros-cell', grid);
                     cell.type = 'button';
+                    cell.style.fontSize = cellFont + 'px';
                     cell.textContent = QUADROS_LETTERS[c] + (r + 1);
                     cell.addEventListener('pointerdown', (e) => { e.preventDefault(); openCell(cell); });
                     cells.push(cell);
