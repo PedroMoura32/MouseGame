@@ -47,96 +47,12 @@ const APP_VERSION = '1.0.0';
 ----------------------------------------------------------- */
 
 /* -----------------------------------------------------------
-   6) NARRAÇÃO (só sob demanda) + SONS
+   6) NARRAÇÃO (só sob demanda) + SONS — movido para audio.js (F2-45)
 ----------------------------------------------------------- */
-
-const voices = { 'pt-BR': null, 'en-US': null };
-
-function loadVoices() {
-    if (!('speechSynthesis' in window)) return;
-    const all = window.speechSynthesis.getVoices();
-    voices['pt-BR'] = all.find((v) => /pt[-_]BR/i.test(v.lang)) || all.find((v) => /^pt/i.test(v.lang)) || null;
-    voices['en-US'] = all.find((v) => /en[-_]US/i.test(v.lang)) || all.find((v) => /^en/i.test(v.lang)) || null;
-}
-if ('speechSynthesis' in window) {
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-}
-
-function stopSpeech() {
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-}
-
-// Palavras em MAIÚSCULAS (COELHO, MACACO...) são soletradas por muitas vozes.
-// Passamos para minúsculas só na hora de falar; letras soltas (A, B) ficam como estão.
-function speakable(text, lang) {
-    return text.replace(/\p{L}{2,}/gu, (w) => w.toLocaleLowerCase(lang));
-}
-
-// F2-02: fala a pergunta/instrução atual sozinha, só se o perfil tiver essa opção ligada
-// (pensada pra quem ainda não lê); o resto do app continua manual, no botão 🔊.
-function autoReadCurrentQuestion() {
-    if (!state.profile || !state.profile.autoRead || !state.question) return;
-    speak(state.question.prompt(state.mode).speak);
-}
-
-// "parts" = texto (pt-BR) ou lista [{ text, lang }] para misturar idiomas.
-// F2-35: passar { slow: true } fala bem mais devagar (pensado pro jogo de Inglês).
-function speak(parts, opts = {}) {
-    if (!('speechSynthesis' in window)) return;
-    const list = typeof parts === 'string' ? [{ text: parts, lang: 'pt-BR' }] : parts;
-    try {
-        window.speechSynthesis.cancel();
-        list.forEach((seg) => {
-            const u = new SpeechSynthesisUtterance(speakable(seg.text, seg.lang));
-            u.lang = seg.lang;
-            u.rate = opts.slow ? 0.5 : (seg.lang === 'en-US' ? 0.85 : 0.95);
-            u.pitch = 1.1;
-            if (voices[seg.lang]) u.voice = voices[seg.lang];
-            window.speechSynthesis.speak(u);
-        });
-    } catch (_) { /* narração é opcional */ }
-}
-
-function playSound(audio) {
-    try {
-        audio.currentTime = 0;
-        const p = audio.play();
-        if (p && p.catch) p.catch(() => {});
-    } catch (_) { /* som é opcional */ }
-}
 
 /* -----------------------------------------------------------
-   7) RENDERIZAÇÃO DOS ITENS
+   7) RENDERIZAÇÃO DOS ITENS — movido para render.js (F2-45)
 ----------------------------------------------------------- */
-
-function shapeSVG(shape, color) {
-    const shapes = {
-        circle:    `<circle cx="50" cy="50" r="44"/>`,
-        square:    `<rect x="8" y="8" width="84" height="84" rx="10"/>`,
-        triangle:  `<polygon points="50,6 94,92 6,92"/>`,
-        rectangle: `<rect x="4" y="26" width="92" height="48" rx="10"/>`,
-        diamond:   `<polygon points="50,4 92,50 50,96 8,50"/>`,
-        star:      `<polygon points="50,4 61,38 97,38 68,60 79,94 50,72 21,94 32,60 3,38 39,38"/>`,
-        heart:     `<path d="M50 88 L14 52 A20 20 0 0 1 50 26 A20 20 0 0 1 86 52 Z"/>`,
-    };
-    return `<svg viewBox="0 0 100 100" fill="${color}" aria-hidden="true">${shapes[shape] || ''}</svg>`;
-}
-
-function renderItemInner(item) {
-    switch (item.kind) {
-        case 'shape': return shapeSVG(item.shape, item.color);
-        case 'color': return `<span class="swatch" style="background:${item.hex}"></span>`;
-        case 'emoji': return `<span class="glyph">${item.glyph}</span>`;
-        case 'char': {
-            // números com mais dígitos usam letra menor para caberem na peça
-            const n = item.glyph.length;
-            return `<span class="glyph" style="--k:${n >= 3 ? 0.36 : n === 2 ? 0.44 : 0.5}">${item.glyph}</span>`;
-        }
-        case 'text':  return `<span class="label-text">${item.label}</span>`;
-        default:      return '';
-    }
-}
 
 /* -----------------------------------------------------------
    8) PERGUNTAS
