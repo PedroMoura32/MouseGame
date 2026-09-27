@@ -29,12 +29,15 @@ const MINIGAMES = (() => {
     /* ---------- utilitários ---------- */
 
     const rand = (a, b) => a + Math.random() * (b - a);
-    const randInt = (a, b) => Math.floor(rand(a, b + 1));
+    // Nome diferente de propósito do randBetween(max) de script.js (achado da auditoria de
+    // 26/09/2026): aqui é um intervalo INCLUSIVO dos dois lados (randBetween(2,5) -> 2..5),
+    // lá é exclusivo do topo (randBetween(5) -> 0..4) — mesma cara, comportamento diferente.
+    const randBetween = (a, b) => Math.floor(rand(a, b + 1));
     const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     function shuffle(arr) {
         const a = arr.slice();
-        for (let i = a.length - 1; i > 0; i--) { const j = randInt(0, i); [a[i], a[j]] = [a[j], a[i]]; }
+        for (let i = a.length - 1; i > 0; i--) { const j = randBetween(0, i); [a[i], a[j]] = [a[j], a[i]]; }
         return a;
     }
     const sample = (arr, n) => shuffle(arr).slice(0, n);
@@ -307,8 +310,8 @@ const MINIGAMES = (() => {
                 d.textContent = pick(DECOR);
                 d.style.left = rand(2, 90) + '%';
                 d.style.top = rand(0, total - 50) + 'px';
-                d.style.fontSize = randInt(26, 48) + 'px';
-                d.style.transform = `rotate(${randInt(-25, 25)}deg)`;
+                d.style.fontSize = randBetween(26, 48) + 'px';
+                d.style.transform = `rotate(${randBetween(-25, 25)}deg)`;
             }
 
             // o tesouro: perto do fim (ou do começo) do caminho de rolagem
@@ -720,7 +723,7 @@ const MINIGAMES = (() => {
         let guard = 0;
         while (opts.size < count && guard < 50) {
             guard++;
-            const cand = correct + randInt(-3, 3);
+            const cand = correct + randBetween(-3, 3);
             if (cand >= 1) opts.add(cand);
         }
         return shuffle([...opts]);
@@ -735,8 +738,8 @@ const MINIGAMES = (() => {
 
         // Sorteado uma vez (na criação), igual aos outros minijogos — sobrevive a
         // um "start()" repetido (ex.: redimensionar a janela não deve trocar a conta).
-        const divisor = randInt(cfg.divisor[0], cfg.divisor[1]);
-        const quociente = randInt(cfg.quociente[0], cfg.quociente[1]);
+        const divisor = randBetween(cfg.divisor[0], cfg.divisor[1]);
+        const quociente = randBetween(cfg.quociente[0], cfg.quociente[1]);
         const total = divisor * quociente;
         const prompt = {
             html: `Distribua <b>${total}</b> pausinhos em <b>${divisor}</b> caixinhas, uma de cada vez! 🥢`,

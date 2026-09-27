@@ -23,6 +23,46 @@
             if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
     </script>
+
+    <!-- F2-43 (achado da auditoria de 26/09/2026): antes, qualquer erro não previsto
+         travava a tela sem nenhum aviso — a criança ficava presa num app "quebrado" sem
+         nenhum jeito de continuar. Registrado o mais cedo possível (antes de minigames.js
+         e script.js), e com estilo tudo inline, pra funcionar mesmo se o CSS ou o resto do
+         JS falhar por completo. Não manda nada pra fora (o app não tem servidor) — só
+         mostra um jeito gentil de recomeçar. -->
+    <script>
+        (function () {
+            var shown = false;
+            function showFallback() {
+                if (shown || !document.body) return;
+                shown = true;
+                var overlay = document.createElement('div');
+                overlay.setAttribute('style',
+                    'position:fixed;inset:0;z-index:99999;background:#2a1a3d;color:#fff;' +
+                    'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+                    'gap:14px;font-family:sans-serif;text-align:center;padding:24px;');
+                var msg = document.createElement('p');
+                msg.textContent = 'Ops! Algo deu errado. 😅';
+                msg.setAttribute('style', 'font-size:1.6rem;font-weight:800;margin:0;');
+                var sub = document.createElement('p');
+                sub.textContent = 'Toque no botão para recomeçar o jogo.';
+                sub.setAttribute('style', 'font-size:1.05rem;margin:0;opacity:0.85;');
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = 'Recomeçar 🔁';
+                btn.setAttribute('style',
+                    'font-size:1.2rem;font-weight:700;padding:14px 28px;border-radius:16px;' +
+                    'border:none;background:#e0559b;color:#fff;cursor:pointer;margin-top:8px;');
+                btn.addEventListener('click', function () { location.reload(); });
+                overlay.appendChild(msg);
+                overlay.appendChild(sub);
+                overlay.appendChild(btn);
+                document.body.appendChild(overlay);
+            }
+            window.addEventListener('error', showFallback);
+            window.addEventListener('unhandledrejection', showFallback);
+        })();
+    </script>
 </head>
 <body>
     <!-- Barra superior sempre visível -->

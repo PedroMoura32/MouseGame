@@ -124,6 +124,21 @@ _(vazio)_
 - Pronto quando: os dois achados 🔴 de segurança da auditoria de 26/09/2026 não relacionados ao backup manual estão corrigidos
 - Nota: auditoria técnica completa pedida pelo Pedro (relatório publicado como documento); ver F2-01 para o achado que foi resolvido removendo a funcionalidade em vez de corrigi-la
 - Nota: implementado — (1) `loadProfiles()` agora valida `Array.isArray(...)` antes de aceitar o dado do localStorage como perfis; um valor corrompido mas "truthy" (ex.: `{}`, uma string, um número) antes derrubava o app inteiro no primeiro `.forEach`/`.filter`/`.map`, agora cai para `[]` normalmente. (2) `renderProfileCard` (painel dos pais) parou de interpolar `p.name`/`p.avatar` direto em `innerHTML` — passou a usar `textContent` nesses dois campos, igual ao resto do app, fechando de vez o vetor de XSS mesmo com a importação de backup já removida (defesa em profundidade). Testado: perfil com nome contendo `<img onerror=...>` aparece como texto puro na lista E no painel dos pais, sem executar nada; `localStorage` corrompido de 3 formas diferentes (objeto, string, número) não trava mais o app, cai pros perfis normalmente e o app continua funcionando depois
+- Nota: aproveitado pra resolver também um achado 🟡 pequeno da mesma auditoria — o `randInt(a,b)` de `minigames.js` tinha o mesmo nome do `randInt(max)` de `script.js`, mas com comportamento diferente (intervalo inclusivo vs. exclusivo). Renomeado pra `randBetween` só em `minigames.js`, sem mudar nenhum comportamento
+
+### F2-44 · Testes automatizados versionados no repositório
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Alta
+- Pronto quando: existe uma pasta de testes no repositório, executável com um comando (sem precisar de build), cobrindo pelo menos os fluxos mais críticos/frágeis já validados manualmente
+- Nota: achado 🔴 da auditoria de 26/09/2026 — até então, toda a validação feita durante o desenvolvimento (incluindo uma bateria extensa via Chrome headless) era escrita em scripts temporários fora do repositório e descartada depois, sem nenhuma rede de segurança contra regressão futura
+- Nota: implementado em `tests/` — um harness reaproveitável (`tests/lib/harness.mjs`, Chrome headless via CDP puro, sem precisar instalar Playwright/Puppeteer) e 4 arquivos de teste com asserções de verdade (`node:assert`, não só "printar e olhar"): `regressao-geral.mjs` (um pouco de cada jogo principal), `seguranca.mjs` (os 2 achados críticos do F2-42), `erro-global.mjs` (o F2-43) e `back-button.mjs` (o F2-41). Roda tudo com `node tests/run-all.mjs`, cada arquivo isolado também. `tests/README.md` explica como rodar e como escrever um teste novo. Testado: os 4 arquivos passam limpos (`4 passaram, 0 falharam`)
+
+### F2-43 · Handler global de erro (tela de fallback amigável)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: um erro não previsto em qualquer lugar do app mostra uma tela gentil pra recomeçar, em vez de travar em branco sem explicação
+- Nota: achado 🟡 da auditoria de 26/09/2026 — não existia nenhuma rede de segurança contra uma exceção não tratada; a criança ficaria numa tela travada sem nenhum aviso nem jeito de continuar
+- Nota: implementado como um script inline bem no início do `<head>` (antes de minigames.js/script.js, com estilo tudo inline) — escuta `error` e `unhandledrejection` da `window` e mostra uma tela cheia com "Ops! Algo deu errado 😅" e um botão "Recomeçar" que recarrega a página. Não manda nada pra fora (o app não tem servidor pra receber um relatório de erro). Testado: não aparece em uso normal (rodada completa de verdade), aparece com um erro síncrono forçado e com uma promise rejeitada sem `.catch`, e o botão realmente recarrega a página
 
 ### F2-24 · Completar a palavra arrastando a letra que falta
 - Fase: 2 · Ideias e melhorias
