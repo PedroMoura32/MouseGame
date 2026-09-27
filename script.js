@@ -192,21 +192,9 @@ const el = {
 
 /* -----------------------------------------------------------
    5) UTILITÁRIOS
+   randInt/randomFrom/randRange/shuffle/sample moraram aqui até esta etapa
+   e agora estão em utils.js.
 ----------------------------------------------------------- */
-
-function randInt(max) { return Math.floor(Math.random() * max); }
-function randomFrom(arr) { return arr[randInt(arr.length)]; }
-function randRange(min, max) { return min + randInt(max - min + 1); }
-
-function shuffle(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = randInt(i + 1);
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-}
-function sample(arr, n) { return shuffle(arr).slice(0, n); }
 
 // Largura da barra de rolagem (0 em telas de toque): usada para alinhar o botão "Começar!" à direita.
 function updateScrollbarWidth() {
