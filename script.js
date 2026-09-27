@@ -383,9 +383,6 @@ const el = {
     newAutoread: $('#new-autoread'),
     createConfirm: $('#create-confirm'),
     createCancel: $('#create-cancel'),
-    exportProfilesBtn: $('#export-profiles-btn'),
-    importProfilesBtn: $('#import-profiles-btn'),
-    importProfilesInput: $('#import-profiles-input'),
     appFooter: $('#app-footer'),
     // painel dos pais (F2-18)
     parentPanelLink: $('#parent-panel-link'),
@@ -1803,9 +1800,14 @@ el.mimicaExitBtn.addEventListener('click', () => showScreen('menu'));
 const STORE_KEY = 'mousegame.profiles.v1';
 const CUR_KEY = 'mousegame.current.v1';
 
+// Valida que o dado salvo é mesmo um array antes de confiar nele — um valor corrompido
+// mas "truthy" (ex.: {} ou uma string) passaria pelo || [] antigo e derrubaria o app
+// inteiro no primeiro .forEach/.filter/.map (achado da auditoria de 26/09/2026).
 function loadProfiles() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch (_) { return []; }
+    try {
+        const parsed = JSON.parse(localStorage.getItem(STORE_KEY));
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_) { return []; }
 }
 function saveProfiles(list) {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch (_) {}
@@ -2003,52 +2005,6 @@ function deleteProfile(p) {
     renderProfiles();
 }
 
-/* F2-01: backup/restauração dos perfis (o localStorage some se o navegador for limpo,
-   ou não existe no aparelho novo — este é o jeito de levar as jogadoras de um lado pro outro). */
-function exportProfiles() {
-    const payload = { app: 'jogo-dos-cliques', version: 1, exportadoEm: new Date().toISOString(), profiles };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `jogo-dos-cliques-backup-${todayKey()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-}
-
-// Importa por soma (nunca sobrescreve): jogadoras cujo id já existe são ignoradas,
-// pra nunca apagar estrelas/avatar por engano ao importar um backup antigo.
-function importProfilesFromFile(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-        let data;
-        try { data = JSON.parse(String(reader.result)); }
-        catch (_) { window.alert('Não consegui ler esse arquivo — ele não parece um backup válido.'); return; }
-
-        const incoming = Array.isArray(data) ? data : Array.isArray(data && data.profiles) ? data.profiles : null;
-        if (!incoming) { window.alert('Esse arquivo não parece ser um backup do Jogo dos Cliques.'); return; }
-
-        const existingIds = new Set(profiles.map((p) => p.id));
-        const novos = incoming.filter((p) => p && typeof p.id === 'string' && typeof p.name === 'string' && !existingIds.has(p.id));
-        const repetidos = incoming.length - novos.length;
-
-        if (novos.length === 0) {
-            window.alert(repetidos > 0
-                ? 'Essas jogadoras já estão neste aparelho — nada novo para importar.'
-                : 'Não encontrei nenhuma jogadora válida nesse arquivo.');
-            return;
-        }
-
-        profiles = profiles.concat(novos);
-        saveProfiles(profiles);
-        renderProfiles();
-        window.alert(`Pronto! ${novos.length} jogadora(s) importada(s)` + (repetidos > 0 ? ` (${repetidos} já existiam e foram ignoradas).` : '.'));
-    };
-    reader.readAsText(file);
-}
-
 function updateProfileBar() {
     if (!state.profile) return;
     el.pbAvatar.textContent = state.profile.avatar;
@@ -2115,11 +2071,15 @@ function renderProfileCard(p) {
 
     const card = document.createElement('div');
     card.className = 'parent-card';
+    // Achado da auditoria de 26/09/2026: p.name/p.avatar são dados do perfil (digitados
+    // pela própria pessoa), nunca interpolados direto em innerHTML — só via textContent,
+    // igual ao resto do app (renderProfiles). O restante do template usa só dado do
+    // próprio código (rótulos de categoria, conquistas, números calculados), sem risco.
     card.innerHTML = `
         <div class="parent-card-head">
-            <span class="parent-card-avatar">${p.avatar}</span>
-            <span class="parent-card-name">${p.name}</span>
-            <span class="parent-card-stars">⭐ ${p.stars || 0}</span>
+            <span class="parent-card-avatar"></span>
+            <span class="parent-card-name"></span>
+            <span class="parent-card-stars"></span>
         </div>
         <div class="parent-section">
             <h3>Tempo de jogo</h3>
@@ -2153,6 +2113,9 @@ function renderProfileCard(p) {
             </div>
         </div>
     `;
+    card.querySelector('.parent-card-avatar').textContent = p.avatar;
+    card.querySelector('.parent-card-name').textContent = p.name;
+    card.querySelector('.parent-card-stars').textContent = `⭐ ${p.stars || 0}`;
     return card;
 }
 
@@ -2423,14 +2386,6 @@ el.createCancel.addEventListener('click', () => { el.profileCreate.hidden = true
 el.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') createProfile(); });
 
 el.appFooter.textContent = `© ${new Date().getFullYear()} Pedro Moura · v${APP_VERSION}`;
-
-el.exportProfilesBtn.addEventListener('click', exportProfiles);
-el.importProfilesBtn.addEventListener('click', () => el.importProfilesInput.click());
-el.importProfilesInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) importProfilesFromFile(file);
-    e.target.value = ''; // permite importar o mesmo arquivo de novo, se precisar
-});
 
 /* -----------------------------------------------------------
    16a2) MODO NOTURNO (F2-22)

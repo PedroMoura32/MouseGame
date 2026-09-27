@@ -45,12 +45,11 @@
 
             <div id="profiles-list" class="profiles-list"></div>
 
-            <!-- Ferramentas discretas pra pais: backup (F2-01) e feedback (F2-19) -->
+            <!-- Ferramenta discreta pra pais: feedback (F2-19). O backup manual (F2-01) foi
+                 descontinuado — o Pedro decidiu que não vale o risco de segurança de importar
+                 um arquivo de fora (ver auditoria) sem uma necessidade real de uso. -->
             <div class="profiles-backup">
-                <button id="export-profiles-btn" class="chip-btn">⬇️ Exportar backup</button>
-                <button id="import-profiles-btn" class="chip-btn">⬆️ Importar backup</button>
                 <a id="feedback-link" class="chip-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdAp7zuWQjdrvZzEPORUAiDN0mkJaz4eglRjLsxSsRH4cnTVg/viewform" target="_blank" rel="noopener">💌 Enviar sugestão</a>
-                <input id="import-profiles-input" type="file" accept="application/json" hidden>
             </div>
 
             <div id="profile-create" class="panel profile-create" hidden>

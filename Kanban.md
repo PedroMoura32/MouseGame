@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 26/09/2026
+Atualizado em: 27/09/2026
 
 **Regras para o Claude Code**
 
@@ -117,6 +117,13 @@ _(vazio)_
 _(vazio)_
 
 ## Concluído
+
+### F2-42 · Correções da auditoria técnica (críticos)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Alta
+- Pronto quando: os dois achados 🔴 de segurança da auditoria de 26/09/2026 não relacionados ao backup manual estão corrigidos
+- Nota: auditoria técnica completa pedida pelo Pedro (relatório publicado como documento); ver F2-01 para o achado que foi resolvido removendo a funcionalidade em vez de corrigi-la
+- Nota: implementado — (1) `loadProfiles()` agora valida `Array.isArray(...)` antes de aceitar o dado do localStorage como perfis; um valor corrompido mas "truthy" (ex.: `{}`, uma string, um número) antes derrubava o app inteiro no primeiro `.forEach`/`.filter`/`.map`, agora cai para `[]` normalmente. (2) `renderProfileCard` (painel dos pais) parou de interpolar `p.name`/`p.avatar` direto em `innerHTML` — passou a usar `textContent` nesses dois campos, igual ao resto do app, fechando de vez o vetor de XSS mesmo com a importação de backup já removida (defesa em profundidade). Testado: perfil com nome contendo `<img onerror=...>` aparece como texto puro na lista E no painel dos pais, sem executar nada; `localStorage` corrompido de 3 formas diferentes (objeto, string, número) não trava mais o app, cai pros perfis normalmente e o app continua funcionando depois
 
 ### F2-24 · Completar a palavra arrastando a letra que falta
 - Fase: 2 · Ideias e melhorias
@@ -251,6 +258,7 @@ _(vazio)_
 - Pronto quando: a pessoa consegue salvar os perfis e restaurá-los em outro aparelho
 - Nota: já estava pendente antes do mapeamento
 - Nota: implementado na tela de perfis com dois botões discretos "Exportar backup" (baixa um `.json` com todas as jogadoras do aparelho) e "Importar backup" (escolhe um arquivo `.json` e soma ao que já existe). Importação nunca sobrescreve: jogadoras com o mesmo id já salvo são ignoradas, evitando perder estrelas por engano ao importar um backup antigo por cima; sempre mostra quantas foram importadas/ignoradas. Testado exportar, importar arquivo com 1 repetida + 1 nova, importar o mesmo arquivo de novo (nada muda), e dois casos de arquivo inválido (JSON quebrado e JSON sem perfis) sem travar a página. Revisão visual também corrigiu 3 cores fixas que tinham escapado da auditoria do modo escuro (F2-22): botão de apagar jogadora, borda do campo de nome e borda dos avatares na criação de perfil
+- Nota: **descontinuado em 27/09/2026.** A auditoria técnica da mesma data encontrou uma XSS armazenada real: um arquivo de backup malicioso importado podia injetar HTML/script no painel dos pais (o `name`/`avatar` do perfil importado ia direto pra `innerHTML` sem escapar). O Pedro decidiu que a funcionalidade não tinha necessidade de uso suficiente pra justificar manter esse risco — removidos os botões, as funções `exportProfiles`/`importProfilesFromFile` e o campo de arquivo. Nada substitui essa funcionalidade; perfis ficam só no aparelho onde foram criados, como no início do projeto
 
 ### F2-22 · Modo noturno
 - Fase: 2 · Ideias e melhorias
