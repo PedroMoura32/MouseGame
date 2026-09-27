@@ -19,7 +19,7 @@
      cache na hora, sem esperar a checagem periódica).
    ============================================================ */
 
-const VERSION = 'v12';
+const VERSION = 'v13';
 const CACHE = 'jogo-dos-cliques-' + VERSION;
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // não verifica de novo antes de 1 dia
 const LAST_CHECK_KEY = new Request('__sw-last-check__');
@@ -36,6 +36,7 @@ const PRECACHE = [
     'audio.js',
     'render.js',
     'questions.js',
+    'menu.js',
     'script.js',
     'minigames.js',
     'confetti.js',
