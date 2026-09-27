@@ -14,6 +14,21 @@ Atualizado em: 27/09/2026
 
 ## Backlog
 
+### F2-45 · 🚦 GATILHO: modularizar script.js/minigames.js (início de sessão dedicada)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Alta
+- Pronto quando: `script.js` está dividido em módulos ES nativos (`<script type="module">`, sem bundler), sem mudar nenhum comportamento do app
+- Nota: achado 🟡 da auditoria técnica de 26/09/2026 — `script.js` (2500+ linhas) concentra bancos de conteúdo, lógica de pergunta, estado e renderização no mesmo escopo global; cada novo jogo já toca vários pontos espalhados. O Pedro decidiu que isso merece uma sessão só pra isso, não misturado com feature nova — este cartão é o "abre aqui" da próxima sessão dedicada
+- Nota: plano já esboçado na conversa da auditoria: `content/*.js` (bancos de dados por categoria), `games/*.js` (funções de pergunta), `state.js` (o objeto `state` e mutações), `ui/screens.js` (`showScreen`, `BACK_ACTION`, navegação), `profiles.js` (perfis, tempo de jogo, painel dos pais), `main.js` (inicialização e eventos). `minigames.js` já está bem isolado — vira só mais um módulo importado, sem mudar conteúdo
+- Nota: fazer em etapas pequenas (um módulo por vez), rodando a suíte de testes do F2-44 (`node tests/run-all.mjs`) a cada etapa — não tudo de uma vez, pelo risco real de regressão num arquivo que hoje faz tudo funcionar
+
+### F2-46 · Confirmar licença de sons e ícones antes do lançamento comercial
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Média
+- Pronto quando: a origem/licença de `sounds/correct.mp3`, `sounds/wrong.mp3` e dos ícones em `icons/` está documentada (banco gratuito com licença comercial, compra, ou criação própria)
+- Nota: achado 🟡 da auditoria técnica de 26/09/2026 — nenhum arquivo de crédito/licença no repositório pra esses assets. O Pedro não lembra ao certo a origem (acha que baixou de sites gratuitos) — decidiu deixar pra revisar mais adiante, antes de qualquer lançamento comercial de verdade
+- Nota: quando for revisitar, se a origem real não puder ser confirmada com segurança, o caminho mais simples é trocar por sons/ícones de um banco de licença clara (ex.: licença CC0, ou explicitamente liberada pra uso comercial) — a fonte Nunito (`fonts/nunito-latin.woff2`) já está OK (SIL Open Font License, de uso comercial livre)
+
 ### F2-05 · Fechar a versão final para produção
 - Fase: 2 · Ideias e melhorias
 - Prioridade: Alta
@@ -187,6 +202,7 @@ _(vazio)_
 - Nota: ideia do Pedro ("crie pequenas historinhas ilustradas com emojis ou o que achar melhor para treinar a leitura")
 - Nota: falta decidir se tem alguma pergunta de compreensão depois (vira uma "pergunta" como o resto do app, com estrela) ou se é só leitura livre, sem pontuação — o F2-13 (problemas de matemática) já mistura leitura com conta e pode servir de referência de formato
 - Nota: seguiu o formato do F2-13, como sugerido — decisão tomada sem precisar perguntar (era só um detalhe de formato, não uma escolha de produto): cada historinha (20 no banco, com emoji ilustrando) vem com 1 pergunta de compreensão simples (onde/o quê/de que cor) e múltipla escolha, valendo estrela como qualquer outra pergunta do app. Nova categoria própria no menu ("Leiturinha"), sem sub-escolha nem modo arrastar (não faz sentido aqui) — fica de fora do "Misturar Tudo", mesmo critério já usado pra Inglês/Matemática. Testado: nenhuma pergunta gerada com opções repetidas ou correta faltando nos 3 níveis (200 amostras cada), fluxo completo de acerto/erro/resultado, Misturar Tudo continua sem Leiturinha, visual claro/escuro/mobile sem rolagem lateral mesmo com 6 opções de texto
+- Nota: **renomeado em 27/09/2026** de "Leiturinha" para **"Leitura e Interpretação"** (tela: "Jogo da Leitura e Interpretação") — a auditoria técnica apontou que "Leiturinha" já é usado por uma marca conhecida de assinatura de livros infantis no Brasil, no mesmo segmento. Trocado o `id` interno (`leiturinha` → `leitura`) e a nomenclatura do código (`LEITURINHA_BANK` → `LEITURA_BANK`, `leiturinhaQuestion` → `leituraQuestion`) pra não deixar rastro do nome antigo. Testado: rótulo novo no menu/config/painel dos pais, 300 amostras sem opção repetida, continua fora do Misturar Tudo, sem rolagem lateral no celular
 
 ### F2-32 · Novo jogo: "Atrás dos quadrados" (descobrir a imagem escondida)
 - Fase: 2 · Ideias e melhorias

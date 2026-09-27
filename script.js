@@ -218,7 +218,7 @@ const CATEGORY_META = [
     { id: 'numletras',  label: 'Números e Letras', emoji: '🔢', sub: '1, 2, A, B…',            gameTitle: 'Jogo de Números e Letras' },
     { id: 'ingles',     label: 'Inglês',           emoji: '💬', sub: 'dog, good morning…',      gameTitle: 'Jogo de Inglês' },
     { id: 'matematica', label: 'Matemática',       emoji: '🧮', sub: '+  −  ×  ÷',              gameTitle: 'Jogo de Matemática' },
-    { id: 'leiturinha', label: 'Leiturinha',       emoji: '📖', sub: 'historinhas curtas',      gameTitle: 'Jogo da Leiturinha' },
+    { id: 'leitura',    label: 'Leitura e Interpretação', emoji: '📖', sub: 'historinhas curtas', gameTitle: 'Jogo da Leitura e Interpretação' },
     { id: 'completar',  label: 'Completar Palavra', emoji: '🔤', sub: 'arraste a vogal',        gameTitle: 'Jogo de Completar a Palavra' },
     { id: 'mouse',      label: 'Treino do mouse',  emoji: '🖱️', sub: 'balões, alvos, rolar…',   gameTitle: 'Treino do Mouse' },
     { id: 'pintura',    label: 'Pintura Livre',    emoji: '🖍️', sub: 'desenhe à vontade',       gameTitle: 'Pintura Livre' },
@@ -909,13 +909,15 @@ function wordProblemQuestion(count) {
     };
 }
 
-/* ---------- leiturinha (F2-33) ---------- */
+/* ---------- leitura e interpretação (F2-33; renomeado de "Leiturinha" em 27/09/2026
+   — nome já usado por uma marca conhecida de assinatura de livros infantis no Brasil,
+   achado da auditoria técnica) ---------- */
 
 // Historinhas curtas ilustradas com emoji, pra treinar leitura (pensada pra
 // filha de 8 anos, que já lê). Cada uma tem uma pergunta de compreensão simples
 // (onde/o quê/de que cor), igual a um exercício de interpretação de texto da
 // escola — segue o mesmo formato de "pergunta" do resto do app, com estrela.
-const LEITURINHA_BANK = [
+const LEITURA_BANK = [
     { emoji: '🐱', story: 'A gata Mel dorme no sofá 🛋️ todas as tardes.', pergunta: 'Onde a gata Mel dorme?', resposta: 'No sofá' },
     { emoji: '🐶', story: 'O cachorro Rex adora correr atrás da bola ⚽ no quintal.', pergunta: 'Atrás de que o Rex corre?', resposta: 'Da bola' },
     { emoji: '🐰', story: 'O coelhinho Bolinha gosta muito de comer cenoura 🥕 no jardim.', pergunta: 'O que o coelhinho gosta de comer?', resposta: 'Cenoura' },
@@ -938,12 +940,12 @@ const LEITURINHA_BANK = [
     { emoji: '🐧', story: 'O pinguim escorregou na neve ❄️ e caiu rindo no chão.', pergunta: 'Onde o pinguim escorregou?', resposta: 'Na neve' },
 ];
 
-function leiturinhaQuestion(count) {
-    const item = randomFrom(LEITURINHA_BANK);
-    const n = Math.min(count, LEITURINHA_BANK.length);
+function leituraQuestion(count) {
+    const item = randomFrom(LEITURA_BANK);
+    const n = Math.min(count, LEITURA_BANK.length);
     const toOpt = (it) => ({ id: 'leit-' + it.resposta, name: it.resposta, kind: 'text', label: it.resposta });
     const correct = toOpt(item);
-    const wrongPool = LEITURINHA_BANK.filter((it) => it.resposta !== item.resposta);
+    const wrongPool = LEITURA_BANK.filter((it) => it.resposta !== item.resposta);
     const options = shuffle([correct, ...sample(wrongPool, n - 1).map(toOpt)]);
     return {
         key: `leit:${item.resposta}`, correct, options,
@@ -1007,7 +1009,7 @@ function buildQuestion(count) {
     if (state.category === 'ingles') return englishQuestion(count);
     if (state.category === 'matematica') return mathQuestion(count);
     if (state.category === 'numletras') return numLetrasQuestion(count);
-    if (state.category === 'leiturinha') return leiturinhaQuestion(count);
+    if (state.category === 'leitura') return leituraQuestion(count);
     if (state.category === 'completar') return completarPalavraQuestion();
     const cat = state.category === 'misturar'
         ? randomFrom(['formas', 'cores', 'animais', 'numletras'])
