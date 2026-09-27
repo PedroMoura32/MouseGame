@@ -315,6 +315,12 @@
     <audio id="correct-sound" src="sounds/correct.mp3" preload="auto"></audio>
     <audio id="wrong-sound" src="sounds/wrong.mp3" preload="auto"></audio>
 
+    <!-- F2-45: script.js foi dividido em arquivos por assunto (ver comentário no topo de
+         script.js). São scripts clássicos, não módulos ES — testamos abrindo o jogo
+         direto via file:// (sem servidor), e Chrome bloqueia por CORS o import de
+         módulo nesse protocolo. Continuam todos no mesmo escopo global, como sempre
+         foram; a ordem abaixo importa (cada arquivo pode usar o que o anterior define). -->
+    <script src="content.js"></script>
     <script src="minigames.js"></script>
     <script src="script.js"></script>
 </body>
