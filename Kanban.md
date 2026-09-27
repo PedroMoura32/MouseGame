@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 27/09/2026
+Atualizado em: 28/09/2026
 
 **Regras para o Claude Code**
 
@@ -13,14 +13,6 @@ Atualizado em: 27/09/2026
 - Mantenha cada campo em uma única linha e atualize a data acima.
 
 ## Backlog
-
-### F2-45 · 🚦 GATILHO: modularizar script.js/minigames.js (início de sessão dedicada)
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Alta
-- Pronto quando: `script.js` está dividido em módulos ES nativos (`<script type="module">`, sem bundler), sem mudar nenhum comportamento do app
-- Nota: achado 🟡 da auditoria técnica de 26/09/2026 — `script.js` (2500+ linhas) concentra bancos de conteúdo, lógica de pergunta, estado e renderização no mesmo escopo global; cada novo jogo já toca vários pontos espalhados. O Pedro decidiu que isso merece uma sessão só pra isso, não misturado com feature nova — este cartão é o "abre aqui" da próxima sessão dedicada
-- Nota: plano já esboçado na conversa da auditoria: `content/*.js` (bancos de dados por categoria), `games/*.js` (funções de pergunta), `state.js` (o objeto `state` e mutações), `ui/screens.js` (`showScreen`, `BACK_ACTION`, navegação), `profiles.js` (perfis, tempo de jogo, painel dos pais), `main.js` (inicialização e eventos). `minigames.js` já está bem isolado — vira só mais um módulo importado, sem mudar conteúdo
-- Nota: fazer em etapas pequenas (um módulo por vez), rodando a suíte de testes do F2-44 (`node tests/run-all.mjs`) a cada etapa — não tudo de uma vez, pelo risco real de regressão num arquivo que hoje faz tudo funcionar
 
 ### F2-46 · Confirmar licença de sons e ícones antes do lançamento comercial
 - Fase: 2 · Ideias e melhorias
@@ -125,7 +117,14 @@ Atualizado em: 27/09/2026
 
 ## Em andamento
 
-_(vazio)_
+### F2-45 · 🚦 GATILHO: modularizar script.js/minigames.js (início de sessão dedicada)
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Alta
+- Pronto quando: `script.js` está dividido em arquivos por assunto, cada um carregado como `<script>` clássico em ordem, sem mudar nenhum comportamento do app
+- Nota: achado 🟡 da auditoria técnica de 26/09/2026 — `script.js` (2500+ linhas) concentra bancos de conteúdo, lógica de pergunta, estado e renderização no mesmo escopo global; cada novo jogo já toca vários pontos espalhados. O Pedro decidiu que isso merece uma sessão só pra isso, não misturado com feature nova
+- Nota: **28/09/2026 — mudança de abordagem.** O plano original previa módulos ES nativos (`<script type="module">`, `import`/`export`). Na prática, o Chrome bloqueia por CORS o `import` de módulo quando a página é aberta via `file://` — e é assim que o jogo é testado/aberto localmente hoje, sem servidor (confirmado: com `type="module"`, o app nem inicializava ao abrir o `index.html` direto). Trocamos para scripts clássicos (sem `import`/`export`) divididos em arquivos por assunto, carregados em ordem e compartilhando o mesmo escopo global de sempre — exatamente como `minigames.js` já funcionava. Isso preserva 100% a compatibilidade com abrir o arquivo direto no navegador e não exige nenhuma mudança nos testes do F2-44
+- Nota: **28/09/2026 — progresso.** `script.js` caiu de 2511 para 1952 linhas em 4 commits pequenos, cada um com `node tests/run-all.mjs` passando 100% antes de seguir: `content.js` (bancos de dados: CONTENT, CATEGORY_META, EN_VOCAB, MATH_OPS, AVATARS etc.), `utils.js` (randInt/shuffle/sample/randomFrom/randRange), `confetti.js` (canvas de confete), `draw.js` + `mimica.js` (Pintura Livre e Mímica). `sw.js` teve `PRECACHE`/`VERSION` atualizados a cada arquivo novo. Falta a parte mais entrelaçada: perfis/localStorage/painel dos pais, motor de perguntas (buildQuestion e cia.), fluxo de jogo (showScreen/BACK_ACTION/state), construção do menu e o bloco de inicialização — todos com dependências cruzadas mais finas, exigindo mais cuidado por etapa
+- Nota: fazer em etapas pequenas (um arquivo por vez), rodando a suíte de testes do F2-44 (`node tests/run-all.mjs`) a cada etapa — não tudo de uma vez, pelo risco real de regressão num arquivo que hoje faz tudo funcionar
 
 ## Impedimento
 
