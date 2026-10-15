@@ -42,6 +42,18 @@ const MINIGAMES = (() => {
     }
     const sample = (arr, n) => shuffle(arr).slice(0, n);
 
+    // F2-25: gera pontos ao longo de um arco elíptico (graus, convenção de tela: 0°=direita,
+    // 90°=baixo, 180°=esquerda, 270°=cima) — usado pra desenhar os trechos curvos das
+    // letras/números de TRACE_SHAPES sem precisar digitar dezenas de pontos à mão.
+    function ellipsePts(cx, cy, rx, ry, a0, a1, n) {
+        const pts = [];
+        for (let i = 0; i <= n; i++) {
+            const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180;
+            pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]);
+        }
+        return pts;
+    }
+
     // Laço de animação com passo de tempo (dt em segundos). Devolve a função "parar".
     function loop(step) {
         let id = 0, last = 0, on = true;
@@ -809,7 +821,249 @@ const MINIGAMES = (() => {
             api.hint('Clique na caixinha com menos pausinhos, uma de cada vez 🥢');
         }
 
-        function destroy() { api.field.innerHTML = ''; }
+    function destroy() { api.field.innerHTML = ''; }
+
+        return { prompt, start, destroy };
+    }
+
+    /* ============================================================
+       8) TRAÇAR — letras e números, na ordem certa do traço (F2-25)
+
+       Cada caractere é 1+ "strokes" (traços — a pessoa levanta o dedo
+       entre um e outro, igual escrita de verdade). Um stroke é uma
+       lista de pontos num grid normalizado 0-100 (fica fácil desenhar à
+       mão: esquerda=20, direita=80, topo=10, base=90, meio=50). As
+       curvas (O, C, S...) usam ellipsePts() em vez de pontos digitados
+       um a um. É o mesmo mecanismo de tolerância-até-o-caminho do
+       minijogo "Caminho" (closestOnPath), só que aplicado trecho por
+       trecho, com o progresso desenhado por cima (tipo livro de colorir)
+       via stroke-dasharray/dashoffset.
+       ============================================================ */
+
+    const TRACE_SHAPES = {
+        // ---------- números ----------
+        '0': { strokes: [ellipsePts(50, 50, 26, 40, -90, 270, 28)] },
+        '1': { strokes: [[[35, 22], [50, 10], [50, 90]]] },
+        '2': { strokes: [[[26, 24], [32, 13], [48, 10], [62, 13], [72, 24], [72, 36], [54, 56], [24, 80], [24, 88], [78, 88]]] },
+        '3': { strokes: [ellipsePts(32, 30, 26, 20, -90, 90, 10).concat(ellipsePts(32, 70, 28, 20, -90, 90, 10).slice(1))] },
+        '4': { strokes: [[[60, 10], [20, 65], [82, 65]], [[60, 10], [60, 90]]] },
+        '5': { strokes: [[[75, 12], [25, 12], [25, 52]], ellipsePts(30, 70, 30, 20, -105, 95, 12)] },
+        '6': { strokes: [[[65, 13], [40, 13], [26, 35], [22, 60]].concat(ellipsePts(45, 68, 24, 20, 180, 540, 16).slice(1))] },
+        '7': { strokes: [[[22, 12], [78, 12], [42, 88]]] },
+        '8': { strokes: [ellipsePts(50, 30, 22, 18, -90, 270, 14), ellipsePts(50, 70, 24, 20, -90, 270, 14)] },
+        '9': { strokes: [ellipsePts(52, 32, 22, 20, -90, 270, 14), [[74, 32], [70, 60], [55, 88]]] },
+        // ---------- letras ----------
+        'A': { strokes: [[[20, 90], [50, 10]], [[50, 10], [80, 90]], [[30, 58], [70, 58]]] },
+        'B': { strokes: [[[25, 10], [25, 90]], ellipsePts(25, 30, 26, 20, -90, 90, 10).concat(ellipsePts(25, 70, 28, 20, -90, 90, 10).slice(1))] },
+        'C': { strokes: [ellipsePts(52, 50, 30, 40, -40, -320, 24)] },
+        'D': { strokes: [[[25, 10], [25, 90]], ellipsePts(25, 50, 35, 40, -90, 90, 16)] },
+        'E': { strokes: [[[25, 10], [25, 90]], [[25, 10], [75, 10]], [[25, 50], [62, 50]], [[25, 90], [75, 90]]] },
+        'F': { strokes: [[[25, 10], [25, 90]], [[25, 10], [75, 10]], [[25, 50], [62, 50]]] },
+        'G': { strokes: [ellipsePts(52, 50, 30, 40, -40, -300, 22), [[67, 85], [67, 58], [50, 58]]] },
+        'H': { strokes: [[[25, 10], [25, 90]], [[75, 10], [75, 90]], [[25, 50], [75, 50]]] },
+        'I': { strokes: [[[50, 10], [50, 90]]] },
+        'J': { strokes: [[[65, 10], [65, 65]].concat(ellipsePts(45, 65, 20, 20, 0, 110, 8).slice(1))] },
+        'K': { strokes: [[[25, 10], [25, 90]], [[75, 10], [25, 50]], [[25, 50], [75, 90]]] },
+        'L': { strokes: [[[25, 10], [25, 90], [75, 90]]] },
+        'M': { strokes: [[[22, 90], [22, 10], [50, 55], [78, 10], [78, 90]]] },
+        'N': { strokes: [[[25, 90], [25, 10], [75, 90], [75, 10]]] },
+        'O': { strokes: [ellipsePts(50, 50, 28, 40, -90, 270, 26)] },
+        'P': { strokes: [[[25, 10], [25, 90]], ellipsePts(25, 30, 30, 20, -90, 90, 12)] },
+        'Q': { strokes: [ellipsePts(50, 50, 28, 40, -90, 270, 26), [[58, 72], [78, 92]]] },
+        'R': { strokes: [[[25, 10], [25, 90]], ellipsePts(25, 30, 30, 20, -90, 90, 12), [[25, 50], [75, 90]]] },
+        'S': { strokes: [[[65, 20], [45, 13], [28, 20], [28, 33], [42, 45], [58, 55], [72, 67], [72, 80], [55, 88], [32, 80]]] },
+        'T': { strokes: [[[20, 10], [80, 10]], [[50, 10], [50, 90]]] },
+        'U': { strokes: [[[25, 10], [25, 65]].concat(ellipsePts(50, 65, 25, 25, 180, 0, 16).slice(1)).concat([[75, 10]])] },
+        'V': { strokes: [[[22, 10], [50, 90], [78, 10]]] },
+        'W': { strokes: [[[18, 10], [35, 90], [50, 50], [65, 90], [82, 10]]] },
+        'X': { strokes: [[[22, 10], [78, 90]], [[78, 10], [22, 90]]] },
+        'Y': { strokes: [[[22, 10], [50, 50]], [[78, 10], [50, 50], [50, 90]]] },
+        'Z': { strokes: [[[22, 12], [78, 12], [22, 88], [78, 88]]] },
+    };
+
+    let lastTracedChar = null;   // evita repetir o mesmo caractere duas rodadas seguidas
+
+    function tracar(api) {
+        // Tolerância (% do tamanho do campo) e raio de "pegar o traço": encolhe no difícil.
+        const cfg = [{ tol: 10, grab: 15 }, { tol: 7, grab: 12 }, { tol: 5, grab: 10 }][api.level];
+        const pool = Object.keys(TRACE_SHAPES);
+        const key = pick(pool.filter((k) => k !== lastTracedChar));
+        lastTracedChar = key;
+        const isDigit = /[0-9]/.test(key);
+        const prompt = {
+            html: `Trace ${isDigit ? 'o número' : 'a letra'} <b>${key}</b> com o dedo ✏️`,
+            speak: `Trace ${isDigit ? 'o número' : 'a letra'} ${key}`,
+        };
+
+        const NS = 'http://www.w3.org/2000/svg';
+        let strokesPx = [], strokeLens = [];
+        let strokeIdx = 0, reachedT = 0, dragging = false;
+        let fillEls = [], startDot, surface, S = 0, ox = 0, oy = 0, tol = 0, grabR = 0;
+
+        function toPx(stroke) {
+            return stroke.map(([nx, ny]) => ({ x: ox + (nx / 100) * S, y: oy + (ny / 100) * S }));
+        }
+        function pathLen(pts) {
+            let len = 0;
+            for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+            return len;
+        }
+        // Ponto mais próximo do trajeto poligonal + quanto já se andou até ele (em px).
+        function closestOnPath(pts, x, y) {
+            let best = Infinity, bestLen = 0, acc = 0;
+            for (let i = 0; i < pts.length - 1; i++) {
+                const x1 = pts[i].x, y1 = pts[i].y, x2 = pts[i + 1].x, y2 = pts[i + 1].y;
+                const dx = x2 - x1, dy = y2 - y1;
+                const t = clamp(((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+                const d = Math.hypot(x - (x1 + t * dx), y - (y1 + t * dy));
+                if (d < best) { best = d; bestLen = acc + t * Math.hypot(dx, dy); }
+                acc += Math.hypot(dx, dy);
+            }
+            return { dist: best, len: bestLen };
+        }
+        function pointAt(pts, lenTarget) {
+            let acc = 0;
+            for (let i = 0; i < pts.length - 1; i++) {
+                const segLen = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+                if (acc + segLen >= lenTarget || i === pts.length - 2) {
+                    const t = segLen ? clamp((lenTarget - acc) / segLen, 0, 1) : 0;
+                    return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * t, y: pts[i].y + (pts[i + 1].y - pts[i].y) * t };
+                }
+                acc += segLen;
+            }
+            return pts[pts.length - 1];
+        }
+
+        function placeDot() {
+            const p = pointAt(strokesPx[strokeIdx], strokeLens[strokeIdx] * reachedT);
+            startDot.style.left = p.x + 'px';
+            startDot.style.top = p.y + 'px';
+        }
+
+        function setProgress(i, t) {
+            const len = strokeLens[i];
+            fillEls[i].style.strokeDasharray = String(len);
+            fillEls[i].style.strokeDashoffset = String(len * (1 - t));
+            // Achado visual: com stroke-linecap redondo, alguns traços (especialmente os
+            // curtos, tipo o gancho do G/Q) deixavam uma bolinha verde "vazando" mesmo com
+            // o progresso em 0%, por um arredondamento do próprio dasharray/dashoffset no
+            // fim do traço. Em vez de depender só disso, escondemos de vez (opacity) o que
+            // ainda não tem progresso real: 0% fica mesmo invisível, sem depender de o
+            // dashoffset "esconder" perfeitamente.
+            fillEls[i].style.opacity = t > 0 ? '1' : '0';
+        }
+
+        function failStroke() {
+            reachedT = 0;
+            dragging = false;
+            setProgress(strokeIdx, 0);
+            placeDot();
+            startDot.classList.remove('shake'); void startDot.offsetWidth; startDot.classList.add('shake');
+            api.mistake('Ops! Siga bem em cima do tracinho 🙂');
+        }
+
+        function nextStroke() {
+            strokeIdx++;
+            reachedT = 0;
+            dragging = false;
+            if (strokeIdx >= strokesPx.length) { startDot.hidden = true; api.done(); return; }
+            placeDot();
+        }
+
+        function onDown(e) {
+            if (strokeIdx >= strokesPx.length) return;
+            const p = localPoint(api.field, e);
+            const tip = pointAt(strokesPx[strokeIdx], strokeLens[strokeIdx] * reachedT);
+            if (Math.hypot(p.x - tip.x, p.y - tip.y) > grabR) return;
+            e.preventDefault();
+            dragging = true;
+            try { surface.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+        function onMove(e) {
+            if (!dragging || strokeIdx >= strokesPx.length) return;
+            const p = localPoint(api.field, e);
+            const { dist, len } = closestOnPath(strokesPx[strokeIdx], p.x, p.y);
+            if (dist > tol) { failStroke(); return; }
+            const t = clamp(len / strokeLens[strokeIdx], 0, 1);
+            if (t > reachedT) {
+                reachedT = t;
+                setProgress(strokeIdx, reachedT);
+                placeDot();
+                if (reachedT >= 0.94) { setProgress(strokeIdx, 1); nextStroke(); }
+            }
+        }
+        function onUp() { dragging = false; }
+
+        function layout() {
+            const { w, h } = api.size();
+            S = Math.min(w, h) * 0.82;
+            ox = (w - S) / 2; oy = (h - S) / 2;
+            tol = S * (cfg.tol / 100);
+            grabR = S * (cfg.grab / 100);
+
+            api.field.innerHTML = '';
+            surface = el('div', 'mg-tracar-surface', api.field);
+            surface.style.cssText = `position:absolute; left:0; top:0; width:${w}px; height:${h}px; touch-action:none;`;
+
+            const svg = document.createElementNS(NS, 'svg');
+            svg.setAttribute('class', 'mg-path');
+            svg.setAttribute('width', w); svg.setAttribute('height', h);
+            svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+            strokesPx = TRACE_SHAPES[key].strokes.map(toPx);
+            strokeLens = strokesPx.map(pathLen);
+            fillEls = [];
+            strokesPx.forEach((pts) => {
+                const d = 'M ' + pts.map((p) => `${p.x} ${p.y}`).join(' L ');
+                // guia pontilhada (3 camadas, igual ao minijogo Caminho) + traço de progresso por cima
+                [[tol * 2.1, 'var(--accent)', 0.18, ''], [tol * 1.5, '#ffffff', 0.9, ''], [3, '#d9bfe8', 1, '1 11']]
+                    .forEach(([sw, col, op, dash]) => {
+                        const p = document.createElementNS(NS, 'path');
+                        p.setAttribute('d', d); p.setAttribute('fill', 'none');
+                        p.setAttribute('stroke-linejoin', 'round'); p.setAttribute('stroke-linecap', 'round');
+                        p.setAttribute('stroke-width', sw); p.setAttribute('opacity', op);
+                        p.style.stroke = col;
+                        if (dash) p.setAttribute('stroke-dasharray', dash);
+                        svg.appendChild(p);
+                    });
+                const fill = document.createElementNS(NS, 'path');
+                fill.setAttribute('class', 'mg-tracar-fill');
+                fill.setAttribute('d', d); fill.setAttribute('fill', 'none');
+                fill.setAttribute('stroke-linejoin', 'round'); fill.setAttribute('stroke-linecap', 'round');
+                fill.setAttribute('stroke-width', tol * 1.5);
+                fill.style.stroke = 'var(--correct, #38d9a9)';
+                svg.appendChild(fill);
+                fillEls.push(fill);
+            });
+            api.field.appendChild(svg);
+            strokesPx.forEach((_, i) => setProgress(i, 0));
+
+            startDot = el('div', 'mg-tracar-dot', api.field);
+            const dotSize = grabR * 1.3;
+            startDot.style.cssText = `position:absolute; width:${dotSize}px; height:${dotSize}px; margin:${-dotSize / 2}px 0 0 ${-dotSize / 2}px; pointer-events:none;`;
+            placeDot();
+
+            surface.addEventListener('pointerdown', onDown);
+            surface.addEventListener('pointermove', onMove);
+            surface.addEventListener('pointerup', onUp);
+            surface.addEventListener('pointercancel', onUp);
+        }
+
+        function start() {
+            strokeIdx = 0; reachedT = 0; dragging = false;
+            layout();
+            api.hint('Encoste no pontinho e arraste seguindo o tracinho 👆');
+        }
+
+        function destroy() {
+            if (surface) {
+                surface.removeEventListener('pointerdown', onDown);
+                surface.removeEventListener('pointermove', onMove);
+                surface.removeEventListener('pointerup', onUp);
+                surface.removeEventListener('pointercancel', onUp);
+            }
+            api.field.innerHTML = '';
+        }
 
         return { prompt, start, destroy };
     }
@@ -822,5 +1076,6 @@ const MINIGAMES = (() => {
         memoria:    { create: memoria },
         quadros:    { create: quadros },
         pausinhos:  { create: pausinhos },
+        tracar:     { create: tracar },
     };
 })();

@@ -1,6 +1,6 @@
 # Kanban: publicação do app na Play Store
 
-Atualizado em: 28/09/2026
+Atualizado em: 15/10/2026
 
 **Regras para o Claude Code**
 
@@ -52,12 +52,6 @@ Atualizado em: 28/09/2026
 - Prioridade: Baixa
 - Pronto quando: os sons de acerto/erro do jogo clássico (sounds/correct.mp3, sounds/wrong.mp3) são trocados por algo que o Pedro prefira
 - Nota: pedido do Pedro, ainda sem direção definida ("queria testar algo diferente") — falta saber se ele tem arquivos de som em mente, se quer que eu gere sons sintéticos (como já existe no Treino do mouse, com Web Audio API, sem depender de arquivo) ou só uma variação do estilo atual; confirmar direção antes de implementar
-
-### F2-25 · Traçar letras e números com o dedo/mouse
-- Fase: 2 · Ideias e melhorias
-- Prioridade: Baixa
-- Pronto quando: a letra ou número aparece grande na tela e a criança consegue "desenhar" por cima seguindo o traçado correto, com algum feedback se saiu muito do traço
-- Nota: ideia de alfabetização motora (treinar a escrita da letra); é a mais complexa tecnicamente desse brainstorm (detectar se o traço do mouse seguiu o contorno certo) — avaliar viabilidade/esforço antes de estimar prazo
 
 ### F2-31 · Idioma da interface: português ou inglês
 - Fase: 2 · Ideias e melhorias
@@ -117,7 +111,16 @@ Atualizado em: 28/09/2026
 
 ## Em andamento
 
-_(vazio)_
+### F2-25 · Traçar letras e números com o dedo/mouse
+- Fase: 2 · Ideias e melhorias
+- Prioridade: Baixa
+- Pronto quando: a letra ou número aparece grande na tela e a criança consegue "desenhar" por cima seguindo o traçado correto, com algum feedback se saiu muito do traço
+- Nota: ideia de alfabetização motora (treinar a escrita da letra); é a mais complexa tecnicamente desse brainstorm (detectar se o traço do mouse seguiu o contorno certo) — avaliar viabilidade/esforço antes de estimar prazo
+- Nota: **15/10/2026 — viável, protótipo funcional implementado.** O Pedro escolheu, entre duas abordagens, a mais fiel (traçado real na ordem certa, não só "colorir a área"), aceitando o trabalho extra de desenhar à mão o caminho de cada letra/número. Implementado como novo minijogo "Traçar" dentro do Treino do mouse (reaproveita toda a engrenagem de rodadas/estrelas/config/HUD, igual Memória/Pausinhos), usando o mesmo mecanismo de tolerância-até-o-caminho do minijogo "Caminho" (distância até uma linha-guia), só que estendido para vários "traços" por caractere (a pessoa levanta o dedo entre um e outro, igual escrita de verdade) e com o progresso desenhado por cima tipo livro de colorir (stroke-dasharray/dashoffset)
+- Nota: as 36 geometrias (0-9, A-Z) foram desenhadas à mão num grid normalizado 0-100, usando um helper de arco elíptico pras curvas (O, C, S, G, U, D...) pra não precisar digitar ponto a ponto. Conferidas visualmente uma a uma (36 screenshots via Chrome headless) — todas reconhecíveis como a letra/número pretendida
+- Nota: achado e corrigido durante a conferência visual — traços curtos (ex.: o gancho do G/Q) e o fim de alguns traços deixavam uma bolinha verde "vazando" mesmo com 0% de progresso, por um arredondamento do próprio truque de stroke-dasharray/dashoffset perto da ponta do traço; corrigido escondendo de vez (opacity) qualquer traço sem progresso real, em vez de confiar só no dashoffset
+- Nota: testado de ponta a ponta com eventos de ponteiro de verdade (não só clique) — seguir certinho o traço completa o caractere e avança de rodada; afastar-se de propósito do traço dispara o aviso de erro — `tests/tracar.mjs`, rodado várias vezes com caracteres aleatórios diferentes, e a suíte completa (`node tests/run-all.mjs`) passando junto
+- Nota: ainda **não publicado** (`git push`) a pedido do Pedro — rodar localmente e só publicar depois que ele validar de verdade com as filhas (o teste automatizado prova que o mecanismo funciona, mas não substitui ver se é gostoso de usar numa tela de toque de verdade). Só 3 arquivos mudaram: `minigames.js` (o minijogo), `content.js` (entrada "Traçar" na lista de treinos do mouse), `styles.css` (estilo do pontinho pulsante)
 
 ## Impedimento
 
