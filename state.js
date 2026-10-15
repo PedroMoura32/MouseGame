@@ -17,6 +17,7 @@ const state = {
     category: 'formas',
     sub: { ingles: 'misturar', matematica: 'somar', mouse: 'misturar', numletras: 'misturar' },
     table: 'todas',        // tabuada específica (só usado quando matematica === 'multiplicar')
+    traceSet: 'tudo',      // F2-25: filtro de caracteres do "Traçar" (tudo/vogais/consoantes/números)
     difficulty: 'facil',
     mode: 'clicar',
     totalQuestions: 10,

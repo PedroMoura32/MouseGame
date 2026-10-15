@@ -57,6 +57,8 @@ const el = {
     subListen: $('#sub-listen'),
     subGrid: $('#sub-grid'),
     panelExtra: $('#panel-extra'),
+    extraTitle: $('#extra-title'),
+    extraListen: $('#extra-listen'),
     extraGrid: $('#extra-grid'),
     difficultyGrid: $('#difficulty-grid'),
     countTitle: $('#count-title'),

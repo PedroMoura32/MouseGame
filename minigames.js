@@ -87,6 +87,18 @@ const MINIGAMES = (() => {
         const g = ac.createGain(); g.gain.value = 0.4;
         src.connect(g); g.connect(ac.destination); src.start();
     }
+    // F2-25: "ops, tenta de nov o" bem suave pro "Traçar" — descendo de leve em vez de um
+    // buzzer, porque ali é comum sair do traço várias vezes seguidas na mesma letra (não é
+    // um erro "de verdade" como errar a pergunta, é só um ajuste fino de percurso).
+    function missSfx() {
+        const ac = audio(); if (!ac) return;
+        const t = ac.currentTime;
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(420, t);
+        o.frequency.exponentialRampToValueAtTime(300, t + 0.14);
+        g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.2);
+    }
     function blipSfx(freq) {
         const ac = audio(); if (!ac) return;
         const t = ac.currentTime;
@@ -886,8 +898,17 @@ const MINIGAMES = (() => {
     function tracar(api) {
         // Tolerância (% do tamanho do campo) e raio de "pegar o traço": encolhe no difícil.
         const cfg = [{ tol: 10, grab: 15 }, { tol: 7, grab: 12 }, { tol: 5, grab: 10 }][api.level];
-        const pool = Object.keys(TRACE_SHAPES);
-        const key = pick(pool.filter((k) => k !== lastTracedChar));
+        // F2-25: filtro "Quais caracteres?" (painel extra, ver menu.js) — "VOGAIS" é
+        // definido em questions.js (banco do "Completar Palavra"), carregado antes deste
+        // arquivo, então dá pra reaproveitar em vez de duplicar a lista de vogais aqui.
+        const pool = Object.keys(TRACE_SHAPES).filter((k) => {
+            if (state.traceSet === 'numeros') return /[0-9]/.test(k);
+            if (state.traceSet === 'vogais') return VOGAIS.includes(k);
+            if (state.traceSet === 'consoantes') return /[A-Z]/.test(k) && !VOGAIS.includes(k);
+            return true; // 'tudo'
+        });
+        const semRepetir = pool.filter((k) => k !== lastTracedChar);
+        const key = pick(semRepetir.length ? semRepetir : pool);
         lastTracedChar = key;
         const isDigit = /[0-9]/.test(key);
         const prompt = {
@@ -959,7 +980,7 @@ const MINIGAMES = (() => {
             setProgress(strokeIdx, 0);
             placeDot();
             startDot.classList.remove('shake'); void startDot.offsetWidth; startDot.classList.add('shake');
-            api.mistake('Ops! Siga bem em cima do tracinho 🙂');
+            api.mistake('Ops! Siga bem em cima do tracinho 🙂', { playSound: missSfx });
         }
 
         function nextStroke() {

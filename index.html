@@ -149,12 +149,13 @@
                 <div id="sub-grid" class="choice-grid" role="radiogroup" aria-label="Tipo de pergunta"></div>
             </div>
 
-            <!-- Só aparece em Matemática > Multiplicar -->
+            <!-- Só aparece em Matemática > Multiplicar (tabuada) ou Treino do mouse > Traçar
+                 (conjunto de caracteres) — título e grid reconstruídos por menu.js conforme o caso -->
             <div id="panel-extra" class="panel" hidden>
-                <h2 class="panel-title">Qual tabuada?
-                    <button class="listen-btn" data-say="Escolha uma tabuada para treinar, ou todas misturadas" aria-label="Ouvir: qual tabuada">🔊</button>
+                <h2 class="panel-title"><span id="extra-title">Qual tabuada?</span>
+                    <button id="extra-listen" class="listen-btn" data-say="Escolha uma tabuada para treinar, ou todas misturadas" aria-label="Ouvir: qual tabuada">🔊</button>
                 </h2>
-                <div id="extra-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Tabuada"></div>
+                <div id="extra-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Opções extras"></div>
             </div>
 
             <div class="panel">

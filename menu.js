@@ -62,11 +62,40 @@ function refreshSubPanel() {
         it.id === state.sub[state.category]));
 }
 
-// F2-10 "Tabuada específica": só aparece dentro de Matemática > Multiplicar.
-// O grid (1 a 10 + Todas) é montado uma única vez em buildMenu(); aqui só
-// mostra/esconde, igual ao panel-mode.
+// Painel "extra": um segundo nível de escolha que só faz sentido dentro de uma
+// categoria/sub específica — hoje são dois casos (F2-10 "Qual tabuada?" dentro
+// de Matemática > Multiplicar, e F2-25 "Quais caracteres?" dentro de Treino do
+// mouse > Traçar). Só reconstrói o grid quando troca de caso (como refreshKindPanels),
+// porque os itens de cada caso são diferentes.
+let extraKind = null;
 function refreshExtraPanel() {
-    el.panelExtra.hidden = !(state.category === 'matematica' && state.sub.matematica === 'multiplicar');
+    const isTabuada = state.category === 'matematica' && state.sub.matematica === 'multiplicar';
+    const isTraceSet = state.category === 'mouse' && state.sub.mouse === 'tracar';
+    el.panelExtra.hidden = !(isTabuada || isTraceSet);
+    if (!isTabuada && !isTraceSet) { extraKind = null; return; }
+
+    const kind = isTabuada ? 'tabuada' : 'traceset';
+    if (kind === extraKind) return;
+    extraKind = kind;
+    el.extraGrid.innerHTML = '';
+
+    if (isTabuada) {
+        el.extraTitle.textContent = 'Qual tabuada?';
+        el.extraListen.dataset.say = 'Escolha uma tabuada para treinar, ou todas misturadas';
+        el.extraListen.setAttribute('aria-label', 'Ouvir: qual tabuada');
+        const items = [{ id: 'todas', label: 'Todas', sub: 'misturadas' }]
+            .concat(Array.from({ length: 10 }, (_, i) => ({ id: String(i + 1), label: String(i + 1), sub: 'tabuada' })));
+        items.forEach((it) => buildChoice(el.extraGrid,
+            { value: it.id, label: it.label, sub: it.sub },
+            (v) => { state.table = v; }, it.id === state.table));
+    } else {
+        el.extraTitle.textContent = 'Quais caracteres?';
+        el.extraListen.dataset.say = 'Escolha quais letras ou números entram no traçar';
+        el.extraListen.setAttribute('aria-label', 'Ouvir: quais caracteres');
+        TRACE_SET_OPTIONS.forEach((it) => buildChoice(el.extraGrid,
+            { value: it.id, label: it.label, emoji: it.emoji, sub: it.sub },
+            (v) => { state.traceSet = v; }, it.id === state.traceSet));
+    }
 }
 
 // Treino do mouse conta "rodadas" (não "perguntas") e o nível muda tamanho/velocidade.
@@ -126,13 +155,8 @@ function buildMenu() {
         { value: m.id, label: m.label, emoji: m.emoji, sub: m.sub },
         (v) => { state.mode = v; }, i === 0));
 
-    // Tabuada específica (F2-10): "Todas" + 1 a 10. Só fica visível via refreshExtraPanel().
-    const tableItems = [{ id: 'todas', label: 'Todas', sub: 'misturadas' }]
-        .concat(Array.from({ length: 10 }, (_, i) => ({ id: String(i + 1), label: String(i + 1), sub: 'tabuada' })));
-    tableItems.forEach((it, i) => buildChoice(
-        el.extraGrid,
-        { value: it.id, label: it.label, sub: it.sub },
-        (v) => { state.table = v; }, i === 0));
+    // O painel "extra" (tabuada / F2-25 caracteres do Traçar) agora é montado sob
+    // demanda em refreshExtraPanel(), porque são dois conjuntos de itens diferentes.
 
     state.category = 'formas';
     state.difficulty = 'facil';

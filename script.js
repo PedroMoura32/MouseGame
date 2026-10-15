@@ -198,9 +198,12 @@ function newRound() {
         level: Math.max(0, DIFFICULTIES.findIndex((d) => d.id === state.difficulty)),
         size: () => ({ w: el.playfield.clientWidth, h: el.playfield.clientHeight }),
         hint: (text) => { el.feedback.textContent = text; el.feedback.className = 'feedback is-checking'; },
-        mistake: (text) => {
+        // F2-25: "opts.playSound" deixa um minijogo tocar um som próprio (ex.: o "Traçar"
+        // usa um som mais suave, já que ali é comum sair do traço várias vezes seguidas na
+        // mesma letra) em vez do som de erro padrão — sem opts, comportamento idêntico a antes.
+        mistake: (text, opts) => {
             state.firstTry = false;
-            playSound(el.wrongSound);
+            if (opts && opts.playSound) opts.playSound(); else playSound(el.wrongSound);
             el.feedback.textContent = text;
             el.feedback.className = 'feedback is-wrong';
         },

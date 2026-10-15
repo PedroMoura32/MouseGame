@@ -297,6 +297,15 @@ const COUNT_DEFAULT_INDEX = 1;
 // Texto do nível no treino do mouse (nos outros jogos o nível muda o nº de opções).
 const DIFF_SUB_MOUSE = ['grande e devagar', 'tamanho normal', 'pequeno e rápido'];
 
+// F2-25: dentro do minijogo "Traçar", filtra quais caracteres entram no sorteio
+// (painel reaproveitado do F2-10 "Qual tabuada?" — ver panelExtra em menu.js).
+const TRACE_SET_OPTIONS = [
+    { id: 'tudo', label: 'Tudo', emoji: '🔤', sub: 'letras e números' },
+    { id: 'vogais', label: 'Vogais', emoji: '🅰️', sub: 'A E I O U' },
+    { id: 'consoantes', label: 'Consoantes', emoji: '🔡', sub: 'as outras letras' },
+    { id: 'numeros', label: 'Números', emoji: '🔢', sub: '0 a 9' },
+];
+
 // F2-14: 6 avatares disponíveis desde o início; os outros 6 destravam com estrelas.
 const AVATARS = [
     { glyph: '🦄', unlockAt: 0 }, { glyph: '🌸', unlockAt: 0 }, { glyph: '🐱', unlockAt: 0 },
