@@ -47,7 +47,6 @@ function refreshModePanel() {
 // Mostra a escolha extra (tipo de inglês / operação) só quando faz sentido.
 function refreshSubPanel() {
     const cfg = SUB_OPTIONS[state.category];
-    el.panelSub.hidden = !cfg;
     if (!cfg) return;
 
     const isMouse = state.category === 'mouse';
@@ -134,6 +133,60 @@ function refreshMenuForCategory() {
     refreshExtraPanel();
 }
 
+/* ---------- Wizard de etapas (F2-52) ---------- */
+let configSteps = [];
+let configStepIdx = 0;
+const stepEls = {
+    sub:    document.querySelector('.config-step[data-step="sub"]'),
+    level:  document.querySelector('.config-step[data-step="level"]'),
+    rounds: document.querySelector('.config-step[data-step="rounds"]'),
+};
+
+function buildConfigSteps() {
+    configSteps = [];
+    if (SUB_OPTIONS[state.category]) configSteps.push('sub');
+    configSteps.push('level', 'rounds');
+    configStepIdx = 0;
+
+    el.stepDots.innerHTML = configSteps
+        .map((_, i) => `<span class="step-dot${i === 0 ? ' is-active' : ''}"></span>`)
+        .join('');
+}
+
+function showConfigStep() {
+    const step = configSteps[configStepIdx];
+    Object.values(stepEls).forEach((s) => { s.hidden = true; });
+    stepEls[step].hidden = false;
+
+    el.stepDots.querySelectorAll('.step-dot').forEach((d, i) => {
+        d.classList.toggle('is-active', i === configStepIdx);
+        d.classList.toggle('is-done', i < configStepIdx);
+    });
+
+    const isLast = configStepIdx === configSteps.length - 1;
+    el.nextStepBtn.hidden = isLast;
+    el.startBtn.hidden = !isLast;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextConfigStep() {
+    if (configStepIdx < configSteps.length - 1) {
+        configStepIdx++;
+        showConfigStep();
+    }
+}
+
+function prevConfigStep() {
+    if (configStepIdx > 0) {
+        configStepIdx--;
+        showConfigStep();
+        return true;
+    }
+    return false;
+}
+
+el.nextStepBtn.addEventListener('click', nextConfigStep);
+
 function buildMenu() {
     CATEGORY_META.forEach((c, i) => {
         const label = c.id === 'mouse' ? term(c.label) : c.label;
@@ -148,6 +201,8 @@ function buildMenu() {
                 if (v === 'pintura') { openDrawScreen(); return; }
                 if (v === 'mimica') { openMimicaScreen(); return; }
                 refreshMenuForCategory();
+                buildConfigSteps();
+                showConfigStep();
                 el.configTitle.textContent = `${emoji} ${title}`;
                 showScreen('config');
             }, i === 0);

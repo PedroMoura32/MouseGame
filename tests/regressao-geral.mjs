@@ -12,6 +12,7 @@ await withBrowser(async (b) => {
     // Formas (clássico, clicar): 5 perguntas até o resultado, 5 estrelas
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Formas')).click()`);
     await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#count-grid .choice')].find(c=>c.textContent.includes('5'))?.click()`);
     await b.click('#start-btn'); await b.sleep(700);
     for (let i = 0; i < 5; i++) await b.responder(true);
@@ -24,6 +25,8 @@ await withBrowser(async (b) => {
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Matemática')).click()`);
     await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#sub-grid .choice')].find(c=>c.textContent.includes('Problemas')).click()`);
+    await b.click('#next-step-btn'); await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.click('#start-btn'); await b.sleep(700);
     const promptProblema = await b.ev(`document.querySelector('#prompt-text').textContent`);
     assert.ok(promptProblema.length > 20, 'Problema de matemática deveria ter um enunciado com historinha');
@@ -35,6 +38,8 @@ await withBrowser(async (b) => {
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Números')).click()`);
     await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#sub-grid .choice')].find(c=>c.textContent.includes('Contar')).click()`);
+    await b.click('#next-step-btn'); await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.click('#start-btn'); await b.sleep(700);
     assert.match(await b.ev(`document.querySelector('#prompt-text').textContent`), /Quantos?|Quantas?/, 'Contar deveria perguntar "quantos/quantas"');
     await b.click('#quit-btn'); await b.sleep(1500);
@@ -43,6 +48,8 @@ await withBrowser(async (b) => {
     // Inglês: sempre 3 opções por padrão (fácil)
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Inglês')).click()`);
     await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.click('#start-btn'); await b.sleep(700);
     assert.equal(await b.ev(`document.querySelectorAll('#options .option').length`), 3);
     await b.click('#quit-btn'); await b.sleep(1500);
@@ -52,6 +59,8 @@ await withBrowser(async (b) => {
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Treino')).click()`);
     await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#sub-grid .choice')].find(c=>c.textContent.includes('Balões')).click()`);
+    await b.click('#next-step-btn'); await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.click('#start-btn'); await b.sleep(900);
     assert.equal(await b.ev(`!document.querySelector('#playfield').hidden`), true, 'Treino do mouse deveria mostrar o #playfield');
     await b.click('#quit-btn'); await b.sleep(1500);
@@ -60,6 +69,7 @@ await withBrowser(async (b) => {
     // Revisão (F2-16): erra 1 de propósito, revisa, acaba em "Revisão concluída!"
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Formas')).click()`);
     await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#count-grid .choice')].find(c=>c.textContent.includes('5'))?.click()`);
     await b.click('#start-btn'); await b.sleep(700);
     // errar não avança a pergunta (é "tenta de novo"): o próximo acerto fecha a MESMA

@@ -573,7 +573,7 @@ el.switcherAutoread.addEventListener('change', () => {
     state.profile.autoRead = el.switcherAutoread.checked;
     saveProfiles(profiles);
 });
-el.configBackBtn.addEventListener('click', () => showScreen('menu'));
+el.configBackBtn.addEventListener('click', () => { if (!prevConfigStep()) showScreen('menu'); });
 
 // F2-45: idem — createProfile só existe depois que profiles.js carrega.
 el.createConfirm.addEventListener('click', () => createProfile());

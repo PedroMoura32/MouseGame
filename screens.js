@@ -29,7 +29,7 @@ let handlingPopstate = false;
 
 const BACK_ACTION = {
     menu:    () => { stopPlaytimeTracking(); renderProfiles(); showScreen('profiles'); },
-    config:  () => showScreen('menu'),
+    config:  () => { if (!prevConfigStep()) showScreen('menu'); },
     game:    () => showResults(),
     draw:    () => showScreen('menu'),
     mimica:  () => showScreen('menu'),

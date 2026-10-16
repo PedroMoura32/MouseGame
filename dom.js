@@ -67,6 +67,8 @@ const el = {
     panelMode: $('#panel-mode'),
     modeGrid: $('#mode-grid'),
     customCount: $('#custom-count-input'),
+    stepDots: $('#step-dots'),
+    nextStepBtn: $('#next-step-btn'),
     startBtn: $('#start-btn'),
     // pintura livre (F2-21)
     drawPalette: $('#draw-palette'),

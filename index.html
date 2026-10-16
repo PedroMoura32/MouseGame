@@ -143,54 +143,58 @@
             <div class="config-header">
                 <button id="config-back-btn" class="chip-btn">← Voltar</button>
                 <h1 id="config-title" class="config-title">🔷 Formas</h1>
+                <div id="step-dots" class="step-dots"></div>
             </div>
 
-            <!-- Escolha extra: aparece só para Inglês (tipo), Matemática (operação) e Treino do mouse -->
-            <div id="panel-sub" class="panel" hidden>
-                <h2 class="panel-title"><span id="sub-title">Que tipo?</span>
-                    <button id="sub-listen" class="listen-btn" data-say="" aria-label="Ouvir">🔊</button>
-                </h2>
-                <div id="sub-grid" class="choice-grid" role="radiogroup" aria-label="Tipo de pergunta"></div>
-            </div>
-
-            <!-- Só aparece em Matemática > Multiplicar (tabuada) ou Treino do mouse > Traçar
-                 (conjunto de caracteres) — título e grid reconstruídos por menu.js conforme o caso -->
-            <div id="panel-extra" class="panel" hidden>
-                <h2 class="panel-title"><span id="extra-title">Qual tabuada?</span>
-                    <button id="extra-listen" class="listen-btn" data-say="Escolha uma tabuada para treinar, ou todas misturadas" aria-label="Ouvir: qual tabuada">🔊</button>
-                </h2>
-                <div id="extra-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Opções extras"></div>
-            </div>
-
-            <div class="panel">
-                <h2 class="panel-title">Nível
-                    <button class="listen-btn" data-say="Escolha o nível de dificuldade" aria-label="Ouvir: escolha o nível">🔊</button>
-                </h2>
-                <div id="difficulty-grid" class="choice-grid choice-grid--3" role="radiogroup" aria-label="Nível"></div>
-            </div>
-
-            <div class="panel">
-                <h2 class="panel-title"><span id="count-title">Quantas perguntas?</span>
-                    <button id="count-listen" class="listen-btn" data-say="Quantas perguntas você quer responder?" aria-label="Ouvir: quantas perguntas">🔊</button>
-                </h2>
-                <div id="count-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Número de perguntas"></div>
-                <div class="custom-count">
-                    <label for="custom-count-input">Outro número:</label>
-                    <input id="custom-count-input" type="number" min="1" max="99" inputmode="numeric" placeholder="ex: 15">
+            <!-- PASSO: tipo/variante (só categorias com sub-options) -->
+            <div class="config-step" data-step="sub" hidden>
+                <div id="panel-sub" class="panel">
+                    <h2 class="panel-title"><span id="sub-title">Que tipo?</span>
+                        <button id="sub-listen" class="listen-btn" data-say="" aria-label="Ouvir">🔊</button>
+                    </h2>
+                    <div id="sub-grid" class="choice-grid" role="radiogroup" aria-label="Tipo de pergunta"></div>
+                </div>
+                <div id="panel-extra" class="panel" hidden>
+                    <h2 class="panel-title"><span id="extra-title">Qual tabuada?</span>
+                        <button id="extra-listen" class="listen-btn" data-say="Escolha uma tabuada para treinar, ou todas misturadas" aria-label="Ouvir: qual tabuada">🔊</button>
+                    </h2>
+                    <div id="extra-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Opções extras"></div>
                 </div>
             </div>
 
-            <!-- Só aparece para Formas, Cores e Animais (arrastar não existe nos outros jogos) -->
-            <div id="panel-mode" class="panel">
-                <h2 class="panel-title">Como jogar?
-                    <button class="listen-btn" data-say="Como você quer jogar? Clicar ou arrastar?" aria-label="Ouvir: como jogar">🔊</button>
-                </h2>
-                <div id="mode-grid" class="choice-grid choice-grid--2" role="radiogroup" aria-label="Modo de jogo"></div>
+            <!-- PASSO: nível -->
+            <div class="config-step" data-step="level" hidden>
+                <div class="panel">
+                    <h2 class="panel-title">Nível
+                        <button class="listen-btn" data-say="Escolha o nível de dificuldade" aria-label="Ouvir: escolha o nível">🔊</button>
+                    </h2>
+                    <div id="difficulty-grid" class="choice-grid choice-grid--3" role="radiogroup" aria-label="Nível"></div>
+                </div>
             </div>
 
-            <!-- Faixa flutuante na largura da janela; o botão fica no canto direito (na margem, fora do conteúdo) -->
+            <!-- PASSO: rodadas + modo -->
+            <div class="config-step" data-step="rounds" hidden>
+                <div class="panel">
+                    <h2 class="panel-title"><span id="count-title">Quantas perguntas?</span>
+                        <button id="count-listen" class="listen-btn" data-say="Quantas perguntas você quer responder?" aria-label="Ouvir: quantas perguntas">🔊</button>
+                    </h2>
+                    <div id="count-grid" class="choice-grid choice-grid--4" role="radiogroup" aria-label="Número de perguntas"></div>
+                    <div class="custom-count">
+                        <label for="custom-count-input">Outro número:</label>
+                        <input id="custom-count-input" type="number" min="1" max="99" inputmode="numeric" placeholder="ex: 15">
+                    </div>
+                </div>
+                <div id="panel-mode" class="panel">
+                    <h2 class="panel-title">Como jogar?
+                        <button class="listen-btn" data-say="Como você quer jogar? Clicar ou arrastar?" aria-label="Ouvir: como jogar">🔊</button>
+                    </h2>
+                    <div id="mode-grid" class="choice-grid choice-grid--2" role="radiogroup" aria-label="Modo de jogo"></div>
+                </div>
+            </div>
+
             <div class="start-dock">
-                <button id="start-btn" class="big-btn">Começar! ▶</button>
+                <button id="next-step-btn" class="big-btn" hidden>Próximo →</button>
+                <button id="start-btn" class="big-btn" hidden>Começar! ▶</button>
             </div>
         </section>
 

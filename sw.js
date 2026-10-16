@@ -19,7 +19,7 @@
      cache na hora, sem esperar a checagem periódica).
    ============================================================ */
 
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CACHE = 'dedinho-esperto-' + VERSION;
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // não verifica de novo antes de 1 dia
 const LAST_CHECK_KEY = new Request('__sw-last-check__');

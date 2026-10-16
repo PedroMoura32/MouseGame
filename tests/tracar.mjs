@@ -72,6 +72,8 @@ await withBrowser(async (b) => {
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Treino')).click()`);
     await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#sub-grid .choice')].find(c=>c.textContent.includes('Traçar')).click()`);
+    await b.click('#next-step-btn'); await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.ev(`[...document.querySelectorAll('#count-grid .choice')].find(c=>c.textContent.includes('5'))?.click()`);
     await b.click('#start-btn');
     await b.sleep(700);

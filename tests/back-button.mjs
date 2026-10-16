@@ -23,6 +23,7 @@ await withBrowser(async (b) => {
     // jogo em andamento -> voltar -> resultado (igual ao botão Encerrar)
     await b.ev(`[...document.querySelectorAll('#category-grid .choice')].find(c=>c.textContent.includes('Formas')).click()`);
     await b.sleep(150);
+    await b.click('#next-step-btn'); await b.sleep(150);
     await b.click('#start-btn'); await b.sleep(700);
     assert.equal(await tela(b), 'screen-game');
     await voltar(b);
