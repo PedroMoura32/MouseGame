@@ -19,8 +19,8 @@
      cache na hora, sem esperar a checagem periódica).
    ============================================================ */
 
-const VERSION = 'v13';
-const CACHE = 'jogo-dos-cliques-' + VERSION;
+const VERSION = 'v15';
+const CACHE = 'dedinho-esperto-' + VERSION;
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // não verifica de novo antes de 1 dia
 const LAST_CHECK_KEY = new Request('__sw-last-check__');
 
@@ -69,7 +69,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys()
             .then((keys) => Promise.all(
-                keys.filter((k) => k.startsWith('jogo-dos-cliques-') && k !== CACHE).map((k) => caches.delete(k))))
+                keys.filter((k) => (k.startsWith('dedinho-esperto-') || k.startsWith('jogo-dos-cliques-')) && k !== CACHE).map((k) => caches.delete(k))))
             .then(() => self.clients.claim())
     );
 });

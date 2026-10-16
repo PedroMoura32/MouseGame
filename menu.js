@@ -50,14 +50,16 @@ function refreshSubPanel() {
     el.panelSub.hidden = !cfg;
     if (!cfg) return;
 
-    el.subTitle.textContent = cfg.title;
-    el.subListen.dataset.say = cfg.say;
-    el.subListen.setAttribute('aria-label', 'Ouvir: ' + cfg.title);
+    const isMouse = state.category === 'mouse';
+    el.subTitle.textContent = isMouse ? term(cfg.title) : cfg.title;
+    el.subListen.dataset.say = isMouse ? term(cfg.say) : cfg.say;
+    el.subListen.setAttribute('aria-label', 'Ouvir: ' + el.subTitle.textContent);
     el.subGrid.innerHTML = '';
-    el.subGrid.className = 'choice-grid' + (cfg.items.length === 3 ? ' choice-grid--3' : '');
-    cfg.items.forEach((it) => buildChoice(
+    const items = isMouse && IS_TOUCH ? cfg.items.filter((it) => it.id !== 'rolar') : cfg.items;
+    el.subGrid.className = 'choice-grid' + (items.length === 3 ? ' choice-grid--3' : '');
+    items.forEach((it) => buildChoice(
         el.subGrid,
-        { value: it.id, label: it.label, emoji: it.emoji, sub: it.sub },
+        { value: it.id, label: it.label, emoji: it.emoji, sub: isMouse ? term(it.sub) : it.sub },
         (v) => { state.sub[state.category] = v; refreshExtraPanel(); },
         it.id === state.sub[state.category]));
 }
@@ -133,17 +135,23 @@ function refreshMenuForCategory() {
 }
 
 function buildMenu() {
-    CATEGORY_META.forEach((c, i) => buildChoice(
-        el.categoryGrid,
-        { value: c.id, label: c.label, emoji: c.emoji, sub: c.sub },
-        (v) => {
-            state.category = v;
-            if (v === 'pintura') { openDrawScreen(); return; }   // sem opções pra configurar: vai direto desenhar
-            if (v === 'mimica') { openMimicaScreen(); return; }  // idem: vai direto pra tela de mímica
-            refreshMenuForCategory();
-            el.configTitle.textContent = `${c.emoji} ${c.gameTitle}`;
-            showScreen('config');   // escolheu o jogo: vai para a tela de configurar esse jogo
-        }, i === 0));
+    CATEGORY_META.forEach((c, i) => {
+        const label = c.id === 'mouse' ? term(c.label) : c.label;
+        const sub   = c.id === 'mouse' && IS_TOUCH ? 'memória, traçar, alvos…' : c.sub;
+        const title = c.id === 'mouse' ? term(c.gameTitle) : c.gameTitle;
+        const emoji = c.id === 'mouse' && IS_TOUCH ? '🤹' : c.emoji;
+        buildChoice(
+            el.categoryGrid,
+            { value: c.id, label, emoji, sub },
+            (v) => {
+                state.category = v;
+                if (v === 'pintura') { openDrawScreen(); return; }
+                if (v === 'mimica') { openMimicaScreen(); return; }
+                refreshMenuForCategory();
+                el.configTitle.textContent = `${emoji} ${title}`;
+                showScreen('config');
+            }, i === 0);
+    });
 
     DIFFICULTIES.forEach((d, i) => buildChoice(
         el.difficultyGrid,
@@ -152,7 +160,7 @@ function buildMenu() {
 
     MODES.forEach((m, i) => buildChoice(
         el.modeGrid,
-        { value: m.id, label: m.label, emoji: m.emoji, sub: m.sub },
+        { value: m.id, label: term(m.label), emoji: m.emoji, sub: term(m.sub) },
         (v) => { state.mode = v; }, i === 0));
 
     // O painel "extra" (tabuada / F2-25 caracteres do Traçar) agora é montado sob

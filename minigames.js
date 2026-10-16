@@ -140,8 +140,8 @@ const MINIGAMES = (() => {
         const COLORS = ['#f47cb5', '#6fc3ee', '#ffd76a', '#b596ee', '#63e6be', '#ff922b'];
         const DOUBLE_MS = 550;   // tempo máximo entre os dois cliques
         const prompt = {
-            html: 'Dê <b>2 cliques rápidos</b> em cada balão 🎈',
-            speak: 'Dê dois cliques rápidos em cada balão',
+            html: `Dê <b>2 ${term('cliques')} rápidos</b> em cada balão 🎈`,
+            speak: `Dê dois ${term('cliques')} rápidos em cada balão`,
         };
         let items = [], stopLoop = null, left = 0;
 
@@ -153,11 +153,11 @@ const MINIGAMES = (() => {
             b.frozenUntil = now + DOUBLE_MS + 150;   // o balão "espera" o segundo clique
             b.inner.classList.remove('bump'); void b.inner.offsetWidth; b.inner.classList.add('bump');
             setTimeout(() => b.inner.classList.remove('bump'), 380);   // volta a balançar
-            api.hint('Boa! Agora clique de novo, bem rápido! ⚡');
+            api.hint(`Boa! Agora ${term('clique')} de novo, bem rápido! ⚡`);
             clearTimeout(b.timer);
             b.timer = setTimeout(() => {
                 b.lastDown = 0;
-                if (b.alive) api.hint(`Dê 2 cliques rápidos no balão 🎈 (faltam ${left})`);
+                if (b.alive) api.hint(`Dê 2 ${term('cliques')} rápidos no balão 🎈 (faltam ${left})`);
             }, DOUBLE_MS + 60);
         }
 
@@ -229,8 +229,8 @@ const MINIGAMES = (() => {
             { e: '🐝', nome: 'abelhinhas' }, { e: '🦋', nome: 'borboletas' }, { e: '⭐', nome: 'estrelas' },
             { e: '🐞', nome: 'joaninhas' }, { e: '🐟', nome: 'peixinhos' },
         ]);
-        const prompt = { html: `Clique em todas as <b>${theme.nome}</b> ${theme.e}`, speak: `Clique em todas as ${theme.nome}` };
-        const MAX_MISSES = 3;   // cliques fora do alvo permitidos sem perder a estrela
+        const prompt = { html: `${term('Clique')} em todas as <b>${theme.nome}</b> ${theme.e}`, speak: `${term('Clique')} em todas as ${theme.nome}` };
+        const MAX_MISSES = 3;   // toques/cliques fora do alvo permitidos sem perder a estrela
         let items = [], stopLoop = null, left = 0, caught = 0, misses = 0;
 
         function onBackground(e) {
@@ -660,8 +660,8 @@ const MINIGAMES = (() => {
         // Pedido do Pedro: mais quadrados cobrindo a imagem do fácil pro difícil.
         const cfg = [{ cols: 4, rows: 4, opts: 3 }, { cols: 6, rows: 6, opts: 4 }, { cols: 8, rows: 8, opts: 6 }][api.level];
         const prompt = {
-            html: 'Clique nos quadrados e descubra o que está escondido! 🔍',
-            speak: 'Clique nos quadrados e descubra o que está escondido',
+            html: `${term('Clique')} nos quadrados e descubra o que está escondido! 🔍`,
+            speak: `${term('Clique')} nos quadrados e descubra o que está escondido`,
         };
         let answered = false;
 
@@ -726,7 +726,7 @@ const MINIGAMES = (() => {
                 });
             });
 
-            api.hint('Clique nos quadrados pra revelar a imagem 🔍');
+            api.hint(`${term('Clique')} nos quadrados pra revelar a imagem 🔍`);
         }
 
         function destroy() { answered = false; api.field.innerHTML = ''; }
@@ -830,7 +830,7 @@ const MINIGAMES = (() => {
             }
 
             refresh();
-            api.hint('Clique na caixinha com menos pausinhos, uma de cada vez 🥢');
+            api.hint(`${term('Clique')} na caixinha com menos pausinhos, uma de cada vez 🥢`);
         }
 
     function destroy() { api.field.innerHTML = ''; }
@@ -1089,6 +1089,177 @@ const MINIGAMES = (() => {
         return { prompt, start, destroy };
     }
 
+    /* ============================================================
+       9) CAÇA AO OBJETO — encontrar o item no cenário rolável (F2-51)
+       A criança rola/arrasta a tela para explorar um cenário maior
+       que a viewport e toca no item certo quando encontra. Funciona
+       em todos os dispositivos; no celular substitui o Rolar.
+       ============================================================ */
+
+    const CACA_BANK = [
+        { e: '🐢', n: 'tartaruga', art: 'a', cat: 'bicho' },
+        { e: '🐘', n: 'elefante', art: 'o', cat: 'bicho' },
+        { e: '🦁', n: 'leão', art: 'o', cat: 'bicho' },
+        { e: '🐬', n: 'golfinho', art: 'o', cat: 'bicho' },
+        { e: '🐼', n: 'panda', art: 'o', cat: 'bicho' },
+        { e: '🦋', n: 'borboleta', art: 'a', cat: 'bicho' },
+        { e: '🐝', n: 'abelha', art: 'a', cat: 'bicho' },
+        { e: '🐸', n: 'sapo', art: 'o', cat: 'bicho' },
+        { e: '🐵', n: 'macaco', art: 'o', cat: 'bicho' },
+        { e: '🐶', n: 'cachorro', art: 'o', cat: 'bicho' },
+        { e: '🐱', n: 'gato', art: 'o', cat: 'bicho' },
+        { e: '🐷', n: 'porco', art: 'o', cat: 'bicho' },
+        { e: '🍕', n: 'pizza', art: 'a', cat: 'comida' },
+        { e: '🍎', n: 'maçã', art: 'a', cat: 'comida' },
+        { e: '🍓', n: 'morango', art: 'o', cat: 'comida' },
+        { e: '🍌', n: 'banana', art: 'a', cat: 'comida' },
+        { e: '🍉', n: 'melancia', art: 'a', cat: 'comida' },
+        { e: '🧁', n: 'bolinho', art: 'o', cat: 'comida' },
+        { e: '🍩', n: 'rosquinha', art: 'a', cat: 'comida' },
+        { e: '🚗', n: 'carro', art: 'o', cat: 'veiculo' },
+        { e: '🚀', n: 'foguete', art: 'o', cat: 'veiculo' },
+        { e: '🚌', n: 'ônibus', art: 'o', cat: 'veiculo' },
+        { e: '🚁', n: 'helicóptero', art: 'o', cat: 'veiculo' },
+        { e: '⛵', n: 'barco', art: 'o', cat: 'veiculo' },
+        { e: '🎈', n: 'balão', art: 'o', cat: 'objeto' },
+        { e: '⭐', n: 'estrela', art: 'a', cat: 'objeto' },
+        { e: '🌻', n: 'girassol', art: 'o', cat: 'objeto' },
+        { e: '🌙', n: 'lua', art: 'a', cat: 'objeto' },
+        { e: '🌈', n: 'arco-íris', art: 'o', cat: 'objeto' },
+    ];
+    const CACA_SCENERY = ['🌸', '🌼', '🍄', '🌳', '🌷', '☁️', '🍀', '🌿', '🪨', '🌾', '🪵', '🍂'];
+
+    function caca(api) {
+        const cfg = [
+            { hMul: 2.5, wMul: 1, dist: 6, decor: 10 },
+            { hMul: 3, wMul: 2, dist: 12, decor: 18 },
+            { hMul: 4, wMul: 2.5, dist: 20, decor: 28 },
+        ][api.level];
+
+        const target = pick(CACA_BANK);
+        const prompt = {
+            html: `Encontre ${target.art} <b>${target.n}</b> ${target.e} no cenário! 🔎`,
+            speak: `Encontre ${target.art} ${target.n} no cenário`,
+        };
+        let finished = false;
+
+        function start() {
+            destroy();
+            finished = false;
+            api.field.innerHTML = '';
+            const { w, h } = api.size();
+            const sceneW = Math.round(w * cfg.wMul);
+            const sceneH = Math.round(h * cfg.hMul);
+            const sz = clamp(Math.min(w, h) * 0.13, 38, 68);
+            const margin = 12;
+
+            const scroller = el('div', 'mg-caca', api.field);
+            if (cfg.wMul > 1) {
+                scroller.style.overflow = 'auto';
+            } else {
+                scroller.style.overflowY = 'auto';
+                scroller.style.overflowX = 'hidden';
+            }
+
+            const inner = el('div', 'mg-caca-inner', scroller);
+            inner.style.width = sceneW + 'px';
+            inner.style.height = sceneH + 'px';
+
+            const placed = [];
+            function placeItem() {
+                for (let a = 0; a < 80; a++) {
+                    const x = rand(margin, sceneW - sz - margin);
+                    const y = rand(margin, sceneH - sz - margin);
+                    if (placed.every((p) => Math.hypot(x - p.x, y - p.y) > sz * 1.5)) {
+                        placed.push({ x, y });
+                        return { x, y };
+                    }
+                }
+                const x = rand(margin, sceneW - sz - margin);
+                const y = rand(margin, sceneH - sz - margin);
+                placed.push({ x, y });
+                return { x, y };
+            }
+
+            // Alvo: fora da viewport inicial (forçar scroll)
+            let tx, ty;
+            if (cfg.wMul <= 1) {
+                tx = rand(margin, Math.max(margin + 1, sceneW - sz - margin));
+                ty = rand(h + 10, Math.max(h + 11, sceneH - sz - margin));
+            } else {
+                if (Math.random() < 0.5) {
+                    tx = rand(w + 10, Math.max(w + 11, sceneW - sz - margin));
+                    ty = rand(margin, Math.max(margin + 1, sceneH - sz - margin));
+                } else {
+                    tx = rand(margin, Math.max(margin + 1, sceneW - sz - margin));
+                    ty = rand(h + 10, Math.max(h + 11, sceneH - sz - margin));
+                }
+            }
+            placed.push({ x: tx, y: ty });
+
+            const targetBtn = el('button', 'mg-caca-item', inner);
+            targetBtn.type = 'button';
+            targetBtn.textContent = target.e;
+            targetBtn.setAttribute('aria-label', target.n);
+            targetBtn.style.cssText = `left:${tx}px; top:${ty}px; width:${sz}px; height:${sz}px; font-size:${sz * 0.78}px`;
+            targetBtn.addEventListener('click', () => {
+                if (finished) return;
+                finished = true;
+                targetBtn.classList.add('mg-caca-found');
+                blipSfx(700);
+                api.done();
+            });
+
+            // Distratores: prioriza mesma categoria
+            const others = CACA_BANK.filter((b) => b.e !== target.e);
+            const sameCat = shuffle(others.filter((b) => b.cat === target.cat));
+            const diffCat = shuffle(others.filter((b) => b.cat !== target.cat));
+            const pool = [...sameCat, ...diffCat].slice(0, cfg.dist);
+
+            pool.forEach((d) => {
+                const pos = placeItem();
+                const btn = el('button', 'mg-caca-item mg-caca-decoy', inner);
+                btn.type = 'button';
+                btn.textContent = d.e;
+                btn.setAttribute('aria-label', d.n);
+                btn.style.cssText = `left:${pos.x}px; top:${pos.y}px; width:${sz}px; height:${sz}px; font-size:${sz * 0.78}px`;
+                btn.addEventListener('click', () => {
+                    if (finished || btn.disabled) return;
+                    btn.classList.remove('mg-caca-wrong');
+                    void btn.offsetWidth;
+                    btn.classList.add('mg-caca-wrong');
+                    api.mistake(`Esse não é ${target.art} ${target.n}! Continue procurando 🔎`);
+                });
+            });
+
+            // Decorações (cenário)
+            for (let i = 0; i < cfg.decor; i++) {
+                const d = el('span', 'mg-caca-decor', inner);
+                d.textContent = pick(CACA_SCENERY);
+                d.style.left = rand(5, sceneW - 30) + 'px';
+                d.style.top = rand(5, sceneH - 40) + 'px';
+                d.style.fontSize = randBetween(20, 38) + 'px';
+                d.style.transform = `rotate(${randBetween(-20, 20)}deg)`;
+            }
+
+            // Dica visual de scroll (some ao rolar)
+            const horiz = cfg.wMul > 1;
+            const hintEl = el('div', 'mg-caca-hint', api.field);
+            hintEl.innerHTML = `<span class="mg-arrow">⬇️</span>${horiz ? '<span class="mg-arrow">↔️</span>' : ''}<span>Explore o cenário!</span>`;
+            const onScroll = () => {
+                if (Math.abs(scroller.scrollTop) > 30 || Math.abs(scroller.scrollLeft) > 30)
+                    hintEl.classList.add('gone');
+            };
+            scroller.addEventListener('scroll', onScroll, { passive: true });
+
+            api.hint(`Explore o cenário e encontre ${target.art} ${target.n} ${target.e}`);
+        }
+
+        function destroy() { api.field.innerHTML = ''; }
+
+        return { prompt, start, destroy };
+    }
+
     return {
         baloes:     { create: baloes },
         alvos:      { create: alvos },
@@ -1098,5 +1269,6 @@ const MINIGAMES = (() => {
         quadros:    { create: quadros },
         pausinhos:  { create: pausinhos },
         tracar:     { create: tracar },
+        caca:       { create: caca },
     };
 })();

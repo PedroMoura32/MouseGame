@@ -1,7 +1,7 @@
 {
-  "name": "Jogo dos Cliques",
-  "short_name": "Cliques",
-  "description": "Jogo educativo para crianças aprenderem a usar o mouse: formas, cores, animais, inglês, matemática e treino de cliques.",
+  "name": "Dedinho Esperto",
+  "short_name": "Dedinho",
+  "description": "Jogo educativo para crianças: formas, cores, animais, inglês, matemática, leitura e coordenação motora.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

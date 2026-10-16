@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#e0559b">
-    <meta name="description" content="Jogo educativo para crianças aprenderem a usar o mouse: formas, cores, animais, inglês, matemática e treino de cliques.">
-    <title>Jogo dos Cliques 🎀</title>
+    <meta name="description" content="Dedinho Esperto — jogo educativo para crianças: formas, cores, animais, inglês, matemática, leitura e coordenação motora.">
+    <title>Dedinho Esperto 🎀</title>
 
     <!-- App instalável (PWA): funciona offline depois da primeira visita -->
     <link rel="manifest" href="manifest.webmanifest">
@@ -13,15 +13,19 @@
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Jogo dos Cliques">
+    <meta name="apple-mobile-web-app-title" content="Dedinho Esperto">
 
     <link rel="stylesheet" href="styles.css">
-    <!-- F2-22: aplica o tema salvo antes de pintar a página, pra não "piscar" o tema errado -->
+    <!-- F2-22: tema salvo + F2-48: detecção de dispositivo — antes da primeira pintura -->
     <script>
         try {
             var t = localStorage.getItem('mousegame.theme.v1');
             if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
+        // F2-48: detecta touch vs mouse e marca no <html> pra CSS usar desde o início
+        var IS_TOUCH = (navigator.maxTouchPoints || 0) > 0
+                       && matchMedia('(pointer: coarse)').matches;
+        document.documentElement.classList.add(IS_TOUCH ? 'is-touch' : 'is-mouse');
     </script>
 
     <!-- F2-43 (achado da auditoria de 26/09/2026): antes, qualquer erro não previsto
@@ -67,7 +71,7 @@
 <body>
     <!-- Barra superior sempre visível -->
     <header class="topbar">
-        <div class="brand">🎀 Jogo dos Cliques</div>
+        <div class="brand">🎀 Dedinho Esperto</div>
         <div class="topbar-actions">
             <!-- F2-22: claro/escuro. Sem escolha salva, segue o tema do sistema -->
             <button id="theme-toggle" class="icon-btn" title="Mudar tema claro/escuro">🌙</button>

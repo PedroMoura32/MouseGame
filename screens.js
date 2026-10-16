@@ -71,5 +71,5 @@ function buildPrompt(item, mode) {
         return { html: `Arraste ${item.gender} ${item.nounHTML}`, speak: `Arraste ${item.gender} ${item.nounText}` };
     }
     const prep = item.gender === 'o' ? 'no' : 'na';
-    return { html: `Clique ${prep} ${item.nounHTML}`, speak: `Clique ${prep} ${item.nounText}` };
+    return { html: `${term('Clique')} ${prep} ${item.nounHTML}`, speak: `${term('Clique')} ${prep} ${item.nounText}` };
 }

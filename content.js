@@ -1,5 +1,5 @@
 /* ============================================================
-   Bancos de conteúdo do Jogo dos Cliques (F2-45: extraído de script.js)
+   Bancos de conteúdo do Dedinho Esperto (F2-45: extraído de script.js)
 
    Script clássico (não módulo ES — ver nota em script.js), carregado
    ANTES de script.js no index.html. Só dados e funções puras que montam
@@ -230,7 +230,7 @@ const SUB_OPTIONS = {
         title: 'O que praticar?',
         say: 'Escolha o que praticar',
         items: [
-            { id: 'reconhecer', label: 'Reconhecer',   emoji: '🔢', sub: 'clique no certo' },
+            { id: 'reconhecer', label: 'Reconhecer',   emoji: '🔢', sub: 'ache o certo' },
             { id: 'contar',     label: 'Contar',       emoji: '🍓', sub: 'quantos tem aqui?' },
             { id: 'inicial',    label: 'Letra inicial', emoji: '🔤', sub: 'com que letra começa?' },
             { id: 'misturar',   label: 'Misturar',     emoji: '🎲', sub: 'um pouco de cada' },
@@ -271,6 +271,7 @@ const SUB_OPTIONS = {
             { id: 'quadros',  label: 'Atrás dos quadros', emoji: '🔍', sub: 'descubra a imagem' },
             { id: 'pausinhos', label: 'Pausinhos', emoji: '🥢', sub: 'divida nas caixinhas' },
             { id: 'tracar', label: 'Traçar', emoji: '✏️', sub: 'letras e números' },
+            { id: 'caca', label: 'Caça ao Objeto', emoji: '🔎', sub: 'ache o escondido' },
             { id: 'misturar', label: 'Misturar', emoji: '🎲', sub: 'todos' },
         ],
     },

@@ -1,7 +1,7 @@
 /* ============================================================
-   Jogo dos Cliques
-   Joguinho para crianças treinarem o uso do mouse (clicar e
-   arrastar), associando objetos/nomes às respostas certas.
+   Dedinho Esperto
+   Jogo educativo para crianças: formas, cores, animais, inglês,
+   matemática, leitura e coordenação motora.
 
    Como adicionar conteúdo novo (é só editar os bancos abaixo):
    - Formas:  shapeItem(id, NOME, genero, forma, cor)
@@ -188,7 +188,8 @@ function newRound() {
     el.playfield.innerHTML = '';
 
     // "misturar" alterna entre os minijogos (sem repetir o anterior)
-    const keys = Object.keys(MINIGAMES);
+    // F2-49: no touch, exclui "rolar" (rodinha do mouse não existe no celular)
+    const keys = Object.keys(MINIGAMES).filter((k) => !(IS_TOUCH && k === 'rolar'));
     const chosen = state.sub.mouse;
     const key = chosen === 'misturar' ? randomFrom(keys.filter((k) => k !== lastKey)) : chosen;
     lastKey = key;
